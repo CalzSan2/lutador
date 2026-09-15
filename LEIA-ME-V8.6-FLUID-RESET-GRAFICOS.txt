@@ -1,0 +1,19 @@
+SORTEP NIAK — V8.6 FLUID
+
+PATCH PRINCIPAL
+- Código REDEFINIR agora executa limpeza total: localStorage, sessionStorage, Cache Storage, IndexedDB, cookies, progresso, passe, compras, cosméticos, códigos usados, moedas, Vandais, PSY, ranking, maestria, história e configurações.
+- Após o reset, a conta volta ao estado inicial: 0 Gold, 0 PSY, 0 Vandais e apenas o campeão inicial Rojo. Nome e tutorial são solicitados novamente.
+- Foi adicionado um bootstrap de reset antes do carregamento dos saves para impedir que eventos de fechamento da página restaurem um save antigo.
+
+FLUIDEZ
+- Velocidade base de movimentação aumentada levemente para ambos os lados.
+- Hit-stop normal foi encurtado; a pausa cinematográfica da Ultimate continua preservada.
+- Exaustão não reduz mais a velocidade de forma exponencial a cada frame; agora a penalidade é fixa e previsível.
+- Limites de efeitos/partículas são adaptados ao perfil gráfico.
+
+GRÁFICOS
+- ALTO: maior orçamento de efeitos e partículas.
+- EQUILIBRADO: efeitos moderados, recomendado.
+- DESEMPENHO: menos partículas, menos sombras/filtros de interface e modo Ultra Performance sincronizado.
+- Mudanças de perfil são aplicadas imediatamente e o painel mostra o perfil efetivamente aplicado.
+- Escala de exibição 80/90/100% agora altera de fato a interface.

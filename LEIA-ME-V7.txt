@@ -1,0 +1,38 @@
+SORTEP NIAK — POLISH 7.0
+
+Esta atualização foi focada em polimento, estabilidade visual e acesso rápido sem entupir o lobby.
+
+PRINCIPAIS MUDANÇAS
+1. HUD/barra de combate voltou ao visual clássico do canvas.
+2. Barra de perfil inferior voltou ao formato reto/compacto anterior.
+3. Lobby corrigido para impedir botões e painéis sobrepostos.
+4. Central Rápida em um único botão, sem poluir a tela.
+5. Atalho de JOGAR pela Central Rápida.
+6. Atalho de TREINO pela Central Rápida.
+7. Atalho para continuar HISTÓRIA.
+8. Atalho para TORNEIO.
+9. Recompensa diária de Gold + Vandais.
+10. Sequência diária (streak) com recompensa crescente e bônus semanal.
+11. Monitor de FPS no lobby.
+12. Indicador TECLADO/GAMEPAD em tempo real.
+13. Salvamento automático periódico com horário do último save.
+14. Cronômetro da sessão no lobby.
+15. Dicas de combate rotativas.
+16. Resumo da última partida na Central Rápida.
+17. Campeão favorito destacado no resumo da sessão.
+18. Dificuldade da IA pode ser trocada pela Central Rápida.
+19. Pausa automática quando a janela perde foco.
+20. Atalhos na tela pós-luta: R para revanche e ESC para lobby.
+21. Seleção de campeões redesenhada e responsiva, sem sobreposições.
+22. Navegação da seleção por setas + ENTER.
+23. Contador de campeões visíveis após filtros.
+24. Limpeza automática de elementos de UI duplicados.
+25. Redução visual automática extra quando o FPS cai.
+
+ATALHOS NOVOS
+F2 — Central Rápida (fora da luta)
+Setas + ENTER — navegar/selecionar campeões
+R — jogar novamente na tela de resultado
+ESC — voltar ao lobby na tela de resultado
+
+Os códigos mestres permanecem como na V6.

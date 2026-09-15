@@ -1,0 +1,21 @@
+SORTEP NIAK — V8.7 R.A.V.A.M STUDIOS / PRIYA ARANYA
+
+NOVO MODO R.A.V.A.M STUDIOS
+- O card R.A.V.A.M continua dentro de MODOS.
+- O acesso permanente custa 2.500 Vandais.
+- Depois da compra, Priya Aranya é desbloqueada automaticamente como a primeira Lenda R.A.V.A.M.
+- O elenco R.A.V.A.M fica separado do elenco principal.
+- O código 00011 continua liberando apenas os campeões do elenco principal e não pula a compra do modo R.A.V.A.M.
+- O código REDEFINIR da V8.6 também apaga a compra do modo R.A.V.A.M e volta o jogo ao estado inicial.
+
+PRIYA ARANYA
+- J: tiro rápido de rifle com projétil próprio e efeito de disparo.
+- L: Ultimate cinematográfica TRÍADE TÁTICA / TRÍADE DEMOLIDORA.
+- Depois da apresentação da Ultimate, Priya arremessa 3 bombas em arco; cada uma explode separadamente.
+- Sprite/poses exclusivos adicionados ao jogo, sem fundo.
+- Retrato próprio na tela do modo e na apresentação da Ultimate.
+
+MODO JOGÁVEL AGORA
+- 1P x CPU: Priya contra Priya controlada pela IA enquanto o elenco R.A.V.A.M ainda tem uma única Lenda.
+- Duelo local: Priya x Priya para dois jogadores.
+- Botão de preview mostra a folha de animações adicionada ao jogo.

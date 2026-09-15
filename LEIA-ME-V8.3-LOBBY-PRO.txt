@@ -1,0 +1,9 @@
+SORTEP NIAK — V8.3 LOBBY PROFISSIONAL
+
+- Lobby restaurado para três colunas: Central da Arena à esquerda, campeão/imagem no centro, Passe e Missões à direita.
+- 16 atalhos principais visíveis na Central da Arena, incluindo Maestria, Perfil, Vestiário, Eventos, Desafios, Roleta e Cosméticos.
+- Tipografia do lobby ajustada para leitura normal, com espaçamento e hierarquia mais limpos.
+- Loja principal redesenhada como hub profissional para Campeões, Recursos, Roleta, Cosméticos e Ajuda.
+- Loja de cosméticos redesenhada, com abas mais claras e cards maiores.
+- 20 cosméticos novos adicionados e equipáveis: 10 skins visuais, 4 entradas, 3 poses e 3 finalizações.
+- Mantidos nome obrigatório no primeiro acesso, tutorial inicial e código REDEFINIR.

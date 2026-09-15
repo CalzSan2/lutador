@@ -1,0 +1,9 @@
+SORTEP NIAK — V8.4 LOBBY LIMPO
+
+- Central à esquerda, campeão em destaque no meio, Passe e Missões à direita.
+- Removidos atalhos duplicados de Roleta e Cosméticos do lobby; eles continuam dentro da Loja.
+- Maestria, Perfil, Vestiário, Eventos, Desafios, Ranking, Códigos, Notícias, Configurações e Estilos continuam visíveis.
+- Marca SORTEP NIAK posicionada no topo sem sobrepor o conteúdo.
+- Removidos do lobby os textos antigos LUTADOR / FIGHTING ARENA / ARENA PRINCIPAL.
+- Mecânica de Campeão em Destaque mantida.
+- Código REDEFINIR agora limpa integralmente os saves locais, passe, moedas, Vandais, personagens, maestria, rank, cosméticos, configurações, histórico e nome; no próximo carregamento começa uma conta nova e o tutorial/nome são solicitados novamente.

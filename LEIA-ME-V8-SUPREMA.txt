@@ -1,0 +1,59 @@
+SORTEP NIAK — V8 SUPREMA 8.0.0
+
+VERSÃO BASE
+- Construída sobre a V7 estável + correção do Super/Ultimate.
+- O Super continua com a regra: primeiro aparece a tela cinematográfica; só depois o golpe é executado.
+
+20+ NOVIDADES DA V8
+01. Lobby Supremo reorganizado, profissional e responsivo.
+02. Design unificado para Modos, Loja, História, Ranking, seleção e diálogos.
+03. 6 estilos de luta selecionáveis: Equilibrado, Rushdown, Guardião, Contra-Golpe, Brutamontes e Controlador.
+04. Passivas reais por estilo alterando dano, velocidade, vida, stamina e guarda.
+05. Parry perfeito ao tocar a defesa pouco antes do golpe.
+06. Barra de guarda independente da stamina.
+07. Guard Break quando a barra de guarda chega a zero.
+08. Push Block: segure defesa e use o poder perto do rival.
+09. Air Dash usando a esquiva no ar.
+10. Recuperação rápida usando a esquiva enquanto estiver derrubado.
+11. Finta/Cancel: toque a defesa no início de um golpe corpo a corpo para cancelar.
+12. Dash Strike: golpes corpo a corpo ganham impacto quando usados durante corrida tática.
+13. Clash: golpes corpo a corpo ativos ao mesmo tempo podem colidir e cancelar os dois lutadores.
+14. Wall Bounce em golpes pesados perto das bordas da arena.
+15. Combo Scaling para reduzir dano em combos muito longos e evitar infinitos.
+16. Barra de Fúria/Adrenalina e buff temporário.
+17. Comeback: lutador com vida crítica recupera parte do fôlego e da fúria uma vez por round.
+18. Objetivo dinâmico por partida com recompensa extra em Gold.
+19. Skins equipadas agora possuem filtro visual + aura dentro da luta e preview na seleção/vestiário.
+20. HUD técnico V8 com estilo, guarda, fúria e objetivo da partida.
+21. Callouts cinematográficos para Parry, Clash, Wall Bounce, Guard Break e Comeback.
+22. CPU Difícil/Insana aprende a usar Parry, recuperação rápida e Push Block.
+23. Sistema de estilos aplicado também à CPU conforme o arquétipo do campeão.
+24. Layout da seleção ampliado com cards maiores e seletor de estilo sem sobreposição.
+25. Integração com Ultra Performance/Redução de Movimento das versões anteriores.
+
+CONTROLES NOVOS
+- PARRY: toque Defesa (K / Num 2, ou tecla remapeada) logo antes do impacto.
+- PUSH BLOCK: segure Defesa e toque Poder (J / Num 1) perto do adversário.
+- AIR DASH: use Esquiva no ar (Q / Num 0).
+- RECUPERAÇÃO RÁPIDA: use Esquiva no chão enquanto estiver derrubado.
+- FINTA/CANCEL: toque Defesa bem no começo de um golpe corpo a corpo.
+- ADRENALINA: T / Num 7 quando a barra de Fúria estiver com pelo menos 60.
+
+SKINS
+A V8 aplica visualmente as skins/auras da Loja e do Passe, incluindo:
+- Aura Carmesim
+- Gelo Espectral
+- Neon Primordial
+- Ouro do Campeão
+- Rojo Ascendente
+- Primordial
+Além das cores por campeão do sistema de personalização.
+
+IMPORTANTE
+Todo o progresso continua salvo localmente no navegador. A V8 usa uma chave adicional de save apenas para estilos e opções novas, sem substituir os saves das versões anteriores.
+
+PATCH V8.1 — CENTRAL DA ARENA
+- A Central da Arena agora ocupa toda a altura disponível da coluna esquerda do lobby.
+- Os 6 atalhos principais se expandem para preencher o espaço sem deixar áreas mortas.
+- Elementos antigos duplicados do lobby foram ocultados para evitar sobreposição e desperdício de espaço.
+- Layout responsivo mantido para telas menores.

@@ -1,0 +1,24 @@
+SORTEP NIAK — V8.5
+
+CORREÇÕES PRINCIPAIS
+- ESC corrigido na Loja: no hub volta ao Lobby; em submenus volta à Loja.
+- Loja reorganizada em 6 áreas: Campeões, Recursos, Roleta, Cosméticos, Melhorias e Ajuda.
+- Passe removido da Loja. O Passe continua acessível pelo Lobby.
+- Modo História: o jogador inicia cada novo round com 100% da vida.
+- Todos os 27 campeões têm nome próprio para a Ultimate cinematográfica.
+
+10 MECÂNICAS EXTRAS
+1. Foco de Contra-Ataque após Parry Perfeito.
+2. Primeiro Sangue com pequeno bônus de stamina e Super.
+3. Momentum por sequência de acertos.
+4. Fadiga anti-spam para repetição excessiva do mesmo golpe.
+5. Counter Hit ao acertar o rival durante a preparação de um ataque.
+6. Combo Breaker gastando stamina e limitado por round.
+7. Air Tech para recuperação aérea após ser atingido.
+8. Exaustão temporária ao zerar a stamina.
+9. Last Stand em vida crítica, recuperando recursos defensivos.
+10. Resolve da Rodada Final em partidas empatadas 1–1.
+
+ULTIMATES
+Cada campeão recebeu dois nomes exibidos na apresentação cinematográfica.
+Exemplo: Rojo — CARMESIM / EXECUÇÃO RUBRA.

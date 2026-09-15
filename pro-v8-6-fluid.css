@@ -1,0 +1,25 @@
+/* SORTEP NIAK — V8.6 FLUIDIDADE / GRÁFICOS FUNCIONAIS */
+#app{zoom:var(--ultimate-scale,100%)}
+:root{--v86-ui-shadow:0 18px 50px rgba(0,0,0,.42);--v86-ui-blur:8px}
+html[data-graphics="high"]{--v86-ui-shadow:0 24px 70px rgba(0,0,0,.52);--v86-ui-blur:10px}
+html[data-graphics="balanced"]{--v86-ui-shadow:0 16px 42px rgba(0,0,0,.38);--v86-ui-blur:6px}
+html[data-graphics="performance"]{--v86-ui-shadow:none;--v86-ui-blur:0px}
+html[data-graphics="performance"] .v82-backdrop,
+html[data-graphics="performance"] dialog::backdrop{backdrop-filter:none!important}
+html[data-graphics="performance"] .v8-screen,
+html[data-graphics="performance"] .v85-shop-card,
+html[data-graphics="performance"] .v84-top-brand,
+html[data-graphics="performance"] .v8-command-center,
+html[data-graphics="performance"] .pro-lobby-hero,
+html[data-graphics="performance"] .pro-lobby-dashboard{box-shadow:none!important;filter:none!important}
+html[data-graphics="performance"] .v8-command-center::before,
+html[data-graphics="performance"] .v82-card::before{display:none!important}
+html[data-graphics="performance"] *,html[data-graphics="performance"] *::before,html[data-graphics="performance"] *::after{
+  animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.06s!important
+}
+html[data-graphics="balanced"] .v8-screen,html[data-graphics="balanced"] .v85-shop-card{box-shadow:0 10px 30px rgba(0,0,0,.28)!important}
+html[data-graphics="high"] .v8-screen,html[data-graphics="high"] .v85-shop-card{box-shadow:var(--v86-ui-shadow)!important}
+.v86-graphics-state{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:10px 12px;border:1px solid #2d3d57;border-radius:12px;background:#09111d;color:#aab8cc;font:700 12px/1.35 system-ui}
+.v86-graphics-state b{color:#fff;font-family:Oxanium,system-ui;letter-spacing:.5px}
+.v86-graphics-state span{display:inline-flex;align-items:center;gap:6px}
+.v86-graphics-dot{width:8px;height:8px;border-radius:50%;background:#66e6ad;box-shadow:0 0 12px rgba(102,230,173,.6)}

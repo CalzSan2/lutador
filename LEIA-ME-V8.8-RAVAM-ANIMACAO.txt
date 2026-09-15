@@ -1,0 +1,10 @@
+SORTEP NIAK — V8.8 R.A.V.A.M / PRIYA ANIMAÇÃO
+
+- Priya agora usa 6 PNGs de pose separados, em vez de células cortadas de um atlas.
+- Recortes de rifle, botas e corpo foram limpos para evitar pedaços de outra pose.
+- Caminhada ganhou transição/blend leve entre quadros.
+- J usa preparação + disparo com recuo e flash de cano.
+- O (chute) ganhou sequência própria de preparação, impacto e recuperação, além de arco de impacto.
+- L / TRÍADE DEMOLIDORA agora cria 3 bombas guiadas com trajetória em arco.
+- Cada bomba acompanha a posição atual do oponente e cai exatamente sobre a área dele, com marcadores no chão.
+- As três bombas caem em sequência (esquerda, centro, direita) para cobrir o alvo.

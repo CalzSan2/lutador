@@ -1,0 +1,38 @@
+SORTEP NIAK — QUALITY 6.0
+
+VERSÃO FOCADA EM QUALIDADE, COMBATE E ESTABILIDADE
+
+PRINCIPAIS MUDANÇAS
+- Sistema de Replay removido. O botão “Jogar novamente” continua apenas como revanche instantânea.
+- Combate revisado: alcance, anti-hit fantasma, stun, recuperação, knockdown e impacto reforçado.
+- Hit-stop/câmera de impacto nos golpes fortes.
+- Ultimate: a tela cinematográfica aparece primeiro e o Super só é executado depois que ela termina.
+- HUD novo com vida, stamina, Ultimate, status e combo.
+- Seleção de campeões totalmente redesenhada com busca, filtros, favoritos, arquétipos e cards maiores.
+- Treino avançado com hitbox/hurtbox, dano, combo, frame advantage aproximado, recuperação, gravação e reprodução do dummy.
+- Arquétipos e balanceamento: Rushdown, Controle, Tanque, Assassino, Zoner, Defensor, Bruiser, Counter etc.
+- IA com comportamentos distintos por dificuldade.
+- Chefes com escudo, fases e enrage.
+- Finalizações específicas para todos os campeões.
+- Vestuário/skins com preview animado, raridade e slots separados para skin, moldura, título, entrada, vitória e finalização.
+- Perfil visual completo e histórico recente sem Replay.
+- Eventos temporários e recompensas.
+- Qualidade automática + Ultra Performance para PCs fracos.
+- Acessibilidade: reduzir flashes, reduzir movimento, alto contraste e interface maior.
+- Mixer de áudio separado: geral, combate, interface, público, voz e música/ambiente.
+- Identidade sonora reforçada para Rojo e Thuvaa.
+- Lobby aprimorado com campeão em destaque, evento, rank e Vandais.
+- Watchdog/anti-bug para recuperar loop de luta e limitar efeitos excessivos.
+- Modo História melhorado com cenas narradas, diálogos antes das lutas e epílogo após vitórias.
+- Mantidas correções de gamepad/teclado e hitbox do Ytiri.
+
+CÓDIGOS ATIVOS
+00011     — libera todos os campeões
+121200    — concede/garante 99.999 Gold
+01010101  — concede/garante 99.999 Vandais
+
+Todos os outros códigos antigos foram removidos.
+
+DICA
+Use Configurações > Acessibilidade & Performance para ativar Ultra Performance em máquinas mais fracas.
+Abra index.html para iniciar o jogo.
