@@ -1,0 +1,7 @@
+SORTEP NIAK — V8.9.1 HOTFIX
+
+- Corrigido travamento ao abrir Configurações.
+- Removido loop infinito de MutationObserver na área de gráficos.
+- Configurações de gráficos voltam a abrir e aplicar Alto/Equilibrado/Desempenho sem congelar o jogo.
+- Jogo continua responsivo depois de fechar Configurações.
+- Mantidas as melhorias de caminhada e pulo da Priya Aranya.

@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamStudios?.version)return;
-  const VERSION='1.1.0';
+  const VERSION='1.2.0';
   const ACCESS_COST=2500;
   const PRIYA=Object.freeze({
     id:'priya',name:'Priya Aranya',color:'#d85b42',hp:1940,dmg:32,speed:82,price:0,
@@ -112,7 +112,7 @@
   function openAnimationPreview(){
     let d=document.getElementById('ravam-animation-dialog');
     if(!d){d=document.createElement('dialog');d.id='ravam-animation-dialog';d.className='ravam-animation-dialog';document.body.appendChild(d)}
-    d.innerHTML=`<header><div><small>PRIYA ARANYA</small><h2>ANIMAÇÕES DE COMBATE</h2></div><button>×</button></header><img src="${PREVIEW_SHEET}" alt="Poses de Priya Aranya"><p>Idle · caminhada · preparação · tiro · guarda · chute procedural. Os recortes agora usam PNGs separados para não cortar arma, pés ou silhueta.</p>`;
+    d.innerHTML=`<header><div><small>PRIYA ARANYA</small><h2>ANIMAÇÕES DE COMBATE</h2></div><button>×</button></header><img src="${PREVIEW_SHEET}" alt="Poses de Priya Aranya"><p>Idle · caminhada corrigida · pulo completo · preparação · tiro · guarda · chute tático. A caminhada usa passos por distância e o pulo possui impulso, subida, ápice, queda e aterrissagem.</p>`;
     d.querySelector('button').onclick=()=>d.close();d.showModal();
   }
 
@@ -170,7 +170,34 @@
     if(!f?.ravamStudios&&!f?.p1?.id?.includes?.('priya')&&!f?.p2?.id?.includes?.('priya'))return;
     if(!Array.isArray(f.priyaBullets))f.priyaBullets=[];
     if(!Array.isArray(f.priyaBombs))f.priyaBombs=[];
-    for(const q of [f.p1,f.p2])if(q?.id==='priya'&&q.ravamBombCastT>0)q.ravamBombCastT=Math.max(0,q.ravamBombCastT-dt);
+    for(const q of [f.p1,f.p2])if(q?.id==='priya'){
+      if(q.ravamBombCastT>0)q.ravamBombCastT=Math.max(0,q.ravamBombCastT-dt);
+      // Ciclo de caminhada baseado na distância real percorrida. Isso elimina o
+      // efeito de "patinar" e a imagem dupla que existia no blend antigo.
+      const lastX=Number.isFinite(q.ravamAnimLastX)?q.ravamAnimLastX:q.x;
+      const dx=Math.abs((q.x||0)-lastX);
+      if(q.onGround&&Math.abs(q.vx||0)>7&&q.state!=='hurt'&&q.state!=='ko'){
+        q.ravamWalkDist=(q.ravamWalkDist||0)+Math.min(dx,28);
+      }else if(q.onGround){
+        q.ravamWalkDist=(q.ravamWalkDist||0)*Math.max(0,1-dt*12);
+      }
+      q.ravamAnimLastX=q.x;
+
+      // Detecta saída do chão / aterrissagem para dar uma animação própria ao pulo.
+      if(q.ravamWasGrounded===undefined)q.ravamWasGrounded=!!q.onGround;
+      if(q.ravamWasGrounded&&!q.onGround){
+        q.ravamJumpT=0;
+        q.ravamLandT=0;
+        try{spark(q.x,GROUND_Y-6,'#d8b08a',7)}catch(_){}
+      }
+      if(!q.ravamWasGrounded&&q.onGround){
+        q.ravamLandT=.13;
+        try{spark(q.x,GROUND_Y-5,'#d8b08a',10)}catch(_){}
+      }
+      if(!q.onGround)q.ravamJumpT=(q.ravamJumpT||0)+dt;
+      if(q.ravamLandT>0)q.ravamLandT=Math.max(0,q.ravamLandT-dt);
+      q.ravamWasGrounded=!!q.onGround;
+    }
     for(const b of f.priyaBullets){
       if(b.dead)continue;b.x+=b.vx*dt;b.life-=dt;
       const enemy=b.owner===f.p1?f.p2:f.p1;
@@ -239,7 +266,25 @@
     if(p.state==='special'||p.ravamBombCastT>0)return {frame:(p.stateT||0)<.18?1:2,bomb:true};
     if(p.state==='throw'||p.state==='attack'||p.proMove)return {frame:(p.stateT||0)<.10?3:4,shot:true};
     if(p.state==='hurt'||p.hitFlash>.035)return {frame:0};
-    if(Math.abs(p.vx||0)>7){const phase=((p.walkT||performance.now()/1000)*7)%2;const a=phase<1?phase:2-phase;return {frame:phase<1?1:2,blendFrame:phase<1?2:1,blend:a*.22,walk:true};}
+
+    // Pulo completo: impulso, subida, ápice, queda e aterrissagem.
+    if(!p.onGround){
+      const vy=Number(p.vy)||0;
+      if(vy>470)return {frame:5,jump:'takeoff'};
+      if(vy>140)return {frame:1,jump:'rise'};
+      if(vy>-160)return {frame:2,jump:'apex'};
+      if(vy>-520)return {frame:1,jump:'fall'};
+      return {frame:5,jump:'fastfall'};
+    }
+    if((p.ravamLandT||0)>0)return {frame:5,jump:'land'};
+
+    // Caminhada sem crossfade: 4 tempos de passada usando poses limpas.
+    if(Math.abs(p.vx||0)>7){
+      const dist=Math.max(0,p.ravamWalkDist||0);
+      const cycle=Math.floor(dist/13)%4;
+      const frames=[1,0,2,0];
+      return {frame:frames[cycle],walk:true,walkCycle:cycle,walkWave:(dist/13)%1};
+    }
     return {frame:0};
   }
   function drawPoseImage(ctx,img,height){
@@ -262,16 +307,46 @@
     const pose=priyaPose(p),img=poseImages[pose.frame];
     if(!img?.complete||!img.naturalWidth)return false;
     const floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),height=218;
-    ctx.save();ctx.globalAlpha=.34;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,floor+4,39,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
+
+    // Sombra reage à altura, diminuindo no pulo para dar melhor leitura de profundidade.
+    const air=Math.max(0,Number(p.y)||0);
+    const shadowScale=Math.max(.35,1-air/420);
+    ctx.save();ctx.globalAlpha=.34*shadowScale;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,GROUND_Y+4,39*shadowScale,8*shadowScale,0,0,Math.PI*2);ctx.fill();ctx.restore();
+
     ctx.save();ctx.translate(p.x,floor);ctx.scale(p.facing||1,1);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+
+    // Caminhada: balanço leve de tronco e "bob" sincronizado à distância percorrida.
+    if(pose.walk){
+      const step=((p.ravamWalkDist||0)/13)*Math.PI*.5;
+      const bob=Math.abs(Math.sin(step))*3.2;
+      const sway=Math.sin(step)*.018;
+      ctx.translate(Math.sin(step)*1.7,-bob);
+      ctx.rotate(sway);
+      if(pose.walkCycle===1||pose.walkCycle===3)ctx.scale(1.005,.995);
+    }
+
+    // Pulo em cinco momentos. As poses mudam com a velocidade vertical e recebem
+    // squash/stretch discreto para parecer uma animação real, não um sprite flutuando.
+    if(pose.jump==='takeoff'){ctx.translate(-3,2);ctx.rotate(-.035);ctx.scale(1.03,.96);}
+    if(pose.jump==='rise'){ctx.translate(2,-3);ctx.rotate(.022);ctx.scale(.99,1.025);}
+    if(pose.jump==='apex'){ctx.translate(0,-6);ctx.rotate(-.012);ctx.scale(1.015,.985);}
+    if(pose.jump==='fall'){ctx.translate(-1,-1);ctx.rotate(.028);ctx.scale(.995,1.012);}
+    if(pose.jump==='fastfall'){ctx.translate(2,2);ctx.rotate(.05);ctx.scale(1.025,.975);}
+    if(pose.jump==='land'){
+      const t=Math.max(0,Math.min(1,(p.ravamLandT||0)/.13));
+      ctx.translate(0,4*(1-t));ctx.scale(1.045-.025*t,.945+.055*t);
+    }
+
     if(pose.kick==='windup'){ctx.translate(-10,-3);ctx.rotate(-.045);}
     if(pose.kick==='impact'){ctx.translate(13,-7);ctx.rotate(-.075);ctx.scale(1.055,.985);}
     if(pose.kick==='recover'){ctx.translate(-3,-2);}
     if(pose.shot&&pose.frame===4){ctx.translate(-6,0);}
     if(p.state==='ko'||(p.proKnockdownT>0&&p.onGround)){ctx.translate(-14,-10);ctx.rotate(-Math.PI/2);ctx.translate(0,height*.38)}
-    if(pose.blendFrame!==undefined&&pose.blend>0){const other=poseImages[pose.blendFrame];ctx.save();ctx.globalAlpha=pose.blend;drawPoseImage(ctx,other,height);ctx.restore();ctx.globalAlpha=1;}
+
+    // Sem blend entre imagens: evita "fantasma" na caminhada.
     drawPoseImage(ctx,img,height);
     ctx.restore();
+
     drawPriyaKickFx(ctx,p,floor,height,pose.kick);
     if(pose.shot&&pose.frame===4){
       ctx.save();ctx.translate(p.x+(p.facing||1)*96,floor-height*.66);ctx.globalCompositeOperation='lighter';ctx.fillStyle='#ffd69f';ctx.shadowColor='#ff9a55';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(0,0,5.5,0,Math.PI*2);ctx.fill();ctx.restore();

@@ -1,0 +1,8 @@
+SORTEP NIAK — V8.9 PRIYA MOVEMENT PATCH
+
+- Caminhada da Priya refeita sem crossfade/ghosting.
+- Ciclo de passos agora acompanha a distância realmente percorrida, reduzindo efeito de patinação.
+- Nova animação de pulo com: impulso, subida, ápice, queda rápida e aterrissagem.
+- Sombra dinâmica durante o pulo para melhorar leitura de altura.
+- Squash/stretch discreto no impulso e aterrissagem.
+- Mantidos J = rifle, O = chute tático e L = 3 bombas guiadas.

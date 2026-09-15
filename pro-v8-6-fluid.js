@@ -3,7 +3,7 @@
   'use strict';
   if(window.__LutadorV86)return;
   window.__LutadorV86=true;
-  const VERSION='8.6';
+  const VERSION='8.6.1';
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
   const game=()=>{try{return typeof fight!=='undefined'&&fight?fight:null}catch(_){return null}};
   const q=()=>String(window.LutadorUltimate?.data?.settings?.graphics||document.documentElement.dataset.graphics||'balanced');
@@ -44,9 +44,16 @@
     const grid=document.querySelector('.ultimate-settings.settings-grid');
     if(!grid)return;
     let row=grid.querySelector('.v86-graphics-state');
-    if(!row){row=document.createElement('div');row.className='v86-graphics-state';grid.appendChild(row)}
+    if(!row){
+      row=document.createElement('div');
+      row.className='v86-graphics-state';
+      row.innerHTML='<span><i class="v86-graphics-dot"></i><b>Perfil aplicado</b></span><span data-v86-label></span>';
+      grid.appendChild(row);
+    }
     const m=quality(),labels={high:'ALTO · MAIS EFEITOS',balanced:'EQUILIBRADO · RECOMENDADO',performance:'DESEMPENHO · FPS PRIORITÁRIO'};
-    row.innerHTML=`<span><i class="v86-graphics-dot"></i><b>Perfil aplicado</b></span><span>${labels[m]}</span>`;
+    const label=row.querySelector('[data-v86-label]');
+    if(label&&label.textContent!==labels[m])label.textContent=labels[m];
+    if(row.dataset.mode!==m)row.dataset.mode=m;
   }
 
   /* Reduz geração de partículas antes de elas existirem. */
@@ -136,7 +143,16 @@
 
   applyGraphicsProfile();
   setTimeout(showGraphicsState,100);
-  const obs=new MutationObserver(()=>{showGraphicsState();applyGraphicsProfile()});
+  let settingsUiQueued=false;
+  const obs=new MutationObserver((mutations)=>{
+    // Evita o loop de MutationObserver que travava o jogo depois de abrir Configurações.
+    // Só sincroniza quando a janela de configurações realmente existe e agrupa mudanças no próximo frame.
+    if(settingsUiQueued||!document.querySelector('.ultimate-settings.settings-grid'))return;
+    const relevant=mutations.some(m=>m.type==='childList');
+    if(!relevant)return;
+    settingsUiQueued=true;
+    requestAnimationFrame(()=>{settingsUiQueued=false;showGraphicsState();applyGraphicsProfile()});
+  });
   obs.observe(document.body,{subtree:true,childList:true});
   window.LutadorV86=Object.freeze({version:VERSION,applyGraphicsProfile,totalReset,quality});
 })();
