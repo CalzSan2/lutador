@@ -219,12 +219,26 @@
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
     f.leoRocks=f.leoRocks||[];f.leoPortals=f.leoPortals||[];
     const sy=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82)-12,dir=p.facing||1;
-    const rocks=[{dy:-10,speed:760,dmg:.88},{dy:15,speed:900,dmg:.78}];
-    for(let i=0;i<rocks.length;i++){
-      const r=rocks[i];f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:1.28,phase:'straight',x:p.x+dir*(52+i*10),y:sy+r.dy,vx:dir*r.speed,vy:(i?14:-18),spin:(i?1:-1)*6.5,dmg:p.dmg*r.dmg,dead:false});
-    }
-    f.leoPortals.push({kind:'entry',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:p.x+dir*62,y:sy,life:.40,maxLife:.40,color:'#53e8ad'});
-    p.throwCd=p.human?.60:.78;p.leoCastT=.30;setState?.(p,'throw');leoFx(p,'PEDRAS VESPER ×2','#72f4ba',.62);try{SFX?.play?.('attack_light',.76)}catch(_){}
+    // Pedra 1: projétil normal, sempre em linha reta.
+    f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:1.45,phase:'straight',x:p.x+dir*56,y:sy-10,vx:dir*820,vy:-10,spin:-6.5,dmg:p.dmg*.88,hitDir:dir,dead:false});
+
+    // Pedra 2: entra em um portal à frente do Leo e reaparece EM CIMA
+    // do ponto onde o inimigo estava no instante do disparo. Esse ponto fica
+    // travado: o portal de cima e a pedra NÃO perseguem o inimigo depois.
+    const entryX=p.x+dir*150;
+    const lockedX=clamp(target.x,42,W-42);
+    const targetBody=(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70);
+    const exitY=Math.max(70,targetBody-195);
+
+    // Os dois portais abrem juntos para deixar a mecânica visualmente clara.
+    f.leoPortals.push({kind:'entry',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:entryX,y:sy+14,life:.96,maxLife:.96,color:'#53e8ad',trackTarget:false});
+    f.leoPortals.push({kind:'exit',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:lockedX,y:exitY,life:.96,maxLife:.96,color:'#74f6bd',trackTarget:false});
+
+    // Esta pedra é intangível enquanto viaja ATÉ o portal. Ela só pode causar
+    // dano depois de sair pelo portal superior e começar a cair.
+    f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:2.25,phase:'toPortal',x:p.x+dir*64,y:sy+14,vx:dir*760,vy:0,spin:6.8,dmg:p.dmg*.82,hitDir:dir,entryX,lockedX,exitY,portalDelay:0,dead:false});
+
+    p.throwCd=p.human?.60:.78;p.leoCastT=.34;setState?.(p,'throw');leoFx(p,'PEDRA RETA + PORTAL','#72f4ba',.72);try{SFX?.play?.('attack_light',.76)}catch(_){}
   }
   function leoSuper(p){
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
@@ -232,7 +246,7 @@
     const kinds=['knife','sword','rock','knife','sword','rock'];
     const offsets=[-82,-38,0,42,84,14];
     for(let i=0;i<6;i++)f.leoRain.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,kind:kinds[i],delay:.28+i*.16,life:2.8,x:target.x+offsets[i],y:52-i*6,vy:0,offset:offsets[i],dead:false,hit:false,dmg:p.dmg*(kinds[i]==='sword'?.72:kinds[i]==='rock'?.66:.58)});
-    f.leoPortals.push({kind:'sky',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:target.x,y:64,life:2.1,maxLife:2.1,color:'#78f5c0'});
+    f.leoPortals.push({kind:'sky',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:target.x,y:64,life:2.1,maxLife:2.1,color:'#78f5c0',trackTarget:true});
     p.specialCd=6.7;p.leoSuperT=1.25;setState?.(p,'special');leoFx(p,'CÉU VESPER','#9dffd2',1.05);try{spark(target.x,58,'#71f3bc',34)}catch(_){}
   }
   const baseThrow=window.throwProjectile;
@@ -246,11 +260,34 @@
     for(const q of [f.p1,f.p2])if(q?.id==='leo'){q.leoCastT=Math.max(0,(q.leoCastT||0)-dt);q.leoSuperT=Math.max(0,(q.leoSuperT||0)-dt)}
     for(const z of f.leoRocks){
       if(z.dead)continue;z.t+=dt;z.life-=dt;const owner=fighterBySlot(f,z.ownerSlot),target=fighterBySlot(f,z.targetSlot);
-      z.x+=(z.vx||0)*dt;z.y+=(z.vy||0)*dt;
-      if(target&&target.state!=='ko'&&Math.abs(z.x-target.x)<47&&hitboxY(target,z.y,20)){
-        z.dead=true;hit(target,z.dmg,{owner,leoStone:true},(z.vx||1)>0?1:-1,'leo-stone');target.vx+=((z.vx||1)>0?1:-1)*125;try{spark(z.x,z.y,'#7dffc5',22)}catch(_){}
+
+      if(z.phase==='toPortal'){
+        z.x+=(z.vx||0)*dt;
+        const reached=(z.vx>=0&&z.x>=z.entryX)||(z.vx<0&&z.x<=z.entryX);
+        if(reached){
+          z.x=z.entryX;z.vx=0;z.vy=0;z.phase='portal';z.portalDelay=.11;
+          try{spark(z.entryX,z.y,'#6ff0bb',14);spark(z.lockedX,z.exitY,'#86ffd0',16)}catch(_){}
+        }
+      }else if(z.phase==='portal'){
+        z.portalDelay-=dt;
+        if(z.portalDelay<=0){z.phase='fall';z.x=z.lockedX;z.y=z.exitY+6;z.vx=0;z.vy=135;z.spin=8.2;}
+      }else if(z.phase==='fall'){
+        z.vy+=1280*dt;z.y+=z.vy*dt;
+      }else{
+        z.x+=(z.vx||0)*dt;z.y+=(z.vy||0)*dt;
       }
-      if(z.life<=0||z.x<-90||z.x>W+90)z.dead=true;
+
+      // A pedra do portal não tem hitbox no trajeto até a entrada. Assim ela
+      // nunca vira uma segunda pedra reta: somente a pedra 'straight' acerta
+      // pela frente, e a pedra 'fall' acerta ao cair do portal superior.
+      const canLeoRockHit=(z.phase==='straight'||z.phase==='fall');
+      if(canLeoRockHit&&target&&target.state!=='ko'&&Math.abs(z.x-target.x)<47&&hitboxY(target,z.y,20)){
+        const hdir=z.phase==='fall'?(target.x>=(owner?.x||target.x)?1:-1):(z.hitDir||((z.vx||1)>0?1:-1));
+        z.dead=true;hit(target,z.dmg,{owner,leoStone:true,fromPortal:z.phase==='fall'},hdir,'leo-stone');target.vx+=hdir*(z.phase==='fall'?70:125);try{spark(z.x,z.y,'#7dffc5',22)}catch(_){}
+      }
+      if(z.life<=0)z.dead=true;
+      if(z.phase==='fall'){if(z.y>GROUND_Y+42)z.dead=true}
+      else if(z.phase!=='portal'&&(z.x<-90||z.x>W+90))z.dead=true;
     }
     f.leoRocks=f.leoRocks.filter(z=>!z.dead);
     for(const d of f.leoRain){
@@ -264,7 +301,7 @@
       if(d.life<=0)d.dead=true;
     }
     f.leoRain=f.leoRain.filter(d=>!d.dead);
-    for(const p of f.leoPortals){p.life-=dt;const target=fighterBySlot(f,p.targetSlot);if((p.kind==='exit'||p.kind==='sky')&&target)p.x=target.x;if(p.life<=0)p.dead=true}
+    for(const p of f.leoPortals){p.life-=dt;const target=fighterBySlot(f,p.targetSlot);if(p.trackTarget&&(p.kind==='exit'||p.kind==='sky')&&target)p.x=target.x;if(p.life<=0)p.dead=true}
     f.leoPortals=f.leoPortals.filter(p=>!p.dead);
     for(const e of f.leoFx){e.life-=dt;e.y-=20*dt}f.leoFx=f.leoFx.filter(e=>e.life>0);
   }

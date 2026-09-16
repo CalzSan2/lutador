@@ -1175,6 +1175,20 @@ function renderCodes() {
   const submit=()=>{
     const code=input.value.trim();
     if(!code){status.textContent='❌ Digite um código.';status.style.color='#f87171';return;}
+    if(code==='010'){
+      let list=document.getElementById('secret-code-list');
+      if(!list){
+        list=document.createElement('div');
+        list.id='secret-code-list';
+        list.className='v6-code-hint';
+        list.style.marginTop='18px';
+        list.innerHTML='<b>🔐 CÓDIGOS ATIVOS</b><span><b>00011</b> · liberar todos os campeões principais</span><span><b>121200</b> · 99.999 Gold</span><span><b>01010101</b> · 99.999 Vandais</span><span><b>REDEFINIR</b> · apagar a conta e começar do zero</span>';
+        const back=document.getElementById('btn-back');
+        back?.parentNode?.insertBefore(list,back);
+      }
+      status.textContent='📋 LISTA DE CÓDIGOS REVELADA.';status.style.color='#7dd3fc';
+      input.value='';SFX.play('menu_confirm');return;
+    }
     if(code==='00011'){
       CHARACTERS.forEach(c=>{if(c.ravamOnly)return;if(!state.roster.includes(c.id))state.roster.push(c.id);});
       state.ztaaaUnlocked=true;state.froghUnlocked=true;state.kloppUnlocked=true;
@@ -7637,4 +7651,4 @@ setTimeout(function(){
 
 <!-- R.A.V.A.M V17: loaded last on purpose so its animation/shop/online patches win. -->
 <link rel="stylesheet" href="pro-ravam-v17.css?v=180">
-<script src="pro-ravam-v17.js?v=181"></script>
+<script src="pro-ravam-v17.js?v=182"></script>
