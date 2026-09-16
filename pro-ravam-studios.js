@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamStudios?.version)return;
-  const VERSION='1.8.0-ravam-combat';
+  const VERSION='1.8.4-ravam-nature';
   const ACCESS_COST=2500;
   const PRIYA=Object.freeze({
     id:'priya',name:'Alana Sorelle',color:'#d85b42',hp:1940,dmg:32,speed:82,price:0,
@@ -21,7 +21,7 @@
   const RAVAM_IDS=Object.freeze(['priya','kain','aria']);
   const ABILITY=Object.freeze({flag:'RAVAM',role:'Atiradora Tática',tag:'PRECISÃO',desc:'J dispara tiros rápidos com o rifle. O executa o Chute Tático. L ativa o super TRÍADE DEMOLIDORA e lança 3 bombas guiadas exatamente sobre a posição do rival.'});
   const KAIN_ABILITY=Object.freeze({flag:'RAVAM',role:'Mímico do Caos',tag:'PODER ATIVO',desc:'J usa o poder selecionado. H no P1 / 9 no P2 alterna entre 10 poderes: Voo, Gelo, Cura, Choque, Repulsão, Troca de Controles, Fogo, Teleporte, Roubo de Vida e Gravidade. L ativa ESPELHO ABISSAL: usa um dos poderes e devolve o super do rival contra ele.'});
-  const ARIA_ABILITY=Object.freeze({flag:'RAVAM',role:'Feiticeira Botânica',tag:'VENENO',desc:'J alterna entre duas Flores Valfleur venenosas e uma trilha de grama com espinhos por 2 segundos. L invoca PRISÃO VERDANTE: um cipó nasce sob o rival, causa impacto e o mantém preso por um curto período.'});
+  const ARIA_ABILITY=Object.freeze({flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J alterna entre RAJADA DE FOLHAS e RAIZ SELVAGEM. São ataques leves e fluidos de natureza, sem efeitos pesados. L invoca PRISÃO VERDANTE: um cipó nasce sob o rival, causa impacto e o mantém preso por um curto período.'});
   const PORTRAIT='ai-assets/characters/priya.png';
   const KAIN_PORTRAIT='ai-assets/characters/kain.png';
   const ARIA_PORTRAIT='ai-assets/characters/aria.png';
@@ -75,7 +75,7 @@
       if(typeof MOVES!=='undefined'){
         if(!MOVES.priya)MOVES.priya=[['J','Tiro de precisão com rifle'],['O','Chute Tático'],['L','TRÍADE DEMOLIDORA · 3 bombas guiadas no rival']];
         if(!MOVES.kain)MOVES.kain=[['J','Usar poder selecionado'],['H / P2 9','Trocar entre 10 poderes'],['I','Soco Sombrio'],['O','Chute Sombrio'],['L','ESPELHO ABISSAL · poder + super do rival']];
-        if(!MOVES.aria)MOVES.aria=[['J','Alterna: 2 Flores / Trilha de Espinhos'],['I','Soco'],['O','Chute'],['L','PRISÃO VERDANTE · cipó prende o rival']];
+        if(!MOVES.aria)MOVES.aria=[['J','Alterna: Rajada de Folhas / Raiz Selvagem'],['I','Soco'],['O','Chute'],['L','PRISÃO VERDANTE · cipó prende o rival']];
       }
       return fn();
     }finally{
@@ -94,7 +94,7 @@
           if(typeof fight!=='undefined'&&fight){
             fight.ravamStudios=true;fight.priyaBullets=[];fight.priyaBombs=[];
             fight.kainIceShots=[];fight.kainFireShots=[];fight.kainBolts=[];fight.kainMirrorCasts=[];fight.kainFx=[];
-            fight.ariaFlowers=[];fight.ariaGrass=[];fight.ariaVines=[];fight.ariaFx=[];fight.priyaExplosions=[];fight.ravamVersion=VERSION;
+            fight.ariaFlowers=[];fight.ariaGrass=[];fight.ariaNatureShots=[];fight.ariaVines=[];fight.ariaFx=[];fight.priyaExplosions=[];fight.ravamVersion=VERSION;
             for(const q of [fight.p1,fight.p2]){
               if(q?.id==='kain')q.kainFlightT=0,q.kainRepelT=0,q.kainControlSwapT=0,q.kainPowerFxT=0,q.kainSuperT=0,q.kainLastRandomPower='',q.kainPowerIndex=0,q.kainSelectedPower=KAIN_POWER_POOL[0],q.kainPowerSwitchCd=0;
               if(q?.id==='aria')q.ariaCastT=0,q.ariaSuperT=0,q.ariaAttackAlt=0;
@@ -266,7 +266,7 @@
     const note=isKain
       ? 'Idle · caminhada em 8 tempos · soco com preparação/impacto/recuperação · chute com arco de impacto · guarda · salto. Todas as poses usam a mesma escala corporal.'
       : isAria
-        ? 'Idle · dois passos de caminhada · conjuração das Flores Valfleur · guarda · salto. Os quadros preservam a escala original do sprite para Aria não mudar de tamanho durante a luta.'
+        ? 'Idle · dois passos de caminhada · conjuração de natureza · guarda · salto. O J alterna Rajada de Folhas e Raiz Selvagem com efeitos leves para manter a luta fluida.'
         : 'Idle · caminhada corrigida · pulo completo · preparação · tiro · guarda · chute tático. A caminhada usa passos por distância e o pulo possui impulso, subida, ápice, queda e aterrissagem.';
     d.innerHTML=`<header><div><small>${displayName(id)}</small><h2>ANIMAÇÕES DE COMBATE</h2></div><button>×</button></header>${preview}<p>${note}</p>`;
     d.querySelector('header button').onclick=()=>d.close();d.showModal();
@@ -326,37 +326,37 @@
     if(!Array.isArray(f.priyaExplosions))f.priyaExplosions=[];
     f.ariaFx.push({x:p.x,y:(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-80)-58,text,color,life,maxLife:life});
   }
-  function ariaGrassTrail(p){
+  // ARIA V18.4 — dois poderes de natureza que se alternam no J.
+  // Cada uso cria somente UM objeto de ataque para manter a luta fluida.
+  function ariaNatureAttack(p){
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;
-    if(!Array.isArray(f.ariaGrass))f.ariaGrass=[];
-    const target=p===f.p1?f.p2:f.p1;
-    const dir=target&&target.x!==p.x?(target.x>p.x?1:-1):(p.facing||1);
-    const startX=p.x+dir*28;
-    const dist=target?Math.abs(target.x-p.x)+58:330;
-    const length=clamp(dist,190,440);
-    f.ariaGrass.push({owner:p,x1:startX,x2:clamp(startX+dir*length,8,W-8),dir,age:0,life:2.0,maxLife:2.0,tick:0,dead:false});
-    p.throwCd=p.human?.50:.66;p.ariaCastT=.20;setState(p,'throw');
-    ariaFx(p,'TRILHA DE ESPINHOS · 2s','#83ff9c',.75);
-    try{spark(startX,GROUND_Y-5,'#62e879',12)}catch(_){}
-  }
-  function ariaFlowerShot(p){
-    const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;
-    p.ariaAttackAlt=((Number(p.ariaAttackAlt)||0)+1)%2;
-    if(p.ariaAttackAlt===0){ariaGrassTrail(p);return;}
-    if(!Array.isArray(f.ariaFlowers))f.ariaFlowers=[];
-    if(!Array.isArray(f.ariaGrass))f.ariaGrass=[];
-    const y=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82)-12;
-    for(let i=0;i<2;i++){
-      const startY=y+(i?8:-7);
-      f.ariaFlowers.push({
-        x:p.x+p.facing*(48+i*9),prevX:p.x+p.facing*(48+i*9),y:startY,baseY:startY,vx:p.facing*(840+i*70),
-        owner:p,life:1.45,dead:false,dmg:p.dmg*.62,poison:1.0,spin:(i?1:-1)*3.6,age:0,lane:i?1:-1
+    if(!Array.isArray(f.ariaNatureShots))f.ariaNatureShots=[];
+    const dir=p.facing||1;
+    const body=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82);
+    const alt=Number(p.ariaAttackAlt)||0;
+    p.ariaAttackAlt=(alt+1)%2;
+
+    if(alt===0){
+      // RAJADA DE FOLHAS: rápida, reta e sem perseguição.
+      f.ariaNatureShots.push({
+        kind:'leaves',owner:p,x:p.x+dir*50,y:body-8,vx:dir*900,vy:0,
+        life:1.15,maxLife:1.15,dead:false,dmg:p.dmg*.92,dir,age:0
       });
+      p.throwCd=p.human?.42:.56;p.ariaCastT=.18;setState(p,'throw');
+      ariaFx(p,'RAJADA DE FOLHAS','#9dffae',.58);
+      try{spark(p.x+dir*46,body-8,'#8cff9d',8);SFX?.play?.('attack_light',.62)}catch(_){}
+    }else{
+      // RAIZ SELVAGEM: onda baixa de raízes/espinhos que corre pelo chão.
+      f.ariaNatureShots.push({
+        kind:'root',owner:p,x:p.x+dir*42,y:GROUND_Y-8,vx:dir*610,vy:0,
+        life:1.35,maxLife:1.35,dead:false,dmg:p.dmg*1.08,dir,age:0
+      });
+      p.throwCd=p.human?.50:.64;p.ariaCastT=.22;setState(p,'throw');
+      ariaFx(p,'RAIZ SELVAGEM','#66e884',.62);
+      try{spark(p.x+dir*38,GROUND_Y-6,'#62e879',9);SFX?.play?.('attack_heavy',.52)}catch(_){}
     }
-    p.throwCd=p.human?.46:.60;p.ariaCastT=.24;setState(p,'throw');
-    try{spark(p.x+p.facing*48,y,'#8cffad',11)}catch(_){}
-    try{SFX?.play?.('attack_light',.68)}catch(_){}
   }
+  function ariaFlowerShot(p){ariaNatureAttack(p)}
   function ariaVineSuper(p){
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;
     const target=p===f.p1?f.p2:f.p1;if(!target||target.state==='ko')return;
@@ -570,6 +570,7 @@
     if(!Array.isArray(f.kainFx))f.kainFx=[];
     if(!Array.isArray(f.ariaFlowers))f.ariaFlowers=[];
     if(!Array.isArray(f.ariaGrass))f.ariaGrass=[];
+    if(!Array.isArray(f.ariaNatureShots))f.ariaNatureShots=[];
     if(!Array.isArray(f.ariaVines))f.ariaVines=[];
     if(!Array.isArray(f.ariaFx))f.ariaFx=[];
     if(!Array.isArray(f.priyaExplosions))f.priyaExplosions=[];
@@ -697,6 +698,32 @@
       if(g.life<=0)g.dead=true;
     }
     f.ariaGrass=f.ariaGrass.filter(g=>!g.dead);
+
+    for(const n of f.ariaNatureShots){
+      if(n.dead)continue;
+      n.age=(n.age||0)+dt;n.life-=dt;n.x+=(n.vx||0)*dt;n.y+=(n.vy||0)*dt;
+      const victim=n.owner===f.p1?f.p2:f.p1;
+      if(victim&&victim.state!=='ko'){
+        const nearX=Math.abs(n.x-victim.x)<(n.kind==='root'?54:48);
+        const nearY=n.kind==='root'?((victim.y||0)<72):hitboxY(victim,n.y,20);
+        if(nearX&&nearY){
+          const hitDir=n.dir||Math.sign(n.vx||1)||1;
+          damageTarget(victim,n.dmg,n,hitDir,n.kind==='root'?'aria-root':'aria-leaves');
+          if(n.kind==='root'){
+            victim.freezeT=Math.max(victim.freezeT||0,.16);
+            victim.vx*=.45;
+            ariaFx(victim,'ESPINHOS DE RAIZ','#73f090',.48);
+            try{spark(n.x,GROUND_Y-10,'#78f596',16)}catch(_){}
+          }else{
+            victim.vx+=hitDir*62;
+            try{spark(n.x,n.y,'#b4ffc0',12)}catch(_){}
+          }
+          n.dead=true;
+        }
+      }
+      if(n.life<=0||n.x<-100||n.x>W+100)n.dead=true;
+    }
+    f.ariaNatureShots=f.ariaNatureShots.filter(n=>!n.dead);
 
     for(const v of f.ariaVines){
       if(v.dead)continue;v.life-=dt;v.delay-=dt;v.age=(v.age||0)+dt;
@@ -852,6 +879,25 @@
       ctx.save();ctx.globalAlpha=Math.min(1,fade*1.35);ctx.strokeStyle='#51d96f';ctx.fillStyle='#79f38f';ctx.shadowBlur=10;ctx.shadowColor='#62ef80';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(lo,GROUND_Y-3);ctx.lineTo(hi,GROUND_Y-3);ctx.stroke();
       const n=Math.min(12,Math.max(3,Math.floor(len/34)));for(let i=0;i<=n;i++){const x=lo+len*i/n,h=10+((i*7)%10);ctx.beginPath();ctx.moveTo(x-5,GROUND_Y-3);ctx.quadraticCurveTo(x-1,GROUND_Y-3-h*.62,x,GROUND_Y-3-h);ctx.quadraticCurveTo(x+2,GROUND_Y-3-h*.55,x+5,GROUND_Y-3);ctx.closePath();ctx.fill();}
       ctx.restore();
+    }
+    for(const n of (f.ariaNatureShots||[])){
+      if(n.kind==='leaves'){
+        const dir=n.dir||1,t=(n.age||0);
+        ctx.save();ctx.translate(n.x,n.y);ctx.scale(dir,1);ctx.globalCompositeOperation='lighter';
+        ctx.globalAlpha=.92;ctx.strokeStyle='#8cff9f';ctx.shadowColor='#72f28f';ctx.shadowBlur=14;ctx.lineWidth=3.5;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(-58,0);ctx.quadraticCurveTo(-28,-7,8,0);ctx.stroke();
+        ctx.fillStyle='#caffd1';
+        for(let i=0;i<4;i++){const ox=-30+i*13,oy=Math.sin(t*12+i)*6;ctx.save();ctx.translate(ox,oy);ctx.rotate((i%2?-.55:.55)+t*3);ctx.beginPath();ctx.ellipse(0,0,7,2.7,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+        ctx.restore();
+      }else{
+        const dir=n.dir||1,pulse=1+Math.sin((n.age||0)*18)*.08;
+        ctx.save();ctx.translate(n.x,GROUND_Y-5);ctx.scale(dir,1);ctx.globalCompositeOperation='lighter';
+        ctx.strokeStyle='#55d875';ctx.fillStyle='#a0ffad';ctx.shadowColor='#58e978';ctx.shadowBlur=12;ctx.lineWidth=4;
+        ctx.beginPath();ctx.moveTo(-42,0);ctx.quadraticCurveTo(-20,-10,5,-2);ctx.stroke();
+        ctx.scale(pulse,pulse);
+        for(let i=0;i<3;i++){const x=-4+i*10,h=12+i*4;ctx.beginPath();ctx.moveTo(x-4,0);ctx.lineTo(x,-h);ctx.lineTo(x+4,0);ctx.closePath();ctx.fill();}
+        ctx.restore();
+      }
     }
     for(const v of (f.ariaVines||[])){
       if(!v.active&&v.delay>0){

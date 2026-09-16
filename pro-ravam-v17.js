@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamV17?.version)return;
-  const VERSION='18.0.0';
+  const VERSION='18.4.0';
   const SHOP_VERSION=17;
   const ACCESS_COST=Number(window.RavamStudios?.cost)||2500;
   const BASE=window.RavamStudios||{};
@@ -28,14 +28,14 @@
   const ABILITY={
     priya:BASE.ability||{flag:'RAVAM',role:'Atiradora Tática',tag:'PRECISÃO',desc:'J dispara com o rifle. L lança a Tríade Demolidora.'},
     kain:BASE.kainAbility||{flag:'RAVAM',role:'Mímico do Caos',tag:'CAOS',desc:'J usa o poder atual. H troca o poder. L ativa o Espelho Abissal.'},
-    aria:BASE.ariaAbility||{flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J lança duas flores venenosas. L prende o rival com cipós.'},
-    leo:Object.freeze({flag:'RAVAM',role:'Arquiteto de Portais',tag:'PORTAIS',desc:'J lança duas pedras retas para a frente, sem perseguir o rival. L abre o CÉU VESPER e faz cair 2 facas, 2 espadas e 2 pedras.'})
+    aria:BASE.ariaAbility||{flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J alterna entre Rajada de Folhas e Raiz Selvagem. L prende o rival com cipós.'},
+    leo:Object.freeze({flag:'RAVAM',role:'Arquiteto de Portais',tag:'PORTAIS',desc:'J lança duas pedras: a frontal pode acertar direto ou entrar num portal no meio do caminho e sair por trás do rival; a segunda cai de um portal no alto. L abre o CÉU VESPER.'})
   };
   const META={
     priya:{name:'ALANA SORELLE',tag:'PRECISÃO',accent:'#ff765e',portrait:'ai-assets/characters/priya.png',stats:[32,82,1940],moves:[['J','RIFLE'],['I','SOCO'],['O','CHUTE'],['L','3 BOMBAS']]},
     kain:{name:'KAIN',tag:'CAOS',accent:'#c0c7ff',portrait:'ai-assets/characters/kain.png',stats:[35,88,2180],moves:[['J','USAR PODER'],['H / P2 9','TROCAR PODER'],['I','SOCO'],['O','CHUTE'],['L','ESPELHO']]},
-    aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','2 FLORES'],['I','SOCO'],['O','CHUTE'],['L','CIPÓ']]},
-    leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','2 PEDRAS RETAS'],['I','SOCO'],['O','CHUTE'],['L','CHUVA VESPER']]}
+    aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','FOLHAS ↔ RAIZ'],['I','SOCO'],['O','CHUTE'],['L','CIPÓ']]},
+    leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','PORTAL ATRÁS + QUEDA'],['I','SOCO'],['O','CHUTE'],['L','CHUVA VESPER']]}
   };
 
   function toast(text,tone='normal',ms=2200){
@@ -85,7 +85,7 @@
     try{
       if(typeof CHARACTERS!=='undefined'&&!CHARACTERS.some(c=>c.id==='leo')){CHARACTERS.push(LEO);added.push('char')}
       if(typeof ABILITIES!=='undefined'&&!ABILITIES.leo)ABILITIES.leo=ABILITY.leo;
-      if(typeof MOVES!=='undefined'&&!MOVES.leo)MOVES.leo=[['J','2 PEDRAS RETAS · sem perseguição'],['I','Soco Vesper'],['O','Chute Vesper'],['L','CÉU VESPER · 2 facas + 2 espadas + 2 pedras']];
+      if(typeof MOVES!=='undefined'&&!MOVES.leo)MOVES.leo=[['J','Pedra direta → portal no meio → sai atrás + pedra do alto'],['I','Soco Vesper'],['O','Chute Vesper'],['L','CÉU VESPER · 2 facas + 2 espadas + 2 pedras']];
     }catch(_){}
     return ()=>{try{if(added.includes('char')&&typeof CHARACTERS!=='undefined'){const i=CHARACTERS.findIndex(c=>c.id==='leo');if(i>=0)CHARACTERS.splice(i,1)}}catch(_){}};
   }
@@ -219,26 +219,36 @@
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
     f.leoRocks=f.leoRocks||[];f.leoPortals=f.leoPortals||[];
     const sy=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82)-12,dir=p.facing||1;
-    // Pedra 1: projétil normal, sempre em linha reta.
-    f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:1.45,phase:'straight',x:p.x+dir*56,y:sy-10,vx:dir*820,vy:-10,spin:-6.5,dmg:p.dmg*.88,hitDir:dir,dead:false});
 
-    // Pedra 2: entra em um portal à frente do Leo e reaparece EM CIMA
-    // do ponto onde o inimigo estava no instante do disparo. Esse ponto fica
-    // travado: o portal de cima e a pedra NÃO perseguem o inimigo depois.
+    // PEDRA 1: se o rival estiver perto, pode acertar antes do portal.
+    // Se não acertar, entra num portal no meio do trajeto e sai ATRÁS da
+    // posição em que o rival estava no momento do disparo, voltando contra ele.
+    const lockedTargetX=clamp(target.x,44,W-44);
+    const dist=Math.abs(lockedTargetX-p.x);
+    // Perto: o portal fica depois da posição inicial do rival, então a pedra
+    // tem chance real de acertar direto. Longe: o portal fica no meio do caminho.
+    const entryDist=dist<=260?dist+85:dist*.52;
+    const frontEntryX=clamp(p.x+dir*entryDist,44,W-44);
+    const behindX=clamp(lockedTargetX+dir*92,42,W-42);
+    const behindY=(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70)-10;
+    f.leoPortals.push({kind:'entry',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:frontEntryX,y:sy-10,life:1.05,maxLife:1.05,color:'#53e8ad',trackTarget:false});
+    f.leoPortals.push({kind:'exit',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:behindX,y:behindY,life:1.05,maxLife:1.05,color:'#74f6bd',trackTarget:false});
+    f.leoRocks.push({
+      ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:2.0,phase:'frontPortal',
+      x:p.x+dir*56,y:sy-10,vx:dir*820,vy:0,spin:-6.5,dmg:p.dmg*.92,
+      hitDir:dir,entryX:frontEntryX,exitX:behindX,exitY:behindY,exitDir:-dir,portalDelay:0,dead:false
+    });
+
+    // PEDRA 2: permanece como ataque vertical. Ela entra à frente e cai do
+    // portal no alto na posição travada do rival, sem perseguição.
     const entryX=p.x+dir*150;
-    const lockedX=clamp(target.x,42,W-42);
-    const targetBody=(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70);
-    const exitY=176; // portal superior fixo, logo abaixo do HUD de vida
-
-    // Os dois portais abrem juntos para deixar a mecânica visualmente clara.
+    const lockedX=lockedTargetX;
+    const exitY=176;
     f.leoPortals.push({kind:'entry',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:entryX,y:sy+14,life:.96,maxLife:.96,color:'#53e8ad',trackTarget:false});
     f.leoPortals.push({kind:'exit',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:lockedX,y:exitY,life:.96,maxLife:.96,color:'#74f6bd',trackTarget:false});
+    f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:2.25,phase:'toPortal',x:p.x+dir*64,y:sy+14,vx:dir*760,vy:0,spin:6.8,dmg:p.dmg*.78,hitDir:dir,entryX,lockedX,exitY,portalDelay:0,dead:false});
 
-    // Esta pedra é intangível enquanto viaja ATÉ o portal. Ela só pode causar
-    // dano depois de sair pelo portal superior e começar a cair.
-    f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:2.25,phase:'toPortal',x:p.x+dir*64,y:sy+14,vx:dir*760,vy:0,spin:6.8,dmg:p.dmg*.82,hitDir:dir,entryX,lockedX,exitY,portalDelay:0,dead:false});
-
-    p.throwCd=p.human?.60:.78;p.leoCastT=.34;setState?.(p,'throw');leoFx(p,'PEDRA RETA + PORTAL','#72f4ba',.72);try{SFX?.play?.('attack_light',.76)}catch(_){}
+    p.throwCd=p.human?.62:.80;p.leoCastT=.34;setState?.(p,'throw');leoFx(p,'PEDRA DIRETA → PORTAL ATRÁS','#72f4ba',.72);try{SFX?.play?.('attack_light',.76)}catch(_){}
   }
   function leoSuper(p){
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
@@ -261,7 +271,20 @@
     for(const z of f.leoRocks){
       if(z.dead)continue;z.t+=dt;z.life-=dt;const owner=fighterBySlot(f,z.ownerSlot),target=fighterBySlot(f,z.targetSlot);
 
-      if(z.phase==='toPortal'){
+      if(z.phase==='frontPortal'){
+        // Hitbox ativa antes do portal: em curta distância o golpe pega direto.
+        z.x+=(z.vx||0)*dt;z.y+=(z.vy||0)*dt;
+        const reached=(z.vx>=0&&z.x>=z.entryX)||(z.vx<0&&z.x<=z.entryX);
+        if(reached){
+          z.x=z.entryX;z.vx=0;z.vy=0;z.phase='frontPortalHold';z.portalDelay=.09;
+          try{spark(z.entryX,z.y,'#6ff0bb',14);spark(z.exitX,z.exitY,'#86ffd0',16)}catch(_){}
+        }
+      }else if(z.phase==='frontPortalHold'){
+        z.portalDelay-=dt;
+        if(z.portalDelay<=0){
+          z.phase='behindReturn';z.x=z.exitX;z.y=z.exitY;z.vx=(z.exitDir||-1)*900;z.vy=0;z.spin=8.4;
+        }
+      }else if(z.phase==='toPortal'){
         z.x+=(z.vx||0)*dt;
         const reached=(z.vx>=0&&z.x>=z.entryX)||(z.vx<0&&z.x<=z.entryX);
         if(reached){
@@ -277,13 +300,12 @@
         z.x+=(z.vx||0)*dt;z.y+=(z.vy||0)*dt;
       }
 
-      // A pedra do portal não tem hitbox no trajeto até a entrada. Assim ela
-      // nunca vira uma segunda pedra reta: somente a pedra 'straight' acerta
-      // pela frente, e a pedra 'fall' acerta ao cair do portal superior.
-      const canLeoRockHit=(z.phase==='straight'||z.phase==='fall');
+      // A pedra frontal acerta antes do portal ou quando retorna por trás.
+      // A pedra vertical só acerta ao cair do portal superior.
+      const canLeoRockHit=(z.phase==='frontPortal'||z.phase==='behindReturn'||z.phase==='fall');
       if(canLeoRockHit&&target&&target.state!=='ko'&&Math.abs(z.x-target.x)<47&&hitboxY(target,z.y,20)){
-        const hdir=z.phase==='fall'?(target.x>=(owner?.x||target.x)?1:-1):(z.hitDir||((z.vx||1)>0?1:-1));
-        z.dead=true;hit(target,z.dmg,{owner,leoStone:true,fromPortal:z.phase==='fall'},hdir,'leo-stone');target.vx+=hdir*(z.phase==='fall'?70:125);try{spark(z.x,z.y,'#7dffc5',22)}catch(_){}
+        const hdir=z.phase==='fall'?(target.x>=(owner?.x||target.x)?1:-1):(z.phase==='behindReturn'?(z.exitDir||-1):(z.hitDir||((z.vx||1)>0?1:-1)));
+        z.dead=true;hit(target,z.dmg,{owner,leoStone:true,fromPortal:z.phase==='behindReturn'||z.phase==='fall'},hdir,'leo-stone');target.vx+=hdir*(z.phase==='fall'?70:125);try{spark(z.x,z.y,'#7dffc5',22)}catch(_){}
       }
       if(z.life<=0)z.dead=true;
       if(z.phase==='fall'){if(z.y>GROUND_Y+42)z.dead=true}
@@ -384,7 +406,7 @@
   function drawLeoFx(ctx,f){
     if(!f)return;
     for(const p of (f.leoPortals||[]))drawPortal(ctx,p);
-    for(const z of (f.leoRocks||[]))if(z.phase!=='portal'){
+    for(const z of (f.leoRocks||[]))if(z.phase!=='portal'&&z.phase!=='frontPortalHold'){
       ctx.save();ctx.translate(z.x,z.y);ctx.rotate(performance.now()/1000*(z.spin||7));ctx.fillStyle='#6f756f';ctx.strokeStyle='#b7c5b7';ctx.lineWidth=2;ctx.shadowBlur=12;ctx.shadowColor='#67f0b6';ctx.beginPath();ctx.moveTo(-10,-8);ctx.lineTo(8,-11);ctx.lineTo(13,3);ctx.lineTo(5,11);ctx.lineTo(-11,7);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
     }
     for(const d of (f.leoRain||[]))if(d.delay<=0){
