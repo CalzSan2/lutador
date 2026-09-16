@@ -30,6 +30,41 @@
   ];
 
   const SEASON_DURATION_MS = 28 * 24 * 60 * 60 * 1000;
+  // Temporadas globais: todos os jogadores usam o mesmo ciclo de 28 dias.
+  // Temporada 1: 01/09/2026 00:00:00 UTC.
+  const GLOBAL_SEASON_EPOCH_MS = Date.UTC(2026, 8, 1, 0, 0, 0);
+  let serverClockOffsetMs = 0;
+  let serverClockReady = false;
+
+  function seasonNow(){ return Date.now() + serverClockOffsetMs; }
+
+  function globalSeasonWindow(now = seasonNow()){
+    const safeNow = Number.isFinite(Number(now)) ? Number(now) : Date.now();
+    const elapsed = Math.max(0, safeNow - GLOBAL_SEASON_EPOCH_MS);
+    const index = Math.floor(elapsed / SEASON_DURATION_MS);
+    const number = index + 1;
+    const startedAt = GLOBAL_SEASON_EPOCH_MS + index * SEASON_DURATION_MS;
+    return {number, startedAt, endAt: startedAt + SEASON_DURATION_MS};
+  }
+
+  async function syncServerClock(){
+    // GitHub Pages e outros hosts HTTP enviam o cabecalho Date. Como a requisicao
+    // e same-origin, podemos usa-lo como referencia para nao depender so do relogio do PC.
+    try {
+      const sentAt = Date.now();
+      const response = await fetch(window.location.href, {method:'HEAD', cache:'no-store'});
+      const receivedAt = Date.now();
+      const header = response.headers.get('date');
+      const serverMs = header ? Date.parse(header) : NaN;
+      if (Number.isFinite(serverMs)) {
+        serverClockOffsetMs = serverMs - Math.round((sentAt + receivedAt) / 2);
+        serverClockReady = true;
+      }
+    } catch (_) {
+      // Offline/host sem Date: mantem Date.now() como fallback.
+    }
+    return serverClockReady;
+  }
   const SEASON_THEMES = [
     {key:'carmim', name:'SANGUE PRIMORDIAL', passName:'COROA CARMESIM', finalTitle:'PRIMORDIAL CARMESIM', coin:1.00, xp:1.00, freeTitles:['Sangue Novo','Sentinela Carmesim','Punho Rubro','Guardião do Sangue','Lenda Carmesim'], premiumTitles:['Elite Rubra','Carrasco Carmesim','Coroado de Sangue','Soberano Rubro','Primordial Carmesim']},
     {key:'gelo', name:'GUERRA GLACIAL', passName:'TRONO DE GELO', finalTitle:'SOBERANO GLACIAL', coin:1.04, xp:1.03, freeTitles:['Batedor Glacial','Punho de Gelo','Sentinela Polar','Guardião Invernal','Lenda Glacial'], premiumTitles:['Elite Polar','Caçador do Inverno','Coroa Congelada','Soberano do Gelo','Soberano Glacial']},
@@ -157,7 +192,7 @@
       totalXp: 0,
       upgrades: {damage:0, health:0, agility:0},
       battlePass: {xp:0, premium:false, claimed:[]},
-      season: {number:1, startedAt:Date.now()},
+      season: (()=>{ const s=globalSeasonWindow(); return {number:s.number, startedAt:s.startedAt}; })(),
       titles: [],
       equippedTitle: '',
       daily: defaultDaily(),
@@ -236,37 +271,39 @@
   let data = load();
 
   function currentSeasonInfo(){
-    const number=Math.max(1,Number(data.season?.number)||1);
-    const startedAt=Math.max(0,Number(data.season?.startedAt)||Date.now());
+    const now=seasonNow();
+    const windowInfo=globalSeasonWindow(now);
+    const number=windowInfo.number;
+    const startedAt=windowInfo.startedAt;
+    const endAt=windowInfo.endAt;
     const theme=seasonTheme(number);
-    const endAt=startedAt+SEASON_DURATION_MS;
-    const remainingMs=Math.max(0,endAt-Date.now());
+    const remainingMs=Math.max(0,endAt-now);
     return {
       number, key:theme.key, theme:theme.name, passName:theme.passName,
       name:`TEMPORADA ${padSeason(number)} · ${theme.name}`,
       startedAt,endAt,remainingMs,remainingLabel:formatSeasonRemaining(remainingMs),
-      endDate:new Date(endAt).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}),
+      endDate:new Date(endAt).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}),
       durationDays:28, finalTitle:theme.finalTitle
     };
   }
 
   function advanceSeasonIfNeeded(){
-    if(!data.season||typeof data.season!=='object') data.season={number:1,startedAt:Date.now()};
-    const now=Date.now();
-    let startedAt=Math.max(0,Number(data.season.startedAt)||now);
-    if(startedAt>now+60000) startedAt=now;
-    const elapsed=Math.max(0,now-startedAt);
-    if(elapsed<SEASON_DURATION_MS){ data.season.startedAt=startedAt; applySeasonRewards(data.season.number); return false; }
-    const skipped=Math.max(1,Math.floor(elapsed/SEASON_DURATION_MS));
-    data.season.number=Math.max(1,Number(data.season.number)||1)+skipped;
-    data.season.startedAt=startedAt+skipped*SEASON_DURATION_MS;
-    data.battlePass={xp:0,premium:false,claimed:[]};
-    data.daily=defaultDaily();
-    applySeasonRewards(data.season.number);
-    return true;
+    const target=globalSeasonWindow();
+    const oldNumber=Math.max(1,Number(data.season?.number)||1);
+    const changed=oldNumber!==target.number;
+
+    // O numero e o inicio da temporada nunca mais dependem do localStorage de cada PC.
+    data.season={number:target.number, startedAt:target.startedAt};
+
+    if(changed){
+      data.battlePass={xp:0,premium:false,claimed:[]};
+      data.daily=defaultDaily();
+    }
+    applySeasonRewards(target.number);
+    return changed;
   }
 
-  applySeasonRewards(data.season?.number||1);
+  advanceSeasonIfNeeded();
 
   function save(){
     if (combatSaveTimer) { clearTimeout(combatSaveTimer); combatSaveTimer = 0; }
@@ -874,6 +911,18 @@
   });
 
   function install(){
+    // Sincroniza a referencia de tempo com o host. O jogo continua funcionando
+    // normalmente se a requisicao falhar (fallback para o relogio local).
+    syncServerClock().then(()=>{
+      const changed=advanceSeasonIfNeeded();
+      save();
+      const season=currentSeasonInfo();
+      document.querySelectorAll('[data-season-countdown]').forEach(el=>el.textContent=season.remainingLabel);
+      document.querySelectorAll('[data-season-name]').forEach(el=>el.textContent=season.name);
+      document.querySelectorAll('[data-pass-name]').forEach(el=>el.textContent=season.passName);
+      if(changed && document.querySelector('.pro-pass-screen')) showBattlePass(lastPassOrigin);
+    });
+    setInterval(syncServerClock, 15 * 60 * 1000);
     installWrappers();
     installModeRewards();
     if (document.body) observer.observe(document.body, {childList:true, subtree:true});
