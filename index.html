@@ -1177,16 +1177,22 @@ function renderCodes() {
     if(!code){status.textContent='❌ Digite um código.';status.style.color='#f87171';return;}
     if(code==='010'){
       let list=document.getElementById('secret-code-list');
-      if(!list){
-        list=document.createElement('div');
-        list.id='secret-code-list';
-        list.className='v6-code-hint';
-        list.style.marginTop='18px';
-        list.innerHTML='<b>🔐 CÓDIGOS ATIVOS</b><span><b>00011</b> · liberar todos os campeões principais</span><span><b>121200</b> · 99.999 Gold</span><span><b>01010101</b> · 99.999 Vandais</span><span><b>REDEFINIR</b> · apagar a conta e começar do zero</span>';
-        const back=document.getElementById('btn-back');
-        back?.parentNode?.insertBefore(list,back);
-      }
-      status.textContent='📋 LISTA DE CÓDIGOS REVELADA.';status.style.color='#7dd3fc';
+      if(list)list.remove();
+      list=document.createElement('div');
+      list.id='secret-code-list';
+      list.className='v6-code-hint';
+      list.style.cssText='margin-top:18px;transition:opacity .35s ease,transform .35s ease;opacity:1;transform:translateY(0)';
+      list.innerHTML='<b>📋 CÓDIGOS EXISTENTES</b><span><b>010</b> · mostrar esta lista por 10 segundos</span><span><b>00011</b> · liberar todos os campeões principais</span><span><b>121200</b> · 99.999 Gold</span><span><b>01010101</b> · 99.999 Vandais</span>';
+      const back=document.getElementById('btn-back');
+      back?.parentNode?.insertBefore(list,back);
+      clearTimeout(window.__lutadorCodeListTimer);
+      window.__lutadorCodeListTimer=setTimeout(()=>{
+        const current=document.getElementById('secret-code-list');
+        if(!current)return;
+        current.style.opacity='0';current.style.transform='translateY(-8px)';
+        setTimeout(()=>current.remove(),360);
+      },10000);
+      status.textContent='📋 LISTA DE CÓDIGOS EXISTENTES · SOME EM 10s.';status.style.color='#7dd3fc';
       input.value='';SFX.play('menu_confirm');return;
     }
     if(code==='00011'){
@@ -7640,7 +7646,7 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-v8-6-fluid.css?v=v861">
 <script src="pro-v8-6-fluid.js?v=v861"></script>
 <link rel="stylesheet" href="pro-ravam-studios.css?v=ravam-180">
-<script src="pro-ravam-studios.js?v=ravam-180"></script>
+<script src="pro-ravam-studios.js?v=ravam-183"></script>
 <link rel="stylesheet" href="pro-v11-quality.css?v=v110">
 <script src="pro-v11-quality.js?v=v110"></script>
 <link rel="stylesheet" href="pro-v15-suprema.css?v=v150">
@@ -7651,4 +7657,4 @@ setTimeout(function(){
 
 <!-- R.A.V.A.M V17: loaded last on purpose so its animation/shop/online patches win. -->
 <link rel="stylesheet" href="pro-ravam-v17.css?v=180">
-<script src="pro-ravam-v17.js?v=182"></script>
+<script src="pro-ravam-v17.js?v=183"></script>

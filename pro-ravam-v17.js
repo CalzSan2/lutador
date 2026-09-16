@@ -228,7 +228,7 @@
     const entryX=p.x+dir*150;
     const lockedX=clamp(target.x,42,W-42);
     const targetBody=(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70);
-    const exitY=Math.max(70,targetBody-195);
+    const exitY=176; // portal superior fixo, logo abaixo do HUD de vida
 
     // Os dois portais abrem juntos para deixar a mecânica visualmente clara.
     f.leoPortals.push({kind:'entry',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:entryX,y:sy+14,life:.96,maxLife:.96,color:'#53e8ad',trackTarget:false});
