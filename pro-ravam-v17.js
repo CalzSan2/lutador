@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamV17?.version)return;
-  const VERSION='18.4.0';
+  const VERSION='18.2.0-tharoth';
   const SHOP_VERSION=17;
   const ACCESS_COST=Number(window.RavamStudios?.cost)||2500;
   const BASE=window.RavamStudios||{};
@@ -22,20 +22,26 @@
     id:'leo',name:'Leo Vesper',color:'#14865f',hp:2050,dmg:34,speed:87,price:0,
     weapon:'vesperPortal',special:'vesperRain',portrait:'ai-assets/characters/leo.png',secret:true,ravamOnly:true
   });
-  const ALL=Object.freeze([oldPriya,oldKain,oldAria,LEO]);
+  const THAROTH=Object.freeze({
+    id:'tharoth',name:'Tharoth Umbra',color:'#8d121f',hp:2120,dmg:35,speed:84,price:0,
+    weapon:'umbraSand',special:'umbraClone',portrait:'ai-assets/characters/tharoth.png',secret:true,ravamOnly:true
+  });
+  const ALL=Object.freeze([oldPriya,oldKain,oldAria,LEO,THAROTH]);
   const ALL_IDS=Object.freeze(ALL.map(c=>c.id));
-  const COSTS=Object.freeze({priya:0,kain:700,aria:650,leo:800});
+  const COSTS=Object.freeze({priya:0,kain:700,aria:650,leo:800,tharoth:900});
   const ABILITY={
     priya:BASE.ability||{flag:'RAVAM',role:'Atiradora Tática',tag:'PRECISÃO',desc:'J dispara com o rifle. L lança a Tríade Demolidora.'},
     kain:BASE.kainAbility||{flag:'RAVAM',role:'Mímico do Caos',tag:'CAOS',desc:'J usa o poder atual. H troca o poder. L ativa o Espelho Abissal.'},
-    aria:BASE.ariaAbility||{flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J alterna entre Rajada de Folhas e Raiz Selvagem. L prende o rival com cipós.'},
-    leo:Object.freeze({flag:'RAVAM',role:'Arquiteto de Portais',tag:'PORTAIS',desc:'J lança duas pedras: a frontal pode acertar direto ou entrar num portal no meio do caminho e sair por trás do rival; a segunda cai de um portal no alto. L abre o CÉU VESPER.'})
+    aria:BASE.ariaAbility||{flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J lança duas flores venenosas. L prende o rival com cipós.'},
+    leo:Object.freeze({flag:'RAVAM',role:'Arquiteto de Portais',tag:'PORTAIS',desc:'J lança 2 pedras: a primeira vai reta e a segunda entra num portal e sai por trás do inimigo para acertá-lo direto. L abre o CÉU VESPER e faz cair 2 facas, 2 espadas e 2 pedras.'}),
+    tharoth:Object.freeze({flag:'RAVAM',role:'Avatar da Umbra',tag:'SOMBRAS',desc:'J arremessa areia negra no inimigo. L cria 1 clone de sombra invulnerável por 3 segundos; ele surge em campo, ataca e desaparece quando o tempo acaba.'})
   };
   const META={
     priya:{name:'ALANA SORELLE',tag:'PRECISÃO',accent:'#ff765e',portrait:'ai-assets/characters/priya.png',stats:[32,82,1940],moves:[['J','RIFLE'],['I','SOCO'],['O','CHUTE'],['L','3 BOMBAS']]},
     kain:{name:'KAIN',tag:'CAOS',accent:'#c0c7ff',portrait:'ai-assets/characters/kain.png',stats:[35,88,2180],moves:[['J','USAR PODER'],['H / P2 9','TROCAR PODER'],['I','SOCO'],['O','CHUTE'],['L','ESPELHO']]},
-    aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','FOLHAS ↔ RAIZ'],['I','SOCO'],['O','CHUTE'],['L','CIPÓ']]},
-    leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','PORTAL ATRÁS + QUEDA'],['I','SOCO'],['O','CHUTE'],['L','CHUVA VESPER']]}
+    aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','2 FLORES'],['I','SOCO'],['O','CHUTE'],['L','CIPÓ']]},
+    leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','PEDRA + PORTAL'],['I','SOCO'],['O','CHUTE'],['L','CHUVA VESPER']]},
+    tharoth:{name:'THAROTH UMBRA',tag:'SOMBRAS',accent:'#ff4d62',portrait:'ai-assets/characters/tharoth.png',stats:[35,84,2120],moves:[['J','AREIA NEGRA'],['I','SOCO'],['O','CHUTE'],['L','CLONE DE SOMBRA']]}
   };
 
   function toast(text,tone='normal',ms=2200){
@@ -67,11 +73,11 @@
   function charOf(id){return ALL.find(c=>c.id===id)||oldPriya}
   function displayName(id){return META[id]?.name||String(id||'AGUARDANDO').toUpperCase()}
   function randomRival(id){const pool=ALL_IDS.filter(x=>x!==id);return pool[Math.floor(Math.random()*pool.length)]||'kain'}
-  function storyRival(id){return ({priya:'aria',aria:'kain',kain:'leo',leo:'priya'})[id]||'kain'}
+  function storyRival(id){return ({priya:'aria',aria:'kain',kain:'leo',leo:'tharoth',tharoth:'priya'})[id]||'kain'}
 
   // API V17: online enxerga todas as Lendas para resolver nomes, mas a seleção filtra pelo isOwned().
   try{
-    const api={...BASE,version:VERSION,cost:ACCESS_COST,priya:oldPriya,kain:oldKain,aria:oldAria,leo:LEO,allCharacters:ALL,isOwned,unlockedIds,displayName};
+    const api={...BASE,version:VERSION,cost:ACCESS_COST,priya:oldPriya,kain:oldKain,aria:oldAria,leo:LEO,tharoth:THAROTH,allCharacters:ALL,isOwned,unlockedIds,displayName};
     delete api.characters;
     Object.defineProperty(api,'characters',{enumerable:true,get:()=>ALL});
     api.render=()=>window.renderRavamMode?.();
@@ -85,15 +91,24 @@
     try{
       if(typeof CHARACTERS!=='undefined'&&!CHARACTERS.some(c=>c.id==='leo')){CHARACTERS.push(LEO);added.push('char')}
       if(typeof ABILITIES!=='undefined'&&!ABILITIES.leo)ABILITIES.leo=ABILITY.leo;
-      if(typeof MOVES!=='undefined'&&!MOVES.leo)MOVES.leo=[['J','Pedra direta → portal no meio → sai atrás + pedra do alto'],['I','Soco Vesper'],['O','Chute Vesper'],['L','CÉU VESPER · 2 facas + 2 espadas + 2 pedras']];
+      if(typeof MOVES!=='undefined'&&!MOVES.leo)MOVES.leo=[['J','1 pedra reta + 1 pedra via portal'],['I','Soco Vesper'],['O','Chute Vesper'],['L','CÉU VESPER · 2 facas + 2 espadas + 2 pedras']];
     }catch(_){}
     return ()=>{try{if(added.includes('char')&&typeof CHARACTERS!=='undefined'){const i=CHARACTERS.findIndex(c=>c.id==='leo');if(i>=0)CHARACTERS.splice(i,1)}}catch(_){}};
   }
+  function registerTharoth(){
+    const added=[];
+    try{
+      if(typeof CHARACTERS!=='undefined'&&!CHARACTERS.some(c=>c.id==='tharoth')){CHARACTERS.push(THAROTH);added.push('char')}
+      if(typeof ABILITIES!=='undefined'&&!ABILITIES.tharoth)ABILITIES.tharoth=ABILITY.tharoth;
+      if(typeof MOVES!=='undefined'&&!MOVES.tharoth)MOVES.tharoth=[['J','AREIA NEGRA'],['I','Soco Umbra'],['O','Chute Umbra'],['L','CLONE DE SOMBRA · 3s invulnerável']];
+    }catch(_){}
+    return ()=>{try{if(added.includes('char')&&typeof CHARACTERS!=='undefined'){const i=CHARACTERS.findIndex(c=>c.id==='tharoth');if(i>=0)CHARACTERS.splice(i,1)}}catch(_){}};
+  }
   const baseStartFight=window.startFight;
   if(typeof baseStartFight==='function')window.startFight=function(playerId,mode,player2Id,stageId,chaos){
-    const needsLeo=playerId==='leo'||player2Id==='leo',undo=needsLeo?registerLeo():()=>{};
+    const needsLeo=playerId==='leo'||player2Id==='leo',needsTharoth=playerId==='tharoth'||player2Id==='tharoth',undoLeo=needsLeo?registerLeo():()=>{},undoTharoth=needsTharoth?registerTharoth():()=>{};
     let r;
-    try{r=baseStartFight.apply(this,arguments)}finally{undo()}
+    try{r=baseStartFight.apply(this,arguments)}finally{undoTharoth();undoLeo()}
     try{
       if(typeof fight!=='undefined'&&fight&&(ALL_IDS.includes(fight.p1?.id)||ALL_IDS.includes(fight.p2?.id))){
         fight.ravamStudios=true;fight.ravamVersion=VERSION;
@@ -101,7 +116,13 @@
         fight.leoRain=Array.isArray(fight.leoRain)?fight.leoRain:[];
         fight.leoPortals=Array.isArray(fight.leoPortals)?fight.leoPortals:[];
         fight.leoFx=Array.isArray(fight.leoFx)?fight.leoFx:[];
-        for(const q of [fight.p1,fight.p2])if(q?.id==='leo'){q.leoCastT=0;q.leoSuperT=0;}
+        fight.tharothSands=Array.isArray(fight.tharothSands)?fight.tharothSands:[];
+        fight.tharothClones=Array.isArray(fight.tharothClones)?fight.tharothClones:[];
+        fight.tharothFx=Array.isArray(fight.tharothFx)?fight.tharothFx:[];
+        for(const q of [fight.p1,fight.p2]){
+          if(q?.id==='leo'){q.leoCastT=0;q.leoSuperT=0;}
+          if(q?.id==='tharoth'){q.tharothCastT=0;q.tharothSuperT=0;}
+        }
       }
     }catch(_){}
     return r;
@@ -129,8 +150,8 @@
     const a=appNode();if(!a)return;
     const can=(Number(state?.vandais)||0)>=ACCESS_COST;
     a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen r17-screen">
-      <section class="ravam-pro-hero locked"><div class="ravam-copy"><small>UNIVERSO PREMIUM</small><h2>R.A.V.A.M <span>STUDIOS</span></h2><p>Adquira o acesso permanente. A primeira Lenda, Alana Sorelle, vem liberada; Kain, Aria e Leo ficam na Loja R.A.V.A.M.</p><div class="ravam-price">🟪 ${fmt(ACCESS_COST)} VANDAIS</div><div class="ravam-wallet-line">SALDO · 🟪 ${fmt(state?.vandais||0)}</div></div><img src="ai-assets/characters/leo.png" alt="Leo Vesper"></section>
-      <section class="ravam-unlock-card"><div><small>ACESSO + 1 LENDA INICIAL</small><h3>ALANA SORELLE</h3><p>Depois da compra, desbloqueie Kain, Aria Valfleur e Leo Vesper individualmente na Loja R.A.V.A.M.</p></div><button id="r17-buy-access" class="btn big" ${can?'':'disabled'}>${can?'🟪 ADQUIRIR R.A.V.A.M':'VANDAIS INSUFICIENTES'}</button></section>
+      <section class="ravam-pro-hero locked"><div class="ravam-copy"><small>UNIVERSO PREMIUM</small><h2>R.A.V.A.M <span>STUDIOS</span></h2><p>Adquira o acesso permanente. A primeira Lenda, Alana Sorelle, vem liberada; Kain, Aria, Leo e Tharoth ficam na Loja R.A.V.A.M.</p><div class="ravam-price">🟪 ${fmt(ACCESS_COST)} VANDAIS</div><div class="ravam-wallet-line">SALDO · 🟪 ${fmt(state?.vandais||0)}</div></div><img src="ai-assets/characters/leo.png" alt="Leo Vesper"></section>
+      <section class="ravam-unlock-card"><div><small>ACESSO + 1 LENDA INICIAL</small><h3>ALANA SORELLE</h3><p>Depois da compra, desbloqueie Kain, Aria Valfleur, Leo Vesper e Tharoth Umbra individualmente na Loja R.A.V.A.M.</p></div><button id="r17-buy-access" class="btn big" ${can?'':'disabled'}>${can?'🟪 ADQUIRIR R.A.V.A.M':'VANDAIS INSUFICIENTES'}</button></section>
       <button id="r17-back" class="btn">← VOLTAR AOS MODOS</button>
     </div>`;
     const b=document.getElementById('r17-buy-access');if(b&&can)b.onclick=()=>{state.vandais=Math.max(0,(Number(state.vandais)||0)-ACCESS_COST);state.ravamModeUnlocked=true;state.ravamStoreVersion=SHOP_VERSION;state.ravamRoster=['priya'];state.ravamPurchasedAt=Date.now();save();toast('R.A.V.A.M LIBERADO · ALANA SORELLE DISPONÍVEL','reward',2800);renderHub()};
@@ -140,7 +161,7 @@
     ensureEconomy();const a=appNode();if(!a)return;
     a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen ravam-v15 r17-screen">
       <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>R.A.V.A.M STUDIOS · V17</small><h2>ESCOLHA O <span>MODO</span></h2><p>Monte a luta, compre novas Lendas e entre na arena.</p></div><div class="ravam-head-wallet"><span>CARTEIRA</span><b>🟪 ${fmt(state?.vandais||0)}</b><small>VANDAIS</small></div></section>
-      <section class="r17-showcase"><div><small>4 LENDAS · ${unlockedIds().length} DESBLOQUEADA(S)</small><h3>ALANA · KAIN · ARIA · <b>LEO</b></h3><p>Precisão, caos, natureza e portais. Lendas bloqueadas precisam ser compradas na Loja R.A.V.A.M.</p></div><div class="r17-art-stack"><img src="ai-assets/characters/priya.png" alt="Alana"><img src="ai-assets/characters/kain.png" alt="Kain"><img src="ai-assets/characters/aria.png" alt="Aria"><img src="ai-assets/characters/leo.png" alt="Leo"></div></section>
+      <section class="r17-showcase"><div><small>5 LENDAS · ${unlockedIds().length} DESBLOQUEADA(S)</small><h3>ALANA · KAIN · ARIA · LEO · <b>THAROTH</b></h3><p>Precisão, caos, natureza, portais e sombras. Lendas bloqueadas precisam ser compradas na Loja R.A.V.A.M.</p></div><div class="r17-art-stack"><img src="ai-assets/characters/priya.png" alt="Alana"><img src="ai-assets/characters/kain.png" alt="Kain"><img src="ai-assets/characters/aria.png" alt="Aria"><img src="ai-assets/characters/leo.png" alt="Leo"></div></section>
       <div class="ravam-section-title battle"><span>01</span><div><small>PASSO UM</small><h3>ESCOLHA COMO LUTAR</h3></div></div>
       <section class="ravam-battle-grid r17-mode-grid">
         <button id="r17-cpu" class="ravam-battle-card cpu"><span class="ravam-battle-icon">◈</span><small>COMBATE SOLO</small><h3>1P <b>× CPU</b></h3><p>Escolha sua Lenda e enfrente a CPU.</p><em>SELECIONAR →</em></button>
@@ -201,13 +222,13 @@
     const b=mode==='pvp'?pickP2:mode==='story'?storyRival(a):randomRival(a);if(!b)return;
     SFX?.play?.('menu_confirm');
     window.startFight(a,mode==='pvp'?'pvp':'ravam',b);
-    try{if(fight){fight.ravamStudios=true;fight.ravamSelectionMode=mode;fight.ravamStory=mode==='story';fight.ravamStoryHero=a;fight.ravamStoryRival=b;fight.ravamStoryTitle=a==='leo'?'PORTAIS SOBRE O CREPÚSCULO':a==='kain'?'O ESPELHO SEM ROSTO':a==='aria'?'O JARDIM QUE NÃO DORME':'A CAÇADORA E O JARDIM'}}catch(_){}
+    try{if(fight){fight.ravamStudios=true;fight.ravamSelectionMode=mode;fight.ravamStory=mode==='story';fight.ravamStoryHero=a;fight.ravamStoryRival=b;fight.ravamStoryTitle=a==='leo'?'PORTAIS SOBRE O CREPÚSCULO':a==='kain'?'O ESPELHO SEM ROSTO':a==='aria'?'O JARDIM QUE NÃO DORME':a==='tharoth'?'ECO DA SOMBRA IMORTAL':'A CAÇADORA E O JARDIM'}}catch(_){}
   }
   window.renderRavamMode=function(){screen='ravam';drawCanvas?.();ensureEconomy();pickP1='';pickP2='';if(!hasAccess())renderLocked();else renderHub()};
 
   // Atualiza o cartão do menu principal sem desfazer wrappers anteriores.
   const baseModes=window.renderModes;
-  if(typeof baseModes==='function')window.renderModes=function(){const r=baseModes.apply(this,arguments);setTimeout(()=>{const card=document.getElementById('mode-ravam');if(!card)return;const p=card.querySelector('p');if(p)p.textContent=hasAccess()?`Loja própria · ${unlockedIds().length}/4 Lendas desbloqueadas · Online 2P2.`:'Adquira o modo. Alana vem inclusa; Kain, Aria e Leo são comprados na Loja R.A.V.A.M.';const badge=card.querySelector('.mode-badge');if(badge)badge.textContent=hasAccess()?'R.A.V.A.M · LOJA DE LENDAS':`🟪 ${fmt(ACCESS_COST)} VANDAIS`;},0);return r};
+  if(typeof baseModes==='function')window.renderModes=function(){const r=baseModes.apply(this,arguments);setTimeout(()=>{const card=document.getElementById('mode-ravam');if(!card)return;const p=card.querySelector('p');if(p)p.textContent=hasAccess()?`Loja própria · ${unlockedIds().length}/5 Lendas desbloqueadas · Online 2P2 + 5ª Lenda.`:'Adquira o modo. Alana e Tharoth vêm inclusos; Kain, Aria, Leo e Tharoth são comprados na Loja R.A.V.A.M.';const badge=card.querySelector('.mode-badge');if(badge)badge.textContent=hasAccess()?'R.A.V.A.M · LOJA DE LENDAS':`🟪 ${fmt(ACCESS_COST)} VANDAIS`;},0);return r};
 
   /* =========================
      LEO VESPER — PODERES
@@ -219,36 +240,20 @@
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
     f.leoRocks=f.leoRocks||[];f.leoPortals=f.leoPortals||[];
     const sy=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82)-12,dir=p.facing||1;
+    // Pedra 1: projétil normal, sempre em linha reta.
+    f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:1.45,phase:'straight',x:p.x+dir*56,y:sy-10,vx:dir*820,vy:-10,spin:-6.5,dmg:p.dmg*.88,hitDir:dir,dead:false});
 
-    // PEDRA 1: se o rival estiver perto, pode acertar antes do portal.
-    // Se não acertar, entra num portal no meio do trajeto e sai ATRÁS da
-    // posição em que o rival estava no momento do disparo, voltando contra ele.
-    const lockedTargetX=clamp(target.x,44,W-44);
-    const dist=Math.abs(lockedTargetX-p.x);
-    // Perto: o portal fica depois da posição inicial do rival, então a pedra
-    // tem chance real de acertar direto. Longe: o portal fica no meio do caminho.
-    const entryDist=dist<=260?dist+85:dist*.52;
-    const frontEntryX=clamp(p.x+dir*entryDist,44,W-44);
-    const behindX=clamp(lockedTargetX+dir*92,42,W-42);
-    const behindY=(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70)-10;
-    f.leoPortals.push({kind:'entry',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:frontEntryX,y:sy-10,life:1.05,maxLife:1.05,color:'#53e8ad',trackTarget:false});
-    f.leoPortals.push({kind:'exit',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:behindX,y:behindY,life:1.05,maxLife:1.05,color:'#74f6bd',trackTarget:false});
-    f.leoRocks.push({
-      ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:2.0,phase:'frontPortal',
-      x:p.x+dir*56,y:sy-10,vx:dir*820,vy:0,spin:-6.5,dmg:p.dmg*.92,
-      hitDir:dir,entryX:frontEntryX,exitX:behindX,exitY:behindY,exitDir:-dir,portalDelay:0,dead:false
-    });
+    // Pedra 2: entra no portal à frente do Leo e sai por trás do inimigo
+    // usando a posição travada do rival no momento do disparo para pegar direto.
+    const entryX=p.x+dir*154;
+    const lockedTargetX=clamp(target.x,42,W-42);
+    const targetBody=(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70);
+    const exitX=clamp(lockedTargetX+dir*94,42,W-42);
+    const exitY=Math.max(84,targetBody-18);
+    f.leoPortals.push({kind:'entry',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:entryX,y:sy+14,life:.62,maxLife:.62,color:'#53e8ad',trackTarget:false});
+    f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:2.1,phase:'toPortal',x:p.x+dir*64,y:sy+14,vx:dir*760,vy:0,spin:6.8,dmg:p.dmg*.86,hitDir:-dir,entryX,lockedTargetX,exitX,exitY,dashDir:-dir,portalDelay:0,dead:false});
 
-    // PEDRA 2: permanece como ataque vertical. Ela entra à frente e cai do
-    // portal no alto na posição travada do rival, sem perseguição.
-    const entryX=p.x+dir*150;
-    const lockedX=lockedTargetX;
-    const exitY=176;
-    f.leoPortals.push({kind:'entry',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:entryX,y:sy+14,life:.96,maxLife:.96,color:'#53e8ad',trackTarget:false});
-    f.leoPortals.push({kind:'exit',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:lockedX,y:exitY,life:.96,maxLife:.96,color:'#74f6bd',trackTarget:false});
-    f.leoRocks.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,t:0,life:2.25,phase:'toPortal',x:p.x+dir*64,y:sy+14,vx:dir*760,vy:0,spin:6.8,dmg:p.dmg*.78,hitDir:dir,entryX,lockedX,exitY,portalDelay:0,dead:false});
-
-    p.throwCd=p.human?.62:.80;p.leoCastT=.34;setState?.(p,'throw');leoFx(p,'PEDRA DIRETA → PORTAL ATRÁS','#72f4ba',.72);try{SFX?.play?.('attack_light',.76)}catch(_){}
+    p.throwCd=p.human?.60:.78;p.leoCastT=.34;setState?.(p,'throw');leoFx(p,'PEDRA RETA + PORTAL','#72f4ba',.72);try{SFX?.play?.('attack_light',.76)}catch(_){}
   }
   function leoSuper(p){
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
@@ -259,77 +264,71 @@
     f.leoPortals.push({kind:'sky',ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:target.x,y:64,life:2.1,maxLife:2.1,color:'#78f5c0',trackTarget:true});
     p.specialCd=6.7;p.leoSuperT=1.25;setState?.(p,'special');leoFx(p,'CÉU VESPER','#9dffd2',1.05);try{spark(target.x,58,'#71f3bc',34)}catch(_){}
   }
+  function tharothFx(p,text,color='#ff5a6a',life=.92){const f=typeof fight!=='undefined'?fight:null;if(!f||!p)return;f.tharothFx=f.tharothFx||[];f.tharothFx.push({x:p.x,y:(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-80)-60,text,color,life,maxLife:life})}
+  function tharothSand(p){
+    const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
+    f.tharothSands=f.tharothSands||[];
+    const sy=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82)-10,dir=p.facing||1;
+    const tx=target.x,ty=(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-72)-4;
+    const startX=p.x+dir*52,dx=tx-startX,dy=ty-sy,len=Math.max(1,Math.hypot(dx,dy));
+    f.tharothSands.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:startX,y:sy,vx:dx/len*760,vy:dy/len*760,life:1.0,dmg:p.dmg*.84,spin:0,dead:false});
+    p.throwCd=p.human?.58:.72;p.tharothCastT=.26;setState?.(p,'throw');tharothFx(p,'AREIA NEGRA','#ff6b79',.78);try{SFX?.play?.('attack_light',.72)}catch(_){ }
+  }
+  function tharothClone(p){
+    const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
+    f.tharothClones=f.tharothClones||[];
+    const dir=(target.x>=p.x?1:-1),cloneX=clamp(target.x+dir*86,32,W-32);
+    f.tharothClones.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:cloneX,life:3,maxLife:3,delay:.36,pulse:0,struck:false,dead:false,dir:-dir});
+    p.specialCd=6.6;p.tharothSuperT=1.05;setState?.(p,'special');tharothFx(p,'CLONE DE SOMBRA','#ff7d88',.96);try{spark(cloneX,GROUND_Y-8,'#ff4f62',26)}catch(_){ }
+  }
+
   const baseThrow=window.throwProjectile;
-  if(typeof baseThrow==='function')window.throwProjectile=function(p){if(p?.id==='leo'){leoStone(p);return}return baseThrow.apply(this,arguments)};
+  if(typeof baseThrow==='function')window.throwProjectile=function(p){if(p?.id==='leo'){leoStone(p);return}if(p?.id==='tharoth'){tharothSand(p);return}return baseThrow.apply(this,arguments)};
   const baseSpecial=window.castSpecial;
-  if(typeof baseSpecial==='function')window.castSpecial=function(p){if(p?.id==='leo'){leoSuper(p);return}return baseSpecial.apply(this,arguments)};
+  if(typeof baseSpecial==='function')window.castSpecial=function(p){if(p?.id==='leo'){leoSuper(p);return}if(p?.id==='tharoth'){tharothClone(p);return}return baseSpecial.apply(this,arguments)};
   function hit(victim,amount,src,dir,type){try{return typeof damage==='function'?damage(victim,amount,src,dir,type):undefined}catch(_){}}
   function updateLeo(f,dt){
     if(!f||(!ALL_IDS.includes(f.p1?.id)&&!ALL_IDS.includes(f.p2?.id)))return;
     f.leoRocks=f.leoRocks||[];f.leoRain=f.leoRain||[];f.leoPortals=f.leoPortals||[];f.leoFx=f.leoFx||[];
-    for(const q of [f.p1,f.p2])if(q?.id==='leo'){q.leoCastT=Math.max(0,(q.leoCastT||0)-dt);q.leoSuperT=Math.max(0,(q.leoSuperT||0)-dt)}
+    f.tharothSands=f.tharothSands||[];f.tharothClones=f.tharothClones||[];f.tharothFx=f.tharothFx||[];
+    for(const q of [f.p1,f.p2]){
+      if(q?.id==='leo'){q.leoCastT=Math.max(0,(q.leoCastT||0)-dt);q.leoSuperT=Math.max(0,(q.leoSuperT||0)-dt)}
+      if(q?.id==='tharoth'){q.tharothCastT=Math.max(0,(q.tharothCastT||0)-dt);q.tharothSuperT=Math.max(0,(q.tharothSuperT||0)-dt)}
+    }
     for(const z of f.leoRocks){
       if(z.dead)continue;z.t+=dt;z.life-=dt;const owner=fighterBySlot(f,z.ownerSlot),target=fighterBySlot(f,z.targetSlot);
-
-      if(z.phase==='frontPortal'){
-        // Hitbox ativa antes do portal: em curta distância o golpe pega direto.
-        z.x+=(z.vx||0)*dt;z.y+=(z.vy||0)*dt;
-        const reached=(z.vx>=0&&z.x>=z.entryX)||(z.vx<0&&z.x<=z.entryX);
-        if(reached){
-          z.x=z.entryX;z.vx=0;z.vy=0;z.phase='frontPortalHold';z.portalDelay=.09;
-          try{spark(z.entryX,z.y,'#6ff0bb',14);spark(z.exitX,z.exitY,'#86ffd0',16)}catch(_){}
-        }
-      }else if(z.phase==='frontPortalHold'){
-        z.portalDelay-=dt;
-        if(z.portalDelay<=0){
-          z.phase='behindReturn';z.x=z.exitX;z.y=z.exitY;z.vx=(z.exitDir||-1)*900;z.vy=0;z.spin=8.4;
-        }
-      }else if(z.phase==='toPortal'){
+      if(z.phase==='toPortal'){
         z.x+=(z.vx||0)*dt;
         const reached=(z.vx>=0&&z.x>=z.entryX)||(z.vx<0&&z.x<=z.entryX);
-        if(reached){
-          z.x=z.entryX;z.vx=0;z.vy=0;z.phase='portal';z.portalDelay=.11;
-          try{spark(z.entryX,z.y,'#6ff0bb',14);spark(z.lockedX,z.exitY,'#86ffd0',16)}catch(_){}
-        }
+        if(reached){z.x=z.entryX;z.vx=0;z.vy=0;z.phase='portal';z.portalDelay=.085;f.leoPortals.push({kind:'exit',ownerSlot:z.ownerSlot,targetSlot:z.targetSlot,x:z.exitX,y:z.exitY,life:.64,maxLife:.64,color:'#74f6bd',trackTarget:false});try{spark(z.entryX,z.y,'#6ff0bb',14);spark(z.exitX,z.exitY,'#86ffd0',16)}catch(_){ }}
       }else if(z.phase==='portal'){
-        z.portalDelay-=dt;
-        if(z.portalDelay<=0){z.phase='fall';z.x=z.lockedX;z.y=z.exitY+6;z.vx=0;z.vy=135;z.spin=8.2;}
-      }else if(z.phase==='fall'){
-        z.vy+=1280*dt;z.y+=z.vy*dt;
-      }else{
-        z.x+=(z.vx||0)*dt;z.y+=(z.vy||0)*dt;
-      }
-
-      // A pedra frontal acerta antes do portal ou quando retorna por trás.
-      // A pedra vertical só acerta ao cair do portal superior.
-      const canLeoRockHit=(z.phase==='frontPortal'||z.phase==='behindReturn'||z.phase==='fall');
-      if(canLeoRockHit&&target&&target.state!=='ko'&&Math.abs(z.x-target.x)<47&&hitboxY(target,z.y,20)){
-        const hdir=z.phase==='fall'?(target.x>=(owner?.x||target.x)?1:-1):(z.phase==='behindReturn'?(z.exitDir||-1):(z.hitDir||((z.vx||1)>0?1:-1)));
-        z.dead=true;hit(target,z.dmg,{owner,leoStone:true,fromPortal:z.phase==='behindReturn'||z.phase==='fall'},hdir,'leo-stone');target.vx+=hdir*(z.phase==='fall'?70:125);try{spark(z.x,z.y,'#7dffc5',22)}catch(_){}
-      }
-      if(z.life<=0)z.dead=true;
-      if(z.phase==='fall'){if(z.y>GROUND_Y+42)z.dead=true}
-      else if(z.phase!=='portal'&&(z.x<-90||z.x>W+90))z.dead=true;
+        z.portalDelay-=dt;if(z.portalDelay<=0){z.phase='dash';z.x=z.exitX;z.y=z.exitY;z.vx=(z.dashDir||1)*960;z.vy=0;z.spin=8.2;}
+      }else{z.x+=(z.vx||0)*dt;z.y+=(z.vy||0)*dt;}
+      if(z.phase!=='portal'&&target&&target.state!=='ko'&&Math.abs(z.x-target.x)<47&&hitboxY(target,z.y,20)){const hdir=z.hitDir||((z.vx||1)>0?1:-1);z.dead=true;hit(target,z.dmg,{owner,leoStone:true,fromPortal:z.phase==='dash'},hdir,'leo-stone');target.vx+=hdir*(z.phase==='dash'?145:125);try{spark(z.x,z.y,'#7dffc5',22)}catch(_){ }}
+      if(z.life<=0)z.dead=true;if(z.phase!=='portal'&&(z.x<-90||z.x>W+90))z.dead=true;
     }
     f.leoRocks=f.leoRocks.filter(z=>!z.dead);
-    for(const d of f.leoRain){
-      if(d.dead)continue;d.life-=dt;const owner=fighterBySlot(f,d.ownerSlot),target=fighterBySlot(f,d.targetSlot);if(!target||target.state==='ko'){d.dead=true;continue}d.delay-=dt;
-      if(d.delay>0){d.x=target.x+d.offset;continue}
-      if(!d.started){d.started=true;d.x=target.x+d.offset;d.y=62;d.vy=190}
-      d.vy+=1180*dt;d.y+=d.vy*dt;
-      const ty=typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70;
-      if(!d.hit&&d.y>=ty-12){d.hit=true;if(Math.abs(d.x-target.x)<58){hit(target,d.dmg,{owner,leoRain:true},target.x>=owner.x?1:-1,`leo-${d.kind}`);try{spark(d.x,ty,d.kind==='rock'?'#b9c4b5':'#b8ffe3',18)}catch(_){}}}
-      if(d.y>GROUND_Y+30){d.dead=true;try{spark(d.x,GROUND_Y-3,'#5fe6ad',10)}catch(_){}}
-      if(d.life<=0)d.dead=true;
-    }
+    for(const d of f.leoRain){if(d.dead)continue;d.life-=dt;const owner=fighterBySlot(f,d.ownerSlot),target=fighterBySlot(f,d.targetSlot);if(!target||target.state==='ko'){d.dead=true;continue}d.delay-=dt;if(d.delay>0){d.x=target.x+d.offset;continue}if(!d.started){d.started=true;d.x=target.x+d.offset;d.y=62;d.vy=190}d.vy+=1180*dt;d.y+=d.vy*dt;const ty=typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70;if(!d.hit&&d.y>=ty-12){d.hit=true;if(Math.abs(d.x-target.x)<58){hit(target,d.dmg,{owner,leoRain:true},target.x>=owner.x?1:-1,`leo-${d.kind}`);try{spark(d.x,ty,d.kind==='rock'?'#b9c4b5':'#b8ffe3',18)}catch(_){}}}if(d.y>GROUND_Y+30){d.dead=true;try{spark(d.x,GROUND_Y-3,'#5fe6ad',10)}catch(_){}}if(d.life<=0)d.dead=true;}
     f.leoRain=f.leoRain.filter(d=>!d.dead);
     for(const p of f.leoPortals){p.life-=dt;const target=fighterBySlot(f,p.targetSlot);if(p.trackTarget&&(p.kind==='exit'||p.kind==='sky')&&target)p.x=target.x;if(p.life<=0)p.dead=true}
     f.leoPortals=f.leoPortals.filter(p=>!p.dead);
     for(const e of f.leoFx){e.life-=dt;e.y-=20*dt}f.leoFx=f.leoFx.filter(e=>e.life>0);
+    for(const s of f.tharothSands){
+      if(s.dead)continue;s.life-=dt;s.x+=(s.vx||0)*dt;s.y+=(s.vy||0)*dt;s.spin=(s.spin||0)+dt*8;
+      const owner=fighterBySlot(f,s.ownerSlot),target=fighterBySlot(f,s.targetSlot);
+      if(target&&target.state!=='ko'&&Math.abs(s.x-target.x)<48&&hitboxY(target,s.y,20)){s.dead=true;hit(target,s.dmg,{owner,tharothSand:true},(s.vx||1)>0?1:-1,'tharoth-sand');target.vx+=((s.vx||1)>0?1:-1)*95;try{spark(s.x,s.y,'#ff596b',18)}catch(_){ }}
+      if(s.life<=0||s.x<-90||s.x>W+90||s.y<20||s.y>GROUND_Y+40)s.dead=true;
+    }
+    f.tharothSands=f.tharothSands.filter(s=>!s.dead);
+    for(const c of f.tharothClones){
+      if(c.dead)continue;c.life-=dt;c.pulse=(c.pulse||0)+dt;c.delay-=dt;const owner=fighterBySlot(f,c.ownerSlot),target=fighterBySlot(f,c.targetSlot);
+      if(target&&target.state!=='ko'){c.targetX=target.x;c.dir=-(target.x>=owner?.x?1:-1);}if(!c.struck&&c.delay<=0&&target&&target.state!=='ko'){c.struck=true;if(Math.abs(c.x-target.x)<132){hit(target,(owner?.dmg||35)*1.08,{owner,tharothClone:true},c.dir,'tharoth-clone');target.vx+=c.dir*160;try{spark(target.x,(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70)-8,'#ff4f62',24)}catch(_){ }}}if(c.life<=0)c.dead=true;
+    }
+    f.tharothClones=f.tharothClones.filter(c=>!c.dead);
+    for(const e of f.tharothFx){e.life-=dt;e.y-=18*dt}f.tharothFx=f.tharothFx.filter(e=>e.life>0);
   }
   const baseUpdate=window.update;
-  if(typeof baseUpdate==='function')window.update=function(f,dt){const r=baseUpdate.apply(this,arguments);if(!f?.paused)updateLeo(f,dt);return r};
-
+  if(typeof baseUpdate==='function')window.update=function(f,dt){const r=baseUpdate.apply(this,arguments);if(!f?.paused){updateLeo(f,dt);}return r};
   /* =========================
      ANIMAÇÃO R.A.V.A.M V17
      ========================= */
@@ -338,7 +337,8 @@
     priya:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/priya/poses-v17-clean/priya-${i}.png`)),ref:654,guard:5,air:5,punch:3,kick:2,special:3},
     kain:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/kain/poses-v17-clean/kain-${i}.png`)),ref:520,guard:4,air:5,punch:3,kick:5,special:3},
     aria:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/aria/poses-v17-clean/aria-${i}.png`)),ref:132,guard:4,air:5,punch:3,kick:2,special:3},
-    leo:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/leo/poses-v17-clean/leo-${i}.png`)),ref:482,guard:4,air:5,punch:3,kick:5,special:3}
+    leo:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/leo/poses-v17-clean/leo-${i}.png`)),ref:482,guard:4,air:5,punch:3,kick:5,special:3},
+    tharoth:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/tharoth/poses-v17-clean/tharoth-${i}.png`)),ref:512,guard:4,air:5,punch:3,kick:5,special:3}
   };
   function strikeInfo(p){
     const kind=p?.proMove?.kind;if(kind!=='punch'&&kind!=='kick'&&kind!=='uppercut')return null;
@@ -351,7 +351,7 @@
     const strike=strikeInfo(p);if(strike)return {frame:strike.kind==='kick'?s.kick:s.punch,strike};
     if(p.state==='ko'||(p.proKnockdownT>0&&p.onGround))return {frame:s.air,ko:true};
     if(p.defend||p.state==='defend'||p.state==='crouch')return {frame:s.guard,guard:true};
-    if(p.state==='special'||p.state==='throw'||(p.id==='leo'&&((p.leoCastT||0)>0||(p.leoSuperT||0)>0)))return {frame:s.special,cast:true};
+    if(p.state==='special'||p.state==='throw'||(p.id==='leo'&&((p.leoCastT||0)>0||(p.leoSuperT||0)>0))||(p.id==='tharoth'&&((p.tharothCastT||0)>0||(p.tharothSuperT||0)>0)))return {frame:s.special,cast:true};
     if(p.state==='hurt'||p.hitFlash>.035)return {frame:s.guard,hurt:true};
     if(!p.onGround)return {frame:s.air,air:true};
     if(Math.abs(p.vx||0)>7){
@@ -406,7 +406,7 @@
   function drawLeoFx(ctx,f){
     if(!f)return;
     for(const p of (f.leoPortals||[]))drawPortal(ctx,p);
-    for(const z of (f.leoRocks||[]))if(z.phase!=='portal'&&z.phase!=='frontPortalHold'){
+    for(const z of (f.leoRocks||[]))if(z.phase!=='portal'){
       ctx.save();ctx.translate(z.x,z.y);ctx.rotate(performance.now()/1000*(z.spin||7));ctx.fillStyle='#6f756f';ctx.strokeStyle='#b7c5b7';ctx.lineWidth=2;ctx.shadowBlur=12;ctx.shadowColor='#67f0b6';ctx.beginPath();ctx.moveTo(-10,-8);ctx.lineTo(8,-11);ctx.lineTo(13,3);ctx.lineTo(5,11);ctx.lineTo(-11,7);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
     }
     for(const d of (f.leoRain||[]))if(d.delay<=0){
@@ -418,8 +418,23 @@
     }
     for(const e of (f.leoFx||[])){const a=clamp(e.life/(e.maxLife||1),0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';ctx.font='900 13px Oxanium,Arial';ctx.fillStyle=e.color||'#7dffc6';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText(e.text,e.x,e.y);ctx.restore()}
   }
+  function drawTharothClone(ctx,c){
+    const s=SPRITES.tharoth;if(!s)return;const img=s.imgs[c.struck?3:0];if(!img?.complete||!img.naturalWidth)return;
+    const H=226,scale=H/s.ref,floor=GROUND_Y,pulse=1+Math.sin(performance.now()/120+(c.pulse||0))*0.035;
+    ctx.save();ctx.translate(c.x,floor);ctx.scale(c.dir||1,1);ctx.globalAlpha=(c.life<.4?c.life/.4:.38)+.10*Math.sin(performance.now()/170);ctx.globalCompositeOperation='lighter';ctx.shadowBlur=26;ctx.shadowColor='#ff4f62';ctx.filter='brightness(1.08) saturate(0.6)';ctx.scale(pulse,pulse);drawFixed(ctx,img,scale,.78);ctx.restore();
+  }
+  function drawTharothFx(ctx,f){
+    if(!f)return;
+    for(const s of (f.tharothSands||[])){
+      ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.spin||0);ctx.globalCompositeOperation='lighter';ctx.shadowBlur=18;ctx.shadowColor='#ff4f62';ctx.fillStyle='#19080d';ctx.strokeStyle='#ff6776';ctx.lineWidth=2;
+      for(let i=0;i<5;i++){const a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(Math.cos(a)*8,Math.sin(a)*5,4.2,0,Math.PI*2);ctx.fill();}
+      ctx.beginPath();ctx.arc(0,0,7,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+    }
+    for(const c of (f.tharothClones||[]))drawTharothClone(ctx,c);
+    for(const e of (f.tharothFx||[])){const a=clamp(e.life/(e.maxLife||1),0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';ctx.font='900 13px Oxanium,Arial';ctx.fillStyle=e.color||'#ff596b';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText(e.text,e.x,e.y);ctx.restore();}
+  }
   const baseDraw=window.draw;
-  if(typeof baseDraw==='function')window.draw=function(f){const r=baseDraw.apply(this,arguments);try{drawLeoFx(canvas.getContext('2d'),f)}catch(_){}return r};
+  if(typeof baseDraw==='function')window.draw=function(f){const r=baseDraw.apply(this,arguments);try{const ctx=canvas.getContext('2d');drawLeoFx(ctx,f);drawTharothFx(ctx,f)}catch(_){}return r};
 
   // Kain: P1 troca no H; P2 troca no 9 (Numpad9), inclusive no online.
   // O listener antigo cobre o P1; este wrapper cobre P2 sem alterar os demais lutadores.
@@ -443,7 +458,7 @@
      ========================= */
   const onlineUltActive={p1:false,p2:false};
   const ULT_NAMES={
-    priya:['TRÍADE TÁTICA','TRÍADE DEMOLIDORA'],kain:['ESPELHO ABISSAL','REFLEXO DO CAOS'],aria:['JARDIM VALFLEUR','PRISÃO VERDANTE'],leo:['CÉU VESPER','CHUVA ENTRE PORTAIS']
+    priya:['TRÍADE TÁTICA','TRÍADE DEMOLIDORA'],kain:['ESPELHO ABISSAL','REFLEXO DO CAOS'],aria:['JARDIM VALFLEUR','PRISÃO VERDANTE'],leo:['CÉU VESPER','CHUVA ENTRE PORTAIS'],tharoth:['UMBRA ETERNA','CLONE DE SOMBRA']
   };
   function remoteUltimate(p,side){
     if(!p)return;const names=ULT_NAMES[p.id]||[String(p.name||'LENDA').toUpperCase(),'ULTIMATE SUPREMA'];
@@ -472,5 +487,5 @@
   }
 
   ensureEconomy();
-  window.RavamV17=Object.freeze({version:VERSION,leo:LEO,renderHub,renderShop,renderSelect,isOwned,all:ALL,syncOnlineUltimate});
+  window.RavamV17=Object.freeze({version:VERSION,leo:LEO,tharoth:THAROTH,renderHub,renderShop,renderSelect,isOwned,all:ALL,syncOnlineUltimate});
 })();
