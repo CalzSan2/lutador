@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamV17?.version)return;
-  const VERSION='18.2.0-tharoth';
+  const VERSION='18.3.0-tharoth-design';
   const SHOP_VERSION=17;
   const ACCESS_COST=Number(window.RavamStudios?.cost)||2500;
   const BASE=window.RavamStudios||{};
@@ -34,14 +34,14 @@
     kain:BASE.kainAbility||{flag:'RAVAM',role:'Mímico do Caos',tag:'CAOS',desc:'J usa o poder atual. H troca o poder. L ativa o Espelho Abissal.'},
     aria:BASE.ariaAbility||{flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J lança duas flores venenosas. L prende o rival com cipós.'},
     leo:Object.freeze({flag:'RAVAM',role:'Arquiteto de Portais',tag:'PORTAIS',desc:'J lança 2 pedras: a primeira vai reta e a segunda entra num portal e sai por trás do inimigo para acertá-lo direto. L abre o CÉU VESPER e faz cair 2 facas, 2 espadas e 2 pedras.'}),
-    tharoth:Object.freeze({flag:'RAVAM',role:'Avatar da Umbra',tag:'SOMBRAS',desc:'J arremessa areia negra no inimigo. L cria 1 clone de sombra invulnerável por 3 segundos; ele surge em campo, ataca e desaparece quando o tempo acaba.'})
+    tharoth:Object.freeze({flag:'RAVAM',role:'Avatar da Umbra',tag:'SOMBRAS',desc:'J arremessa areia negra contra o rival. L cria 1 clone de sombra invulnerável por 3 segundos que ataca continuamente, causando 20 de dano a cada 0,50 s.'})
   };
   const META={
     priya:{name:'ALANA SORELLE',tag:'PRECISÃO',accent:'#ff765e',portrait:'ai-assets/characters/priya.png',stats:[32,82,1940],moves:[['J','RIFLE'],['I','SOCO'],['O','CHUTE'],['L','3 BOMBAS']]},
     kain:{name:'KAIN',tag:'CAOS',accent:'#c0c7ff',portrait:'ai-assets/characters/kain.png',stats:[35,88,2180],moves:[['J','USAR PODER'],['H / P2 9','TROCAR PODER'],['I','SOCO'],['O','CHUTE'],['L','ESPELHO']]},
     aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','2 FLORES'],['I','SOCO'],['O','CHUTE'],['L','CIPÓ']]},
     leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','PEDRA + PORTAL'],['I','SOCO'],['O','CHUTE'],['L','CHUVA VESPER']]},
-    tharoth:{name:'THAROTH UMBRA',tag:'SOMBRAS',accent:'#ff4d62',portrait:'ai-assets/characters/tharoth.png',stats:[35,84,2120],moves:[['J','AREIA NEGRA'],['I','SOCO'],['O','CHUTE'],['L','CLONE DE SOMBRA']]}
+    tharoth:{name:'THAROTH UMBRA',tag:'SOMBRAS',accent:'#ff4d62',portrait:'ai-assets/characters/tharoth.png',stats:[35,84,2120],moves:[['J','AREIA NEGRA'],['I','SOCO'],['O','CHUTE'],['L','CLONE 3S · 20 A CADA 0,50S']]}
   };
 
   function toast(text,tone='normal',ms=2200){
@@ -100,7 +100,7 @@
     try{
       if(typeof CHARACTERS!=='undefined'&&!CHARACTERS.some(c=>c.id==='tharoth')){CHARACTERS.push(THAROTH);added.push('char')}
       if(typeof ABILITIES!=='undefined'&&!ABILITIES.tharoth)ABILITIES.tharoth=ABILITY.tharoth;
-      if(typeof MOVES!=='undefined'&&!MOVES.tharoth)MOVES.tharoth=[['J','AREIA NEGRA'],['I','Soco Umbra'],['O','Chute Umbra'],['L','CLONE DE SOMBRA · 3s invulnerável']];
+      if(typeof MOVES!=='undefined'&&!MOVES.tharoth)MOVES.tharoth=[['J','AREIA NEGRA'],['I','Soco Umbra'],['O','Chute Umbra'],['L','CLONE DE SOMBRA · 3s / 20 a cada 0,50s']];
     }catch(_){}
     return ()=>{try{if(added.includes('char')&&typeof CHARACTERS!=='undefined'){const i=CHARACTERS.findIndex(c=>c.id==='tharoth');if(i>=0)CHARACTERS.splice(i,1)}}catch(_){}};
   }
@@ -272,14 +272,14 @@
     const tx=target.x,ty=(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-72)-4;
     const startX=p.x+dir*52,dx=tx-startX,dy=ty-sy,len=Math.max(1,Math.hypot(dx,dy));
     f.tharothSands.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:startX,y:sy,vx:dx/len*760,vy:dy/len*760,life:1.0,dmg:p.dmg*.84,spin:0,dead:false});
-    p.throwCd=p.human?.58:.72;p.tharothCastT=.26;setState?.(p,'throw');tharothFx(p,'AREIA NEGRA','#ff6b79',.78);try{SFX?.play?.('attack_light',.72)}catch(_){ }
+    p.throwCd=p.human?.58:.72;p.tharothCastT=.26;setState?.(p,'throw');tharothFx(p,'AREIA NEGRA','#121212',.82);try{SFX?.play?.('attack_light',.72)}catch(_){ }
   }
   function tharothClone(p){
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;const target=opp(p,f);if(!target)return;
     f.tharothClones=f.tharothClones||[];
     const dir=(target.x>=p.x?1:-1),cloneX=clamp(target.x+dir*86,32,W-32);
-    f.tharothClones.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:cloneX,life:3,maxLife:3,delay:.36,pulse:0,struck:false,dead:false,dir:-dir});
-    p.specialCd=6.6;p.tharothSuperT=1.05;setState?.(p,'special');tharothFx(p,'CLONE DE SOMBRA','#ff7d88',.96);try{spark(cloneX,GROUND_Y-8,'#ff4f62',26)}catch(_){ }
+    f.tharothClones.push({ownerSlot:p.playerSlot,targetSlot:target.playerSlot,x:cloneX,life:3,maxLife:3,pulse:0,dead:false,dir:-dir,hitCd:.28,tickRate:.50});
+    p.specialCd=6.6;p.tharothSuperT=1.05;setState?.(p,'special');tharothFx(p,'CLONE SOMBRIO','#ff5568',.96);try{spark(cloneX,GROUND_Y-8,'#ff4f62',26)}catch(_){ }
   }
 
   const baseThrow=window.throwProjectile;
@@ -321,8 +321,20 @@
     }
     f.tharothSands=f.tharothSands.filter(s=>!s.dead);
     for(const c of f.tharothClones){
-      if(c.dead)continue;c.life-=dt;c.pulse=(c.pulse||0)+dt;c.delay-=dt;const owner=fighterBySlot(f,c.ownerSlot),target=fighterBySlot(f,c.targetSlot);
-      if(target&&target.state!=='ko'){c.targetX=target.x;c.dir=-(target.x>=owner?.x?1:-1);}if(!c.struck&&c.delay<=0&&target&&target.state!=='ko'){c.struck=true;if(Math.abs(c.x-target.x)<132){hit(target,(owner?.dmg||35)*1.08,{owner,tharothClone:true},c.dir,'tharoth-clone');target.vx+=c.dir*160;try{spark(target.x,(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70)-8,'#ff4f62',24)}catch(_){ }}}if(c.life<=0)c.dead=true;
+      if(c.dead)continue;c.life-=dt;c.pulse=(c.pulse||0)+dt;const owner=fighterBySlot(f,c.ownerSlot),target=fighterBySlot(f,c.targetSlot);
+      if(target&&target.state!=='ko'){
+        c.dir=target.x>=c.x?1:-1;
+        const desired=clamp(target.x-c.dir*62,40,W-40);
+        c.x+=Math.max(-260*dt,Math.min(260*dt,desired-c.x));
+        c.hitCd=(c.hitCd??0)-dt;
+        if(c.hitCd<=0 && Math.abs(c.x-target.x)<118){
+          hit(target,20,{owner,tharothClone:true},c.dir,'tharoth-clone');
+          target.vx+=c.dir*70;
+          c.hitCd=c.tickRate||.50;
+          try{spark(target.x,(typeof bodyY==='function'?bodyY(target):GROUND_Y-target.y-70)-8,'#ff4f62',24)}catch(_){ }
+        }
+      }
+      if(c.life<=0)c.dead=true;
     }
     f.tharothClones=f.tharothClones.filter(c=>!c.dead);
     for(const e of f.tharothFx){e.life-=dt;e.y-=18*dt}f.tharothFx=f.tharothFx.filter(e=>e.life>0);
@@ -419,16 +431,60 @@
     for(const e of (f.leoFx||[])){const a=clamp(e.life/(e.maxLife||1),0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';ctx.font='900 13px Oxanium,Arial';ctx.fillStyle=e.color||'#7dffc6';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText(e.text,e.x,e.y);ctx.restore()}
   }
   function drawTharothClone(ctx,c){
-    const s=SPRITES.tharoth;if(!s)return;const img=s.imgs[c.struck?3:0];if(!img?.complete||!img.naturalWidth)return;
-    const H=226,scale=H/s.ref,floor=GROUND_Y,pulse=1+Math.sin(performance.now()/120+(c.pulse||0))*0.035;
-    ctx.save();ctx.translate(c.x,floor);ctx.scale(c.dir||1,1);ctx.globalAlpha=(c.life<.4?c.life/.4:.38)+.10*Math.sin(performance.now()/170);ctx.globalCompositeOperation='lighter';ctx.shadowBlur=26;ctx.shadowColor='#ff4f62';ctx.filter='brightness(1.08) saturate(0.6)';ctx.scale(pulse,pulse);drawFixed(ctx,img,scale,.78);ctx.restore();
+    const s=SPRITES.tharoth;if(!s)return;const img=s.imgs[0];if(!img?.complete||!img.naturalWidth)return;
+    const H=232,scale=H/s.ref,floor=GROUND_Y,pulse=1+Math.sin(performance.now()/120+(c.pulse||0))*0.04;
+    ctx.save();
+    ctx.translate(c.x,floor);
+    ctx.scale(c.dir||1,1);
+    ctx.globalAlpha=(c.life<.4?c.life/.4:.44)+.10*Math.sin(performance.now()/170);
+    ctx.globalCompositeOperation='lighter';
+    ctx.shadowBlur=34;ctx.shadowColor='#ff4258';
+    ctx.filter='brightness(0.42) contrast(1.35) saturate(0.2)';
+    ctx.scale(pulse,pulse);
+    drawFixed(ctx,img,scale,.92);
+    ctx.restore();
+    // aura sombria
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha=.22;
+    ctx.strokeStyle='#ff5668';
+    ctx.shadowColor='#ff4258';ctx.shadowBlur=16;ctx.lineWidth=3;
+    ctx.beginPath();ctx.ellipse(c.x,GROUND_Y-80,42+Math.sin(c.pulse*10)*4,72,0,0,Math.PI*2);ctx.stroke();
+    ctx.restore();
   }
   function drawTharothFx(ctx,f){
     if(!f)return;
     for(const s of (f.tharothSands||[])){
-      ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.spin||0);ctx.globalCompositeOperation='lighter';ctx.shadowBlur=18;ctx.shadowColor='#ff4f62';ctx.fillStyle='#19080d';ctx.strokeStyle='#ff6776';ctx.lineWidth=2;
-      for(let i=0;i<5;i++){const a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(Math.cos(a)*8,Math.sin(a)*5,4.2,0,Math.PI*2);ctx.fill();}
-      ctx.beginPath();ctx.arc(0,0,7,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+      ctx.save();
+      ctx.translate(s.x,s.y);
+      ctx.rotate(s.spin||0);
+      ctx.globalCompositeOperation='source-over';
+      ctx.shadowBlur=10;ctx.shadowColor='rgba(0,0,0,.55)';
+      // trilha de areia preta
+      for(let k=0;k<4;k++){
+        const off=-k*8;
+        ctx.globalAlpha=.16-.03*k;
+        ctx.fillStyle=['#080808','#111','#171717','#232323'][k]||'#111';
+        ctx.beginPath();
+        ctx.ellipse(off,Math.sin((s.spin||0)+k)*2,18-k*2,8-k,0,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha=1;
+      ctx.fillStyle='#090909';
+      ctx.strokeStyle='#2b2b2b';
+      ctx.lineWidth=1.6;
+      for(let i=0;i<11;i++){
+        const a=i*Math.PI*2/11 + (s.spin||0)*0.7;
+        const r=6 + (i%3)*2.8;
+        ctx.beginPath();
+        ctx.arc(Math.cos(a)*r,Math.sin(a)*(3+r*0.22),2.2+(i%2)*1.1,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.ellipse(0,0,11,7,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     }
     for(const c of (f.tharothClones||[]))drawTharothClone(ctx,c);
     for(const e of (f.tharothFx||[])){const a=clamp(e.life/(e.maxLife||1),0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';ctx.font='900 13px Oxanium,Arial';ctx.fillStyle=e.color||'#ff596b';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText(e.text,e.x,e.y);ctx.restore();}
