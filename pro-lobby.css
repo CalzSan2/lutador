@@ -329,3 +329,11 @@ body.pro-lobby-surface{display:block!important;overflow:auto!important;min-width
   .pro-lobby-ready .lobby-actions.pro-legacy-actions{grid-auto-rows:minmax(46px,auto)!important}
   .pro-lobby-ready .pro-mission-list{grid-template-rows:none!important}
 }
+
+
+/* ===== DESTAQUE DE TEMPORADA / PASSE ===== */
+.pro-season-highlight{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin-bottom:9px!important}
+.pro-season-highlight>span{display:block!important;color:#ffe5a3!important;font:900 11px/1.2 Oxanium,Arial!important;letter-spacing:1px!important;text-shadow:0 0 18px rgba(255,203,95,.18)}
+.pro-season-highlight>b{flex:0 0 auto!important;padding:5px 8px!important;border:1px solid #72592b!important;border-radius:999px!important;background:#261f14!important;color:#f7d68a!important;font:900 9px Oxanium,Arial!important;letter-spacing:.7px!important}
+.pro-pass-highlight{display:block!important;margin-bottom:4px!important;color:#fff4cf!important;font:900 12px/1.25 Oxanium,Arial!important;letter-spacing:.8px!important;text-transform:uppercase!important}
+.pro-season-panel{position:relative;overflow:hidden}.pro-season-panel::after{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,transparent,#f0bd59,transparent);opacity:.78;pointer-events:none}

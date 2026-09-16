@@ -60,3 +60,19 @@
 .pp-tier-card.primordial-tier{border-color:#e6bf65;box-shadow:0 0 0 1px rgba(230,191,101,.25),0 0 28px rgba(230,191,101,.12)}
 .pp-tier-card.primordial-tier .pro-tier-number{background:linear-gradient(90deg,#6c451e,#291c28)}
 .pp-tier-card.primordial-tier .pro-track.premium strong{color:#ffe39a;text-shadow:0 0 16px rgba(246,200,95,.32)}
+
+
+/* ===== TEMPORADAS DE 28 DIAS ===== */
+.pro-pass-header .pp-season-name{
+  display:inline-flex!important;align-items:center;gap:8px;padding:7px 11px!important;margin-bottom:9px!important;
+  border:1px solid rgba(255,207,103,.48);border-radius:999px;background:linear-gradient(90deg,rgba(116,70,18,.46),rgba(66,33,77,.34));
+  color:#ffe4a3!important;font-size:11px!important;letter-spacing:1.4px!important;box-shadow:0 0 0 1px rgba(255,255,255,.03),0 10px 26px rgba(0,0,0,.22)
+}
+.pro-pass-header .pp-pass-name{margin:0!important;font-size:clamp(36px,4vw,64px)!important;line-height:.96!important;letter-spacing:.3px!important;color:#f8fbff!important;text-shadow:0 8px 28px rgba(0,0,0,.45)}
+.pro-pass-header .pp-pass-name em{display:inline-block;color:#ffd77d!important;font-style:normal!important;text-shadow:0 0 22px rgba(255,193,75,.22)}
+.pp-season-clock{display:grid;gap:2px;min-width:180px;padding:9px 12px;margin:5px 0 8px;border:1px solid #5f4b2d;border-radius:10px;background:linear-gradient(180deg,#2b2116,#15131a);text-align:right}
+.pp-season-clock small{color:#c9a66d;font:800 8px Oxanium,Arial;letter-spacing:1.3px}
+.pp-season-clock strong{color:#fff0b5;font:900 18px Oxanium,Arial;letter-spacing:.6px}
+.pp-season-clock i{color:#8f9aaf;font:700 9px Oxanium,Arial;font-style:normal}
+.pro-pass-screen .pp-season-overview{border-color:#755b31!important;box-shadow:inset 0 1px rgba(255,255,255,.03),0 12px 35px rgba(0,0,0,.18)}
+@media(max-width:760px){.pp-season-clock{text-align:left;min-width:0}.pro-pass-header .pp-pass-name{font-size:38px!important}}

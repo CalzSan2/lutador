@@ -10,7 +10,7 @@
 
   const STORAGE_KEY = 'lutador-progression-v1';
   const STORAGE_BACKUP_KEY = 'lutador-progression-v1-backup';
-  const VERSION = 3;
+  const VERSION = 4;
   const MAX_PROFILE_LEVEL = 100;
   const PASS_TIERS = 70;
   const PASS_XP_PER_TIER = 250;
@@ -28,6 +28,26 @@
     {id:'wins', title:'Sequência de conquistas', description:'Vença 2 partidas em qualquer modo.', target:2, xp:220, coins:180, icon:'★'},
     {id:'styles', title:'Lutador completo', description:'Acerte um soco, um chute e um especial com P1.', target:3, xp:250, coins:150, icon:'✦'}
   ];
+
+  const SEASON_DURATION_MS = 28 * 24 * 60 * 60 * 1000;
+  const SEASON_THEMES = [
+    {key:'carmim', name:'SANGUE PRIMORDIAL', passName:'COROA CARMESIM', finalTitle:'PRIMORDIAL CARMESIM', coin:1.00, xp:1.00, freeTitles:['Sangue Novo','Sentinela Carmesim','Punho Rubro','Guardião do Sangue','Lenda Carmesim'], premiumTitles:['Elite Rubra','Carrasco Carmesim','Coroado de Sangue','Soberano Rubro','Primordial Carmesim']},
+    {key:'gelo', name:'GUERRA GLACIAL', passName:'TRONO DE GELO', finalTitle:'SOBERANO GLACIAL', coin:1.04, xp:1.03, freeTitles:['Batedor Glacial','Punho de Gelo','Sentinela Polar','Guardião Invernal','Lenda Glacial'], premiumTitles:['Elite Polar','Caçador do Inverno','Coroa Congelada','Soberano do Gelo','Soberano Glacial']},
+    {key:'eclipse', name:'ECLIPSE NEON', passName:'ECLIPSE NIAK', finalTitle:'ÍDOLO DO ECLIPSE', coin:1.07, xp:1.05, freeTitles:['Faísca Neon','Vigia do Eclipse','Combatente Neon','Guardião Noturno','Lenda do Eclipse'], premiumTitles:['Elite Neon','Predador do Eclipse','Coroa Neon','Soberano Noturno','Ídolo do Eclipse']},
+    {key:'tita', name:'ASCENSÃO TITÂNICA', passName:'TITÃS DA ARENA', finalTitle:'TITÃ SUPREMO', coin:1.10, xp:1.07, freeTitles:['Discípulo Titânico','Quebra-Aço','Sentinela Titã','Guardião Colossal','Lenda Titânica'], premiumTitles:['Elite Titã','Caçador de Colossos','Coroa Titânica','Soberano Colossal','Titã Supremo']},
+    {key:'violeta', name:'RUPTURA VIOLETA', passName:'VÉU VIOLETA', finalTitle:'ARCONTE VIOLETA', coin:1.12, xp:1.09, freeTitles:['Eco Violeta','Vigia da Ruptura','Punho Violeta','Guardião do Véu','Lenda Violeta'], premiumTitles:['Elite Violeta','Ruptor Supremo','Coroa Violeta','Soberano do Véu','Arconte Violeta']},
+    {key:'inferno', name:'CHAMAS DA COROA', passName:'COROA INFERNAL', finalTitle:'REI INFERNAL', coin:1.15, xp:1.11, freeTitles:['Brasa da Arena','Punho Flamejante','Sentinela Infernal','Guardião da Coroa','Lenda das Chamas'], premiumTitles:['Elite Infernal','Executor de Cinzas','Coroa em Chamas','Soberano Infernal','Rei Infernal']}
+  ];
+
+  function seasonTheme(number){ return SEASON_THEMES[(Math.max(1, Number(number)||1)-1) % SEASON_THEMES.length]; }
+  function padSeason(number){ return String(Math.max(1, Number(number)||1)).padStart(2,'0'); }
+  function formatSeasonRemaining(ms){
+    ms=Math.max(0, Number(ms)||0);
+    const days=Math.floor(ms/86400000); ms-=days*86400000;
+    const hours=Math.floor(ms/3600000); ms-=hours*3600000;
+    const minutes=Math.floor(ms/60000);
+    return `${days}D ${String(hours).padStart(2,'0')}H ${String(minutes).padStart(2,'0')}M`;
+  }
 
   function localDay(){
     const date = new Date();
@@ -110,12 +130,34 @@
   // Último patamar: título exclusivo apenas da trilha paga.
   premiumRewards[PASS_TIERS - 1] = {type:'title', value:'PRIMORDIAL'};
 
+  const baseFreeRewards = freeRewards.map(reward => ({...reward}));
+  const basePremiumRewards = premiumRewards.map(reward => ({...reward}));
+  function applySeasonRewards(seasonNumber){
+    const theme=seasonTheme(seasonNumber);
+    const number=Math.max(1,Number(seasonNumber)||1);
+    const titleOffset=(number-1)%theme.freeTitles.length;
+    for(let i=0;i<PASS_TIERS;i++){
+      const tier=i+1;
+      const free={...baseFreeRewards[i]}, premium={...basePremiumRewards[i]};
+      if(free.type==='coins') free.amount=Math.max(50,Math.round((free.amount*theme.coin + (number-1)*12)/25)*25);
+      else if(free.type==='xp') free.amount=Math.max(50,Math.round((free.amount*theme.xp + (number-1)*8)/10)*10);
+      else if(free.type==='title') free.value=theme.freeTitles[(tier+titleOffset)%theme.freeTitles.length];
+      if(premium.type==='coins') premium.amount=Math.max(75,Math.round((premium.amount*theme.coin + (number-1)*20)/25)*25);
+      else if(premium.type==='xp') premium.amount=Math.max(75,Math.round((premium.amount*theme.xp + (number-1)*12)/10)*10);
+      else if(premium.type==='title') premium.value=theme.premiumTitles[(tier+titleOffset)%theme.premiumTitles.length];
+      else if(premium.type==='vandais') premium.amount=Math.max(1,(Number(premium.amount)||0)+((number-1)%4)*2);
+      freeRewards[i]=free; premiumRewards[i]=premium;
+    }
+    premiumRewards[PASS_TIERS-1]={type:'title',value:theme.finalTitle};
+  }
+
   function defaultData(){
     return {
       version: VERSION,
       totalXp: 0,
       upgrades: {damage:0, health:0, agility:0},
       battlePass: {xp:0, premium:false, claimed:[]},
+      season: {number:1, startedAt:Date.now()},
       titles: [],
       equippedTitle: '',
       daily: defaultDaily(),
@@ -137,6 +179,7 @@
     const bp = raw.battlePass && typeof raw.battlePass === 'object' ? raw.battlePass : {};
     const up = raw.upgrades && typeof raw.upgrades === 'object' ? raw.upgrades : {};
     const stats = raw.stats && typeof raw.stats === 'object' ? raw.stats : {};
+    const season = raw.season && typeof raw.season === 'object' ? raw.season : {};
     const titles = Array.isArray(raw.titles) ? Array.from(new Set(raw.titles.filter(x => typeof x === 'string'))).slice(0, 100) : [];
     const equipped = typeof raw.equippedTitle === 'string' && titles.includes(raw.equippedTitle) ? raw.equippedTitle : '';
     const daily = raw.daily && raw.daily.day === localDay() ? raw.daily : defaultDaily();
@@ -152,6 +195,10 @@
         xp: finiteInt(bp.xp, 0, 0, 999999999),
         premium: bp.premium === true,
         claimed: Array.from(new Set(Array.isArray(bp.claimed) ? bp.claimed.filter(x => /^(free|premium):([1-9]|[1-6][0-9]|70)$/.test(String(x))) : []))
+      },
+      season: {
+        number: finiteInt(season.number, 1, 1, 9999),
+        startedAt: finiteInt(season.startedAt, base.season.startedAt, 0, Number.MAX_SAFE_INTEGER)
       },
       titles,
       equippedTitle: equipped,
@@ -188,8 +235,42 @@
 
   let data = load();
 
+  function currentSeasonInfo(){
+    const number=Math.max(1,Number(data.season?.number)||1);
+    const startedAt=Math.max(0,Number(data.season?.startedAt)||Date.now());
+    const theme=seasonTheme(number);
+    const endAt=startedAt+SEASON_DURATION_MS;
+    const remainingMs=Math.max(0,endAt-Date.now());
+    return {
+      number, key:theme.key, theme:theme.name, passName:theme.passName,
+      name:`TEMPORADA ${padSeason(number)} · ${theme.name}`,
+      startedAt,endAt,remainingMs,remainingLabel:formatSeasonRemaining(remainingMs),
+      endDate:new Date(endAt).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}),
+      durationDays:28, finalTitle:theme.finalTitle
+    };
+  }
+
+  function advanceSeasonIfNeeded(){
+    if(!data.season||typeof data.season!=='object') data.season={number:1,startedAt:Date.now()};
+    const now=Date.now();
+    let startedAt=Math.max(0,Number(data.season.startedAt)||now);
+    if(startedAt>now+60000) startedAt=now;
+    const elapsed=Math.max(0,now-startedAt);
+    if(elapsed<SEASON_DURATION_MS){ data.season.startedAt=startedAt; applySeasonRewards(data.season.number); return false; }
+    const skipped=Math.max(1,Math.floor(elapsed/SEASON_DURATION_MS));
+    data.season.number=Math.max(1,Number(data.season.number)||1)+skipped;
+    data.season.startedAt=startedAt+skipped*SEASON_DURATION_MS;
+    data.battlePass={xp:0,premium:false,claimed:[]};
+    data.daily=defaultDaily();
+    applySeasonRewards(data.season.number);
+    return true;
+  }
+
+  applySeasonRewards(data.season?.number||1);
+
   function save(){
     if (combatSaveTimer) { clearTimeout(combatSaveTimer); combatSaveTimer = 0; }
+    advanceSeasonIfNeeded();
     data.version = VERSION;
     data.updatedAt = Date.now();
     try {
@@ -252,6 +333,8 @@
   }
 
   function passInfo(){
+    if (advanceSeasonIfNeeded()) save();
+    const season=currentSeasonInfo();
     const tier = Math.max(1, Math.min(PASS_TIERS, 1 + Math.floor(data.battlePass.xp / PASS_XP_PER_TIER)));
     const atMax = tier >= PASS_TIERS;
     const current = atMax ? PASS_XP_PER_TIER : data.battlePass.xp % PASS_XP_PER_TIER;
@@ -262,7 +345,15 @@
       ratio: atMax ? 1 : current / PASS_XP_PER_TIER,
       max: atMax,
       totalXp:data.battlePass.xp,
-      totalNeeded:(PASS_TIERS - 1) * PASS_XP_PER_TIER
+      totalNeeded:(PASS_TIERS - 1) * PASS_XP_PER_TIER,
+      season,
+      seasonNumber:season.number,
+      seasonName:season.name,
+      passName:season.passName,
+      remainingMs:season.remainingMs,
+      remainingLabel:season.remainingLabel,
+      endAt:season.endAt,
+      endDate:season.endDate
     };
   }
 
@@ -398,36 +489,7 @@
     save();
   }
 
-  function installModeRewards(){
-    if (modeRewardInstalled) return;
-    modeRewardInstalled = true;
-    window.addEventListener('lutador:mode-reward', event => {
-      const detail = event?.detail && typeof event.detail === 'object' ? event.detail : {};
-      if (processedModeRewards.has(detail)) return;
-      processedModeRewards.add(detail);
-      const xp = finiteInt(detail.xp, 0, 0, 1000000);
-      const coins = finiteInt(detail.credits, 0, 0, 1000000);
-      const s = getGameState();
-      if (coins && s) {
-        s.coins = Math.max(0, Number(s.coins) || 0) + coins;
-        saveGameState();
-      }
-      if (detail.source === 'extra-modes') {
-        const daily = ensureDaily();
-        daily.matches++;
-        data.stats.matches++;
-        if (detail.won === true) { daily.wins++; data.stats.wins++; }
-        else data.stats.losses++;
-        data.stats.lastMatchAt = Date.now();
-        data.history.push({at:Date.now(), won:detail.won === true, mode:String(detail.mode || 'extra'), xp});
-        data.history = data.history.slice(-30);
-      }
-      if (xp) addXp(xp, {source:'MODO ESPECIAL', passAmount:xp, silent:true});
-      else save();
-      if (xp || coins) showToast(`RECOMPENSA • +${xp} XP • +${coins} GOLD`, 'level');
-      refreshVisibleProgress();
-    });
-  }
+  function installModeRewards(){ /* Arena Pro removida: sem créditos/modos extras. */ }
 
   function rewardLabel(reward){
     if (!reward) return '—';
@@ -653,8 +715,8 @@
     }).join('');
     host.innerHTML = `<section class="pro-screen pro-pass-screen">
       <header class="pro-screen-header pro-pass-header">
-        <div><span class="pro-kicker">TEMPORADA 01 / ARENA ASCENDENTE</span><h2>A SUA PRÓXIMA <em>CONQUISTA.</em></h2><p>Passe de batalha · 70 patamares · Gold, experiência, Vandais e títulos para equipar.</p></div>
-        <div class="pro-wallet"><span>SUA CARTEIRA</span><b>◈ ${gameCoins().toLocaleString('pt-BR')} GOLD</b><b>💠 ${gamePsy().toLocaleString('pt-BR')} PSY</b><button id="pro-pass-back" class="pp-back" type="button">← VOLTAR AO ${origin === 'shop' ? 'ARSENAL' : 'LOBBY'}</button></div>
+        <div><span class="pro-kicker pp-season-name" data-season-name>${escapeHtml(info.season.name)}</span><h2 class="pp-pass-name">PASSE <em data-pass-name>${escapeHtml(info.season.passName)}</em></h2><p>Temporada de 28 dias · 70 patamares · recompensas renovadas a cada ciclo.</p></div>
+        <div class="pro-wallet"><span>SUA CARTEIRA</span><b>◈ ${gameCoins().toLocaleString('pt-BR')} GOLD</b><b>💠 ${gamePsy().toLocaleString('pt-BR')} PSY</b><div class="pp-season-clock"><small>TERMINA EM</small><strong data-season-countdown>${escapeHtml(info.season.remainingLabel)}</strong><i>até ${escapeHtml(info.season.endDate)}</i></div><button id="pro-pass-back" class="pp-back" type="button">← VOLTAR AO ${origin === 'shop' ? 'ARSENAL' : 'LOBBY'}</button></div>
       </header>
       <div class="pp-season-overview">
         <div class="pp-level-medal"><small>PATAMAR</small><b>${String(info.tier).padStart(2,'0')}</b><span>DE ${PASS_TIERS}</span></div>
@@ -664,7 +726,7 @@
       <section class="pp-daily-section" aria-labelledby="pp-daily-heading"><div class="pp-section-caption"><h3 id="pp-daily-heading">MISSÕES DIÁRIAS</h3><span>Renovam à meia-noite local · ${missions.filter(m=>m.claimed).length}/3 resgatadas</span></div><div class="pp-daily-grid">${missions.map(mission => `<article class="pp-mission-card ${mission.claimed ? 'claimed' : mission.completed ? 'ready' : ''}"><div class="pp-mission-symbol">${mission.icon}</div><div class="pp-mission-body"><div><h4>${mission.title}</h4><b>${mission.progress}/${mission.target}</b></div><p>${mission.description}</p><div class="pro-progress"><i style="width:${mission.progress/mission.target*100}%"></i></div><footer><span>+${mission.xp} XP · ${mission.coins} GOLD</span><button class="pro-claim ${mission.completed && !mission.claimed ? 'ready' : ''}" data-claim-mission="${mission.id}" ${!mission.completed || mission.claimed ? 'disabled' : ''}>${mission.claimed ? '✓ RESGATADA' : mission.completed ? 'RESGATAR' : 'EM ANDAMENTO'}</button></footer></div></article>`).join('')}</div></section>
       <div class="pp-track-toolbar"><div><h3>TRILHA DE RECOMPENSAS</h3><small>Patamar 1 é um presente de boas-vindas. Resgate o restante ao avançar.</small></div><button id="pro-claim-all" class="btn pro-accent-btn" ${readyCount ? '' : 'disabled'}>RESGATAR DISPONÍVEIS (${readyCount})</button><div class="pp-track-nav"><button type="button" data-track-step="-1" aria-label="Patamares anteriores">←</button><button type="button" data-track-step="1" aria-label="Próximos patamares">→</button></div></div>
       <div class="pp-track-grid" tabindex="0" aria-label="Recompensas do passe; use as setas para navegar">${tiers}</div>
-      <footer class="pp-pass-bottom"><div><strong>${data.battlePass.premium ? '◆ PREMIUM ATIVO' : '◆ COMPLETE A SUA COLEÇÃO'}</strong><span>Premium custa PSY obtida na Central de Recursos. Inclui Vandais em marcos especiais e o título exclusivo PRIMORDIAL no Patamar 70.</span></div>${data.battlePass.premium ? '<span class="pro-premium-owned">70 RECOMPENSAS EXTRAS</span>' : `<button id="pro-unlock-premium" class="btn pro-premium-buy">DESBLOQUEAR • ${PREMIUM_PSY_PRICE.toLocaleString('pt-BR')} PSY</button>`}</footer>
+      <footer class="pp-pass-bottom"><div><strong>${data.battlePass.premium ? '◆ PREMIUM ATIVO' : '◆ COMPLETE A SUA COLEÇÃO'}</strong><span>O Premium é válido apenas nesta temporada. No fim dos 28 dias o Passe reinicia e chega uma nova coleção; recompensa final atual: <b>${escapeHtml(info.season.finalTitle)}</b>.</span></div>${data.battlePass.premium ? '<span class="pro-premium-owned">70 RECOMPENSAS EXTRAS</span>' : `<button id="pro-unlock-premium" class="btn pro-premium-buy">DESBLOQUEAR • ${PREMIUM_PSY_PRICE.toLocaleString('pt-BR')} PSY</button>`}</footer>
       <div class="pp-title-locker"><label for="pp-title-select">SEU TÍTULO NO LOBBY</label><select id="pp-title-select"><option value="">NOVO DESAFIANTE</option>${data.titles.map(value=>`<option value="${escapeHtml(value)}" ${value===data.equippedTitle ? 'selected' : ''}>${escapeHtml(titleLabel(value))}</option>`).join('')}</select><button id="pp-equip-title" class="btn">EQUIPAR TÍTULO</button><button id="pro-open-upgrades-from-pass" class="btn">MELHORIAS DO PERFIL →</button></div>
     </section>`;
     host.querySelectorAll('[data-claim-track]').forEach(button => button.addEventListener('click', () => {
@@ -820,11 +882,25 @@
     window.addEventListener('beforeunload', save);
     window.addEventListener('pagehide', save);
     window.addEventListener('pro:open-missions', () => { showBattlePass('menu'); appElement()?.querySelector('.pp-daily-section')?.scrollIntoView({block:'nearest'}); });
+    let lastSeasonNumber=data.season.number;
+    setInterval(()=>{
+      const changed=advanceSeasonIfNeeded();
+      const season=currentSeasonInfo();
+      document.querySelectorAll('[data-season-countdown]').forEach(el=>el.textContent=season.remainingLabel);
+      document.querySelectorAll('[data-season-name]').forEach(el=>el.textContent=season.name);
+      document.querySelectorAll('[data-pass-name]').forEach(el=>el.textContent=season.passName);
+      if(changed||lastSeasonNumber!==season.number){
+        lastSeasonNumber=season.number; save(); emit('season',{season});
+        showToast(`NOVA ${season.name} • PASSE ${season.passName}`,'level');
+        if(document.querySelector('.pro-pass-screen')) showBattlePass(lastPassOrigin);
+      }
+    },1000);
   }
 
   function getSnapshot(){
     const missions = dailyMissions();
-    return JSON.parse(JSON.stringify({data, profile:{...profileInfo(), missions, displayTitle:titleLabel(data.equippedTitle)}, pass:passInfo(), coins:gameCoins(), psy:gamePsy()}));
+    const pass=passInfo();
+    return JSON.parse(JSON.stringify({data, profile:{...profileInfo(), missions, displayTitle:titleLabel(data.equippedTitle), seasonName:pass.seasonName, passName:pass.passName, seasonRemainingLabel:pass.remainingLabel}, pass, season:pass.season, coins:gameCoins(), psy:gamePsy()}));
   }
 
   window.ProProgression = Object.freeze({
@@ -845,6 +921,7 @@
     showUpgrades,
     showBattlePass,
     applyUpgrades,
+    getSeasonInfo:()=>({...currentSeasonInfo()}),
     save
   });
 

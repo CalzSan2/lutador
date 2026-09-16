@@ -94,7 +94,9 @@
       coins:number(saved.coins),
       roster:Array.isArray(saved.roster)?saved.roster.length:1,
       wins:number(stats.wins),matches:number(stats.matches),bestStreak:number(stats.bestStreak),
-      season:escapeHtml(progress.seasonName||saved.seasonName||'TEMPORADA 01'),
+      season:escapeHtml(provider.pass?.seasonName||progress.seasonName||saved.seasonName||'TEMPORADA 01'),
+      passName:escapeHtml(provider.pass?.passName||progress.passName||'PASSE DE BATALHA'),
+      seasonRemaining:escapeHtml(provider.pass?.remainingLabel||progress.seasonRemainingLabel||'28D 00H 00M'),
       missions
     };
   }
@@ -129,8 +131,8 @@
     return `<section class="pro-lobby-dashboard" data-pro-lobby-block="dashboard" aria-label="Central do jogador">
       <aside class="pro-side-stack">
         <article class="pro-season-panel" id="pro-season-panel">
-          <div class="pro-panel-kicker"><span>${data.season}</span><b>ATIVO</b></div>
-          <div class="pro-pass-tier"><span><small>PASSE DE BATALHA</small><strong data-pro-pass-tier>PATAMAR ${String(data.passTier).padStart(2,'0')}</strong></span><span class="pro-tier-emblem" data-pro-pass-emblem>${String(data.passTier).padStart(2,'0')}</span></div>
+          <div class="pro-panel-kicker pro-season-highlight"><span data-pro-season-name>${data.season}</span><b data-pro-season-countdown>${data.seasonRemaining}</b></div>
+          <div class="pro-pass-tier"><span><small class="pro-pass-highlight" data-pro-pass-name>${data.passName}</small><strong data-pro-pass-tier>PATAMAR ${String(data.passTier).padStart(2,'0')}</strong></span><span class="pro-tier-emblem" data-pro-pass-emblem>${String(data.passTier).padStart(2,'0')}</span></div>
           <span class="pro-pass-track" role="progressbar" aria-label="Progresso do passe de batalha" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(data.passProgress)}"><i data-pro-pass-bar style="--progress:${data.passProgress}%"></i></span>
           <button type="button" class="pro-text-action" data-pro-action="pass">ABRIR PASSE <span>→</span></button>
         </article>
@@ -227,6 +229,9 @@
     updateText('[data-pro-xp-label]',`${format(data.xp)} / ${format(data.xpTarget)} XP`);
     updateText('[data-pro-pass-tier]',`PATAMAR ${String(data.passTier).padStart(2,'0')}`);
     updateText('[data-pro-pass-emblem]',String(data.passTier).padStart(2,'0'));
+    updateText('[data-pro-season-name]',data.season);
+    updateText('[data-pro-season-countdown]',data.seasonRemaining);
+    updateText('[data-pro-pass-name]',data.passName);
     const xp=document.querySelector('[data-pro-xp-bar]');if(xp){xp.style.setProperty('--progress',`${data.xpPercent}%`);xp.parentElement?.setAttribute('aria-valuenow',String(Math.round(data.xpPercent)))}
     const pass=document.querySelector('[data-pro-pass-bar]');if(pass){pass.style.setProperty('--progress',`${data.passProgress}%`);pass.parentElement?.setAttribute('aria-valuenow',String(Math.round(data.passProgress)))}
   }

@@ -189,6 +189,7 @@
   };
   function equippedSkin(p){
     if(!p)return'original';
+    if(p.v16OnlineSkin)return p.v16OnlineSkin;
     if(p.playerSlot==='p1')return exp()?.equipped?.skin||complete()?.cosmetics?.equippedSkin||window.LutadorUltimate?.data?.cosmetics?.[p.id]?.skin||'original';
     return window.LutadorUltimate?.data?.cosmetics?.[p.id]?.skin||'original';
   }
@@ -211,14 +212,14 @@
 
   /* Lobby Supremo — um layout único, limpo e sem cartões sobrepostos. */
   function favoriteId(){return v6()?.lastSelected||v6()?.favorites?.[0]||'rojo'}
-  function rankText(){try{const d=window.LutadorComplete?.division?.();return `${d?.icon||'⬟'} ${d?.name||'FERRO'} · ${complete()?.rank?.rp||0} RP`}catch(_){return'⬟ FERRO'}}
+  function rankText(){return 'ARENA'}
   function skinName(){return exp()?.equipped?.skin||complete()?.cosmetics?.equippedSkin||'Original'}
   function lobbyTip(){const tips=['Parry perfeito: toque a defesa pouco antes do impacto.','Defesa + poder perto do rival executa Push Block.','No ar, esquiva vira Air Dash.','Esquiva no chão durante a queda executa recuperação rápida.','Defesa durante o começo de um golpe cancela com uma finta.','T provoca Adrenalina quando a Fúria estiver acima de 60.'];return tips[Math.floor(Date.now()/15000)%tips.length]}
   function decorateLobby(){
     const menu=document.querySelector('.menu.pro-lobby-ready');if(!menu)return;menu.classList.add('v8-supreme-lobby');
     const hero=menu.querySelector('.pro-lobby-hero'),combat=menu.querySelector('.pro-combat-menu');const id=favoriteId(),c=byId(id)||byId('rojo');
     if(hero){hero.style.setProperty('--v8-champ',`url('ai-assets/characters/${id}.png')`);let badge=hero.querySelector('.v8-hero-badge');if(!badge){badge=document.createElement('div');badge.className='v8-hero-badge';hero.appendChild(badge)}badge.innerHTML=`<small>V8 SUPREMA · CAMPEÃO EM DESTAQUE</small><strong>${esc(c?.name||'ROJO')}</strong><span>${esc(rankText())}</span><i>SKIN · ${esc(skinName())}</i>`}
-    if(combat&&!combat.querySelector('.v8-command-center')){const box=document.createElement('section');box.className='v8-command-center';box.innerHTML=`<header><div><small>CENTRAL DA ARENA</small><h3>ENTRE NA ARENA</h3></div><span>V${VERSION}</span></header><div class="v8-quick-grid"><button data-v8-go="play">⚔<b>JOGAR</b><small>Modos e Ranked</small></button><button data-v8-go="training">🥊<b>TREINO</b><small>Hitbox e frame data</small></button><button data-v8-go="story">📖<b>HISTÓRIA</b><small>Campanha narrativa</small></button><button data-v8-go="shop">🛒<b>LOJA</b><small>Campeões e itens</small></button><button data-v8-go="wardrobe">🎨<b>SKINS</b><small>Vestiário funcional</small></button><button data-v8-go="settings">⚙<b>CONFIG.</b><small>Vídeo, som e controles</small></button></div><div class="v8-mini-links"><button data-v8-go="ranking">RANKING</button><button data-v8-go="codes">CÓDIGOS</button><button data-v8-go="news">NOTÍCIAS</button><button data-v8-go="hub">MAIS</button></div><div class="v8-lobby-tip"><span>💡 ${esc(lobbyTip())}</span><button data-v8-go="styles">ESTILOS DE LUTA</button></div>`;combat.prepend(box);box.querySelectorAll('[data-v8-go]').forEach(b=>b.onclick=()=>runLobbyAction(b.dataset.v8Go))}
+    if(combat&&!combat.querySelector('.v8-command-center')){const box=document.createElement('section');box.className='v8-command-center';box.innerHTML=`<header><div><small>CENTRAL DA ARENA</small><h3>ENTRE NA ARENA</h3></div><span>V${VERSION}</span></header><div class="v8-quick-grid"><button data-v8-go="play">⚔<b>JOGAR</b><small>Modos e partidas</small></button><button data-v8-go="training">🥊<b>TREINO</b><small>Hitbox e frame data</small></button><button data-v8-go="story">📖<b>HISTÓRIA</b><small>Campanha narrativa</small></button><button data-v8-go="shop">🛒<b>LOJA</b><small>Campeões e itens</small></button><button data-v8-go="wardrobe">🎨<b>SKINS</b><small>Vestiário funcional</small></button><button data-v8-go="settings">⚙<b>CONFIG.</b><small>Vídeo, som e controles</small></button></div><div class="v8-mini-links"><button data-v8-go="codes">CÓDIGOS</button><button data-v8-go="news">NOTÍCIAS</button><button data-v8-go="hub">MAIS</button></div><div class="v8-lobby-tip"><span>💡 ${esc(lobbyTip())}</span><button data-v8-go="styles">ESTILOS DE LUTA</button></div>`;combat.prepend(box);box.querySelectorAll('[data-v8-go]').forEach(b=>b.onclick=()=>runLobbyAction(b.dataset.v8Go))}
     menu.querySelectorAll('.exp-premium-home').forEach(x=>x.classList.add('v8-legacy-hide'));menu.querySelectorAll('.v6-live-strip').forEach(x=>x.classList.add('v8-compact-live'));
   }
   function runLobbyAction(a){if(a==='play')return window.renderModes?.();if(a==='training')return window.ProCombat?.openGuide?.(true);if(a==='story')return window.renderStorySelect?.();if(a==='shop')return window.renderShop?.();if(a==='wardrobe')return window.LutadorV6?.openWardrobe?.();if(a==='settings')return window.LutadorUltimate?.openSettings?.();if(a==='ranking')return window.renderRanking?.();if(a==='codes')return window.renderCodes?.();if(a==='news')return window.renderNews?.();if(a==='hub'){const b=document.querySelector('.v7-hub-button');if(b)return b.click()}if(a==='styles')return openStyleDialog()}
@@ -308,7 +309,7 @@
         <button class="v82-card" data-v82-go="settings"><span class="ico">⚙</span><b>CONFIGURAÇÕES</b><small>Vídeo, áudio, controles e desempenho.</small></button>
       </div>
       <div class="v82-mini-links">
-        <button data-v82-go="ranking">RANKING</button>
+        
         <button data-v82-go="codes">CÓDIGOS</button>
         <button data-v82-go="news">NOTÍCIAS</button>
         <button data-v82-go="hub">MAIS</button>
@@ -374,7 +375,7 @@
     const steps=[
       {title:'BEM-VINDO À ARENA', eyebrow:'TUTORIAL OFICIAL', desc:'Entenda rapidamente como navegar por todo o jogo e começar forte.', body:`<div class="v82-tutorial-grid"><div class="v82-tut-card"><h3>Lobby</h3><p>A Central da Arena reúne os atalhos principais: Jogar, Treino, História, Loja, Skins e Configurações. No lado direito ficam passe, missões e progresso.</p></div><div class="v82-tut-card"><h3>Seu Perfil</h3><p>Seu nome aparece no jogo, no lobby e em futuras estatísticas. Gold, Vandais, passe, rank e campeões ficam salvos automaticamente.</p></div></div>`},
       {title:'COMO LUTAR', eyebrow:'COMBATE', desc:'Os fundamentos do sistema de luta.', body:`<div class="v82-tutorial-grid"><div class="v82-tut-card"><h3>Comandos Básicos</h3><ul><li>P1: mover, socar, chutar, defender, gancho e Ultimate.</li><li>P2: teclas numéricas equivalentes.</li><li>Esquiva perfeita pode abrir contra-ataque.</li></ul></div><div class="v82-tut-card"><h3>Mecânicas</h3><ul><li>Combos aumentam dano e pressão.</li><li>No chão, o rival derrubado só leva dano de chute.</li><li>Parry, Push Block, Air Dash e estilos de luta fazem parte do meta.</li></ul></div></div>`},
-      {title:'PROGRESSÃO E MODOS', eyebrow:'CONTEÚDO', desc:'Como avançar e aproveitar tudo que o jogo oferece.', body:`<div class="v82-tutorial-grid"><div class="v82-tut-card"><h3>Modos</h3><ul><li>Jogar: partidas, CPU e Ranked.</li><li>Treino: hitbox, frame data e prática.</li><li>História: campanha com narrativa.</li></ul></div><div class="v82-tut-card"><h3>Economia</h3><ul><li>Gold compra conteúdo.</li><li>Vandais servem para itens premium.</li><li>Skins, títulos e recompensas ficam no perfil.</li></ul></div></div>`}
+      {title:'PROGRESSÃO E MODOS', eyebrow:'CONTEÚDO', desc:'Como avançar e aproveitar tudo que o jogo oferece.', body:`<div class="v82-tutorial-grid"><div class="v82-tut-card"><h3>Modos</h3><ul><li>Jogar: partidas contra CPU e versus.</li><li>Treino: hitbox, frame data e prática.</li><li>História: campanha com narrativa.</li></ul></div><div class="v82-tut-card"><h3>Economia</h3><ul><li>Gold compra conteúdo.</li><li>Vandais servem para itens premium.</li><li>Skins, títulos e recompensas ficam no perfil.</li></ul></div></div>`}
     ];
     const item=steps[step];
     const isLast=step===steps.length-1;
@@ -446,9 +447,9 @@
     try{return map[id]?.()}catch(e){console.warn('[V8.3] action',id,e)}
   };
   const items=[
-    ['play','⚔','JOGAR','Modos e Ranked'],['training','🥊','TREINO','Prática avançada'],
+    ['play','⚔','JOGAR','Modos e partidas'],['training','🥊','TREINO','Prática avançada'],
     ['story','📖','HISTÓRIA','Campanha narrativa'],['shop','🛒','LOJA','Central da loja'],
-    ['roulette','🎡','ROLETA','Giro diário'],['cosmetics','✨','COSMÉTICOS','Skins e finalizações'],
+    ['roulette','🎰','TESTE DE SORTE','Caça-níquel por 2 PSY'],['cosmetics','✨','COSMÉTICOS','Skins e finalizações'],
     ['mastery','★','MAESTRIA','Evolução por campeão'],['profile','👤','PERFIL','Conta e estatísticas'],
     ['wardrobe','🎨','VESTIÁRIO','Equipar coleção'],['events','⚡','EVENTOS','Recompensas temporárias'],
     ['challenges','📋','DESAFIOS','Diários e semanais'],['ranking','🏆','RANKING','Classificação da arena'],
@@ -478,7 +479,7 @@
   const shopCards={
     'shop-champions':['🥊','CAMPEÕES','Desbloqueie e compre lutadores para sua coleção.'],
     'shop-resources':['💠','RECURSOS','Gold, PSY e Vandais para sua progressão.'],
-    'shop-roulette':['🎡','ROLETA DIÁRIA','Faça seu giro e tente conquistar recompensas.'],
+    'shop-roulette':['🎰','TESTE DE SORTE','Pague 2 PSY e teste sua sorte no caça-níquel.'],
     'exp-cosmetic-shop-btn':['✨','COSMÉTICOS','Skins, entradas, poses e finalizações equipáveis.'],
     'shop-help':['❓','AJUDA DA LOJA','Entenda moedas, recursos e compras do jogo.']
   };
@@ -495,7 +496,7 @@
     });
     if(!root.querySelector('.v83-shop-title')){
       const sub=root.querySelector('.select-subtitle');
-      const n=document.createElement('section');n.className='v83-shop-title';n.innerHTML='<small>MERCADO DA ARENA</small><b>TUDO EM UM SÓ LUGAR</b><span>Campeões, recursos, roleta e cosméticos com navegação clara e sem sobreposição.</span>';
+      const n=document.createElement('section');n.className='v83-shop-title';n.innerHTML='<small>MERCADO DA ARENA</small><b>TUDO EM UM SÓ LUGAR</b><span>Campeões, recursos, Teste de Sorte e cosméticos com navegação clara e sem sobreposição.</span>';
       sub?.after(n);
     }
   }
@@ -544,16 +545,16 @@
     styles:()=>window.LutadorV8?.openStyleDialog?.()
   };
   const menuItems=[
-    ['play','⚔','JOGAR','Modos, versus e Ranked'],
+    ['play','⚔','JOGAR','Modos e partidas'],
     ['training','🥊','TREINO','Prática e frame data'],
     ['story','📖','HISTÓRIA','Campanha narrativa'],
-    ['shop','🛒','LOJA','Campeões, roleta e cosméticos'],
+    ['shop','🛒','LOJA','Campeões, recursos e sorte'],
     ['mastery','★','MAESTRIA','Evolução por campeão'],
     ['profile','👤','PERFIL','Conta e estatísticas'],
     ['wardrobe','🎨','VESTIÁRIO','Equipar itens comprados'],
     ['events','⚡','EVENTOS','Recompensas temporárias'],
     ['challenges','📋','DESAFIOS','Diários e semanais'],
-    ['ranking','🏆','RANKING','Classificação da temporada'],
+    
     ['codes','🔐','CÓDIGOS','Códigos oficiais'],
     ['news','📰','NOTÍCIAS','Atualizações do jogo'],
     ['settings','⚙','CONFIGURAÇÕES','Vídeo, áudio e controles'],
@@ -687,11 +688,11 @@
     const s=playerState();if(!s||typeof app==='undefined')return shopOriginal?.apply(this,arguments);
     screen='shop';drawCanvas();
     app.innerHTML=`<div class="card shop mk-card mk-arena v85-shop">
-      <header class="v85-shop-head"><div><small>MERCADO OFICIAL · SORTEP NIAK</small><h2>CENTRAL DA LOJA</h2><p>Compre campeões, recursos e cosméticos ou use sua roleta diária. O Passe continua disponível somente pelo Lobby.</p></div><div class="v85-wallet"><span>🪙 <b>${Number(s.coins||0).toLocaleString('pt-BR')}</b> GOLD</span><span>💠 <b>${Number(s.psy||0).toLocaleString('pt-BR')}</b> PSY</span><span>🟪 <b>${Number(s.vandais||0).toLocaleString('pt-BR')}</b> VANDAIS</span></div></header>
+      <header class="v85-shop-head"><div><small>MERCADO OFICIAL · SORTEP NIAK</small><h2>CENTRAL DA LOJA</h2><p>Compre campeões, recursos e cosméticos ou arrisque no Teste de Sorte. O Passe continua disponível somente pelo Lobby.</p></div><div class="v85-wallet"><span>🪙 <b>${Number(s.coins||0).toLocaleString('pt-BR')}</b> GOLD</span><span>💠 <b>${Number(s.psy||0).toLocaleString('pt-BR')}</b> PSY</span><span>🟪 <b>${Number(s.vandais||0).toLocaleString('pt-BR')}</b> VANDAIS</span></div></header>
       <div class="v85-shop-grid">
         <button id="shop-champions" class="v85-shop-card champ"><i>🥊</i><b>CAMPEÕES</b><small>Desbloqueie lutadores e aumente seu elenco.</small><em>ABRIR →</em></button>
         <button id="shop-resources" class="v85-shop-card resource"><i>💠</i><b>RECURSOS</b><small>Converta Gold em PSY e confira sua carteira.</small><em>ABRIR →</em></button>
-        <button id="shop-roulette" class="v85-shop-card roulette"><i>🎡</i><b>ROLETA DIÁRIA</b><small>Um giro gratuito por dia com recompensas reais.</small><em>GIRAR →</em></button>
+        <button id="shop-roulette" class="v85-shop-card roulette"><i>🎰</i><b>TESTE DE SORTE</b><small>Caça-níquel por 2 PSY com prêmios raros.</small><em>JOGAR →</em></button>
         <button id="shop-cosmetics" class="v85-shop-card cosmetic"><i>✨</i><b>COSMÉTICOS</b><small>Skins, entradas, poses e finalizações funcionais.</small><em>VER COLEÇÃO →</em></button>
         <button id="shop-upgrades" class="v85-shop-card upgrade"><i>⬆</i><b>MELHORIAS</b><small>Evolua atributos e progressão permanente.</small><em>EVOLUIR →</em></button>
         <button id="shop-help" class="v85-shop-card help"><i>?</i><b>AJUDA</b><small>Moedas, compras, recursos e suporte.</small><em>ABRIR →</em></button>

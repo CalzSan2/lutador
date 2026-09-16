@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script id="v16-safe-boot">
+(()=>{
+  const release=()=>{
+    try{const loader=document.getElementById('game-loading');if(loader){loader.classList.add('hide');setTimeout(()=>loader.remove(),260)}}catch(_){}
+    try{const a=document.getElementById('app');if(a&&!a.children.length&&typeof window.renderMenu==='function')window.renderMenu()}catch(_){}
+  };
+  window.__sortepSafeBoot=release;
+  setTimeout(release,3600);
+  window.addEventListener('load',()=>setTimeout(release,2500),{once:true});
+  window.addEventListener('error',()=>setTimeout(release,100),true);
+})();
+</script>
+
 <script id="sortep-reset-bootstrap">
 (()=>{
   try{
@@ -1074,7 +1087,6 @@ function renderMenu() {
         <button id="btn-news" class="btn">📰 NOTÍCIAS</button>
         <button id="btn-codes" class="btn">🔐 CÓDIGOS</button>
         <button id="btn-settings" class="btn">⚙️ CONFIGURAÇÕES</button>
-        <button id="btn-ranking" class="btn">🏆 RANKING</button>
         <button id="btn-credits" class="btn">🎬 CRÉDITOS</button>
       </div>
       <div class="lobby-feature">
@@ -1093,7 +1105,6 @@ function renderMenu() {
   document.getElementById('btn-news').onclick = () => { SFX.play('menu_select'); renderNews(); };
   document.getElementById('btn-codes').onclick = () => { SFX.play('menu_select'); renderCodes(); };
   document.getElementById('btn-settings').onclick = () => { SFX.play('menu_select'); window.LutadorUltimate?.openSettings?.(); };
-  document.getElementById('btn-ranking').onclick = () => { SFX.play('menu_select'); renderRanking(); };
   document.getElementById('btn-credits').onclick = () => { SFX.play('menu_select'); renderCredits(); };
 }
 
@@ -1484,7 +1495,7 @@ function renderShop() {
       <div class="lobby-actions" style="max-width:560px;margin:20px auto">
         <button id="shop-champions" class="btn big">🥊 CAMPEÕES</button>
         <button id="shop-resources" class="btn big">💠 RECURSOS / COMPRAR PSY</button>
-        <button id="shop-roulette" class="btn big">🎡 ROLETA DIÁRIA</button>
+        <button id="shop-roulette" class="btn big">🎰 TESTE DE SORTE</button>
         <button id="shop-help" class="btn big">❓ AJUDA</button>
       </div>
       <button id="btn-back" class="btn">Voltar ao lobby</button>
@@ -1521,7 +1532,7 @@ function renderShopResources(fromRavam=false) {
       <div class="pick-status"><span class="pick-pill">💰 ${state.coins.toLocaleString('pt-BR')} GOLD</span><span class="pick-pill active">💠 ${(state.psy||0).toLocaleString('pt-BR')} PSY</span><span class="pick-pill">🟪 ${(state.vandais||0).toLocaleString('pt-BR')} VANDAIS</span></div>
       <p class="select-subtitle">Câmbio oficial: <b>1 PSY = 120 GOLD</b>. PSY é usada para ativar o Passe Premium.</p>
       <div class="lobby-actions" style="max-width:680px;margin:22px auto">${options.map(amount=>`<button class="btn big psy-buy" data-amount="${amount}">💠 ${amount} PSY <small style="display:block;opacity:.75">${(amount*120).toLocaleString('pt-BR')} GOLD</small></button>`).join('')}</div>
-      <div class="ravam-empty"><b>🟪 LOJA R.A.V.A.M</b><p>Vandais são conquistados na Roleta Diária e serão usados exclusivamente para comprar Lendas do modo R.A.V.A.M.</p><span class="pick-pill">ELENCO ATUAL · 0 LENDAS</span></div>
+      <div class="ravam-empty"><b>🟪 LOJA R.A.V.A.M</b><p>Vandais podem ser conquistados no Teste de Sorte e serão usados exclusivamente para comprar Lendas do modo R.A.V.A.M.</p><span class="pick-pill">ELENCO ATUAL · 0 LENDAS</span></div>
       <button id="btn-back-resources" class="btn">← ${fromRavam?'VOLTAR AO MODO R.A.V.A.M':'VOLTAR À LOJA'}</button>
     </div>`;
   document.querySelectorAll('.psy-buy').forEach(button=>button.onclick=()=>buyPsy(Number(button.dataset.amount)));
@@ -6428,23 +6439,33 @@ const YTIRI_J_SCALE = 0.55;
 </script>
 <script id="lan-online-module">
 /*
- ONLINE RADMIN VPN — P2P pelo navegador
+ SORTEP NIAK V16 ONLINE — INTERNET P2P
  Fluxo:
  HOST cria sala -> mostra ID -> P2 entra com ID.
- O Radmin VPN deve estar ativo nos dois PCs para fornecer a rede virtual.
- Não há servidor Python/BAT neste HTML.
+ Usa WebRTC/PeerJS pela internet. Não exige LAN ou Radmin VPN.
+ A sala é casual e o HOST é autoritativo para a simulação.
 */
 (()=>{
+  const ONLINE_VERSION='16.1.0';
+  const PEER_OPTIONS={debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}};
   const lan={
     peer:null,conn:null,role:null,connected:false,lastState:0,
-    p1:null,p2:null,roomId:null,visualFight:null
+    p1:null,p2:null,roomId:null,visualFight:null,ping:0,lastPingAt:0,remoteName:'',remoteVersion:'',ready:false,matchType:'casual',remoteProfile:null
   };
   window.__lan=lan;
 
-  const p2Codes=new Set([
-    'ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
-    'Numpad1','Numpad2','Numpad3','Numpad5','Numpad6'
-  ]);
+  const actionToP2={left:'ArrowLeft',right:'ArrowRight',jump:'ArrowUp',crouch:'ArrowDown',power:'Numpad1',guard:'Numpad2',ultimate:'Numpad3',punch:'Numpad5',kick:'Numpad6',hook:'Numpad4',dodge:'Numpad0',taunt:'Numpad7'};
+  const defaultP1={left:'KeyA',right:'KeyD',jump:'KeyW',crouch:'KeyS',power:'KeyJ',guard:'KeyK',ultimate:'KeyL',punch:'KeyI',kick:'KeyO',hook:'KeyG',dodge:'KeyQ',taunt:'KeyT'};
+  const p2CanonicalCodes=new Set(Object.values(actionToP2));
+  function guestTranslate(code){
+    const binds=window.LutadorExpansion?.data?.keybinds?.p1||defaultP1;
+    for(const [action,physical] of Object.entries(binds)) if(physical===code && actionToP2[action]) return actionToP2[action];
+    for(const [action,physical] of Object.entries(defaultP1)) if(physical===code && actionToP2[action]) return actionToP2[action];
+    return null;
+  }
+  function playerName(){try{return String(state?.playerName||'JOGADOR').slice(0,18)}catch(_){return'JOGADOR'}}
+  function connectionLabel(){const ms=Math.round(lan.ping||0);if(!lan.connected)return'OFFLINE';if(!ms)return'CONECTADO';if(ms<70)return ms+' ms · EXCELENTE';if(ms<130)return ms+' ms · BOM';if(ms<220)return ms+' ms · MÉDIO';return ms+' ms · ALTO'}
+  function updateNetBadge(){const el=document.getElementById('v16-net-badge');if(el)el.textContent=connectionLabel()}
 
   function status(text,ok=false){
     const el=document.getElementById('lan-status');
@@ -6463,19 +6484,29 @@ const YTIRI_J_SCALE = 0.55;
   // O módulo online só é baixado quando o jogador realmente abre uma sala.
   // Isso remove uma requisição externa da inicialização e deixa o lobby/offline mais rápido.
   let peerLoading=false, peerWaiters=[];
+  const PEER_CDNS=[
+    'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js',
+    'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'
+  ];
   function ensurePeerReady(done){
     if(typeof Peer!=='undefined'){ done?.(); return; }
     if(typeof done==='function') peerWaiters.push(done);
     if(peerLoading) return;
-    peerLoading=true;
-    status('Carregando módulo online…');
-    const script=document.createElement('script');
-    script.id='peerjs-lazy';
-    script.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-    script.async=true;
-    script.onload=()=>{peerLoading=false;const list=peerWaiters.splice(0);for(const fn of list){try{fn()}catch(e){console.warn('Falha ao iniciar online',e)}}};
-    script.onerror=()=>{peerLoading=false;peerWaiters.length=0;status('✕ O módulo online não carregou. Conecte-se à internet e tente novamente.');script.remove()};
-    document.head.appendChild(script);
+    peerLoading=true; status('Carregando módulo online…');
+    let i=0;
+    const fail=()=>{
+      document.getElementById('peerjs-lazy')?.remove();
+      if(i<PEER_CDNS.length){load();return;}
+      peerLoading=false;peerWaiters.length=0;
+      status('✕ Não foi possível carregar a rede online. Verifique a internet e recarregue a página.');
+    };
+    const load=()=>{
+      const script=document.createElement('script');script.id='peerjs-lazy';script.src=PEER_CDNS[i++];script.async=true;
+      script.onload=()=>{peerLoading=false;const list=peerWaiters.splice(0);for(const fn of list){try{fn()}catch(e){console.warn('Falha ao iniciar online',e)}}};
+      script.onerror=fail;document.head.appendChild(script);
+    };
+    load();
   }
 
   function closeLan(){
@@ -6489,12 +6520,11 @@ const YTIRI_J_SCALE = 0.55;
     lan.p2=null;
     lan.roomId=null;
     lan.visualFight=null;
+    lan.matchType='casual'; lan.remoteProfile=null;
   }
 
   function roomId(){
-    return 'LUTADOR-'+
-      Math.random().toString(36).slice(2,7).toUpperCase()+'-'+
-      Math.random().toString(36).slice(2,6).toUpperCase();
+    return 'NIAK-'+Math.random().toString(36).slice(2,8).toUpperCase();
   }
 
   function bindConnection(conn){
@@ -6503,7 +6533,8 @@ const YTIRI_J_SCALE = 0.55;
     conn.on('open',()=>{
       lan.connected=true;
       status('✓ P2 conectado! Conexão online estabelecida.',true);
-      if(lan.role==='guest') send({type:'hello'});
+      if(lan.role==='guest') send({type:'hello',version:ONLINE_VERSION,name:playerName()});
+      updateNetBadge();
       renderLanCharacterSelect();
     });
 
@@ -6511,10 +6542,17 @@ const YTIRI_J_SCALE = 0.55;
       if(!msg || typeof msg!=='object') return;
 
       if(msg.type==='hello' && lan.role==='host'){
+        lan.remoteVersion=String(msg.version||'');lan.remoteName=String(msg.name||'JOGADOR');
+        if(lan.remoteVersion!==ONLINE_VERSION){send({type:'version-error',expected:ONLINE_VERSION});status('✕ Versões diferentes. Os dois precisam usar V16.');return;}
+        send({type:'hello-ack',version:ONLINE_VERSION,name:playerName()});
         send({type:'lan-p1',id:lan.p1||null});
         if(lan.p2) send({type:'lan-p2',id:lan.p2});
         return;
       }
+      if(msg.type==='hello-ack'){lan.remoteVersion=String(msg.version||'');lan.remoteName=String(msg.name||'JOGADOR');updateNetBadge();return;}
+      if(msg.type==='version-error'){status('✕ Versão incompatível. Use V'+String(msg.expected||ONLINE_VERSION)+'.');try{lan.conn?.close()}catch(_){};return;}
+      if(msg.type==='ping'){send({type:'pong',t:msg.t});return;}
+      if(msg.type==='pong'){lan.ping=Math.max(0,performance.now()-Number(msg.t||performance.now()));updateNetBadge();return;}
 
       if(msg.type==='key' && lan.role==='host' && fight?.mode==='lan'){
         window.keys=window.keys||{};
@@ -6611,7 +6649,7 @@ const YTIRI_J_SCALE = 0.55;
 
     conn.on('error',()=>{
       lan.connected=false;
-      status('✕ Erro na conexão. Verifique o Radmin VPN e tente novamente.');
+      status('✕ Erro de conexão pela internet. Tente novamente ou use outra rede.');
     });
   }
 
@@ -6626,7 +6664,7 @@ const YTIRI_J_SCALE = 0.55;
 
     const id=roomId();
     lan.roomId=id;
-    const peer=new Peer(id,{debug:0});
+    const peer=new Peer(id,PEER_OPTIONS);
     lan.peer=peer;
 
     peer.on('open',()=>{
@@ -6645,7 +6683,7 @@ const YTIRI_J_SCALE = 0.55;
             Aguardando o jogador 2…
           </p>
           <p style="font-size:13px;color:#94a3b8">
-            Os dois PCs devem estar conectados à mesma rede do Radmin VPN.
+            A sala funciona pela internet. Envie este código para o outro jogador.
           </p>
         </div>`;
 
@@ -6689,7 +6727,7 @@ const YTIRI_J_SCALE = 0.55;
         <p>Digite o código enviado pelo HOST:</p>
         <input id="lan-room-input" class="code-input"
           style="width:100%;box-sizing:border-box;font-size:20px;text-align:center;text-transform:uppercase"
-          placeholder="LUTADOR-XXXXX-XXXX" autocomplete="off">
+          placeholder="NIAK-ABC123" autocomplete="off">
         <button id="lan-connect-guest" class="btn big" style="margin-top:10px">
           ENTRAR
         </button>
@@ -6703,7 +6741,7 @@ const YTIRI_J_SCALE = 0.55;
     const room=(document.getElementById('lan-room-input')?.value||'')
       .trim().toUpperCase();
 
-    if(!/^LUTADOR-[A-Z0-9]{5}-[A-Z0-9]{4}$/.test(room)){
+    if(!/^NIAK-[A-Z0-9]{6}$/.test(room)){
       status('✕ Código inválido.');
       return;
     }
@@ -6718,7 +6756,7 @@ const YTIRI_J_SCALE = 0.55;
     lan.roomId=room;
     status('Conectando ao HOST…');
 
-    const peer=new Peer(undefined,{debug:0});
+    const peer=new Peer(undefined,PEER_OPTIONS);
     lan.peer=peer;
 
     peer.on('open',()=>{
@@ -6749,11 +6787,12 @@ const YTIRI_J_SCALE = 0.55;
       <div class="card mk-card mk-arena" style="max-width:860px">
         <div class="emblem"><span>🌐</span></div>
         <h2 class="select-title mk-title">
-          ONLINE <span class="mk-accent">RADMIN VPN</span>
+          ONLINE <span class="mk-accent">INTERNET</span>
         </h2>
         <p class="select-subtitle">
-          Os dois jogadores entram pela mesma rede virtual do Radmin VPN.
+          Crie uma sala privada e jogue pela internet. Não precisa de LAN ou Radmin VPN.
         </p>
+        <div id="v16-net-badge" style="display:inline-flex;margin:0 auto 14px;padding:7px 12px;border:1px solid #2b4968;border-radius:999px;background:#071321;color:#83eaff;font:800 12px Oxanium,system-ui">PRONTO PARA CONECTAR</div>
 
         <div class="lobby-actions">
           <button id="lan-host" class="btn big">CRIAR SALA</button>
@@ -6764,12 +6803,12 @@ const YTIRI_J_SCALE = 0.55;
         <div id="lan-status" style="min-height:24px;margin:12px;font-weight:800"></div>
 
         <div style="padding:14px;border-radius:14px;background:rgba(15,23,42,.7);color:#cbd5e1;font-size:13px">
-          <b>Como jogar:</b><br>
-          1. Abra o Radmin VPN nos dois PCs e entre na mesma rede.<br>
-          2. PC 1 clica em <b>Criar sala</b>.<br>
-          3. PC 1 envia o código para o PC 2.<br>
-          4. PC 2 clica em <b>Entrar na sala</b> e coloca o código.<br>
-          5. Cada jogador escolhe seu campeão e inicia a luta.
+          <b>V16 ONLINE ALPHA:</b><br>
+          1. Os dois jogadores precisam estar conectados à internet e usar a mesma V16.<br>
+          2. Jogador 1 clica em <b>Criar sala</b> e envia o código NIAK ao amigo.<br>
+          3. Jogador 2 clica em <b>Entrar na sala</b> e cola o código.<br>
+          4. Cada jogador usa os controles de P1 no próprio PC e escolhe seu campeão.<br>
+          5. A partida é casual e o HOST simula a luta. Redes muito restritas podem exigir TURN dedicado.
         </div>
 
         <button id="lan-back" class="btn" style="margin-top:14px">Voltar</button>
@@ -6790,7 +6829,7 @@ const YTIRI_J_SCALE = 0.55;
         <h2 class="select-title mk-title">AGUARDANDO</h2>
         <p class="select-subtitle">${message}</p>
         <p style="color:#9fb2d9;margin:18px">
-          P2: setas + Num 1 / Num 2 / Num 3.
+          No seu PC use A/D/W + J/K/L normalmente. A rede converte para o P2 automaticamente.
         </p>
         <button id="lan-leave" class="btn">Sair</button>
       </div>`;
@@ -6813,14 +6852,15 @@ const YTIRI_J_SCALE = 0.55;
     const name=id=>CHARACTERS.find(c=>c.id===id)?.name||'---';
 
     const mineLabel=mine
-      ? `${slot} · ${name(mine)} ✓`
-      : `${slot} · escolha seu campeão`;
+      ? `${slot} · ${playerName()} · ${name(mine)} ✓`
+      : `${slot} · ${playerName()} · escolha seu campeão`;
 
     const otherId=isHost?lan.p2:lan.p1;
     const otherSlot=isHost?'P2':'P1';
+    const remote=lan.remoteName||'ADVERSÁRIO';
     const otherLabel=otherId
-      ? `${otherSlot} · ${name(otherId)} ✓`
-      : `${otherSlot} · escolhendo…`;
+      ? `${otherSlot} · ${remote} · ${name(otherId)} ✓`
+      : `${otherSlot} · ${remote} · escolhendo…`;
 
     app.innerHTML=`
       <div class="card select mk-card mk-arena">
@@ -6833,9 +6873,10 @@ const YTIRI_J_SCALE = 0.55;
           <span class="pick-pill active">${mineLabel}</span>
           <span class="pick-pill">${otherLabel}</span>
         </div>
+        <div id="v16-net-badge" style="display:inline-flex;margin:4px auto 10px;padding:6px 12px;border:1px solid #2b4968;border-radius:999px;background:#071321;color:#83eaff;font:800 11px Oxanium,system-ui">${connectionLabel()}</div>
 
         <p class="select-subtitle">
-          Escolha seu campeão. O P1 controla o lado esquerdo e o P2 o lado direito.
+          Escolha seu campeão. Cada jogador usa os controles normais de P1 no próprio computador.
         </p>
 
         <div class="roster mk-roster">
@@ -6950,13 +6991,14 @@ const YTIRI_J_SCALE = 0.55;
   window.addEventListener('keydown',e=>{
     if(!fight || fight.mode!=='lan')return;
 
-    if(lan.role==='guest' && p2Codes.has(e.code)){
-      send({type:'key',code:e.code,down:true});
+    const netCode=lan.role==='guest'?guestTranslate(e.code):null;
+    if(lan.role==='guest' && netCode){
+      send({type:'key',code:netCode,down:true,seq:Date.now()});
       e.preventDefault();
       e.stopImmediatePropagation();
     }
 
-    if(lan.role==='host' && p2Codes.has(e.code)){
+    if(lan.role==='host' && p2CanonicalCodes.has(e.code)){
       e.preventDefault();
       e.stopImmediatePropagation();
     }
@@ -6965,17 +7007,23 @@ const YTIRI_J_SCALE = 0.55;
   window.addEventListener('keyup',e=>{
     if(!fight || fight.mode!=='lan')return;
 
-    if(lan.role==='guest' && p2Codes.has(e.code)){
-      send({type:'key',code:e.code,down:false});
+    const netCode=lan.role==='guest'?guestTranslate(e.code):null;
+    if(lan.role==='guest' && netCode){
+      send({type:'key',code:netCode,down:false,seq:Date.now()});
       e.preventDefault();
       e.stopImmediatePropagation();
     }
 
-    if(lan.role==='host' && p2Codes.has(e.code)){
+    if(lan.role==='host' && p2CanonicalCodes.has(e.code)){
       e.preventDefault();
       e.stopImmediatePropagation();
     }
   },true);
+
+
+  setInterval(()=>{
+    if(lan.connected&&lan.conn?.open){lan.lastPingAt=performance.now();send({type:'ping',t:lan.lastPingAt});}
+  },2000);
 
   function drawSmoothLanClient(){
     if(!fight)return;
@@ -7002,9 +7050,9 @@ const YTIRI_J_SCALE = 0.55;
       grid.insertAdjacentHTML('beforeend',`
         <button id="mode-lan" class="mode-card mk-mode">
           <div class="mode-icon">🌐</div>
-          <span class="mode-badge local">REDE LOCAL</span>
-          <h3>ONLINE <span class="mk-gold">RADMIN</span></h3>
-          <p>Crie uma sala e jogue com outro PC pela rede do Radmin VPN.</p>
+          <span class="mode-badge local">INTERNET · ALPHA</span>
+          <h3>ONLINE <span class="mk-gold">V16</span></h3>
+          <p>Crie uma sala privada, compartilhe o código NIAK e lute pela internet.</p>
         </button>`);
       document.getElementById('mode-lan').onclick=()=>{
         try{SFX.play('menu_confirm');}catch(e){}
@@ -7027,6 +7075,8 @@ const YTIRI_J_SCALE = 0.55;
 
   window.renderLanLobby=renderLanLobby;
   window.renderLanWaiting=renderLanWaiting;
+  window.renderLanCharacterSelect=renderLanCharacterSelect;
+  window.LutadorOnlineV16={version:ONLINE_VERSION,open:renderLanLobby,state:lan,getPing:()=>lan.ping,ensurePeerReady,bindConnection,close:closeLan,send,startIfReady:startLanMatchIfReady,peerOptions:PEER_OPTIONS};
 })();
 </script>
 
@@ -7247,6 +7297,17 @@ setTimeout(function(){
   },true);
 })();
 </script>
+
+
+<script id="remove-arena-pro-legacy">
+(()=>{
+  try{ localStorage.removeItem('lutador.pro.extra-modes.v1'); }catch(e){}
+  try{ sessionStorage.removeItem('lutador.pro.extra-modes.v1'); }catch(e){}
+})();
+</script>
+
+<link rel="stylesheet" href="pro-v16-online-pro.css?v=161">
+<script src="pro-v16-online-pro.js?v=161"></script>
 
 </body>
 </html>
@@ -7494,13 +7555,11 @@ setTimeout(function(){
 
 <link rel="stylesheet" href="pro-character-design.css">
 <script src="pro-character-design.js?v=gancho1"></script>
-<link rel="stylesheet" href="pro-progression.css?v=passe4">
-<link rel="stylesheet" href="pro-extra-modes.css">
-<link rel="stylesheet" href="pro-lobby.css?v=lobby61">
+<link rel="stylesheet" href="pro-progression.css?v=season28">
+<link rel="stylesheet" href="pro-lobby.css?v=season28">
 <link rel="stylesheet" href="pro-sprite-animation.css">
-<script src="pro-progression.js?v=passe4"></script>
-<script src="pro-extra-modes.js"></script>
-<script src="pro-lobby.js?v=lobby61"></script>
+<script src="pro-progression.js?v=season28"></script>
+<script src="pro-lobby.js?v=season28"></script>
 <script src="pro-motion.js?v=combate4"></script>
 <script src="pro-sprite-animation.js?v=gancho1"></script>
 <link rel="stylesheet" href="pro-audio.css?v=combate4">
@@ -7515,7 +7574,7 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-complete-system.css?v=all15">
 <script src="pro-complete-system.js?v=all15"></script>
 <link rel="stylesheet" href="pro-expansion.css?v=exp40">
-<script src="pro-expansion.js?v=exp40"></script>
+<script src="pro-expansion.js?v=season28"></script>
 
 <link rel="stylesheet" href="pro-v5-competitive.css?v=v50">
 <script src="pro-v5-competitive.js?v=v50"></script>
@@ -7531,3 +7590,10 @@ setTimeout(function(){
 <script src="pro-v8-6-fluid.js?v=v861"></script>
 <link rel="stylesheet" href="pro-ravam-studios.css?v=ravam11">
 <script src="pro-ravam-studios.js?v=ravam11"></script>
+<link rel="stylesheet" href="pro-v11-quality.css?v=v110">
+<script src="pro-v11-quality.js?v=v110"></script>
+<link rel="stylesheet" href="pro-v15-suprema.css?v=v150">
+<script src="pro-v15-suprema.js?v=v150"></script>
+
+<link rel="stylesheet" href="pro-v16-2-luck.css?v=162">
+<script src="pro-v16-2-luck.js?v=162"></script>

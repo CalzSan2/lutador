@@ -27,7 +27,7 @@
     'F1 abre a lista completa de golpes e o laboratório de combate.',
     'Rojo domina pressão e sangramento; Thuvaa controla espaço com gelo.',
     'Use o Treino para conferir hitbox, dano, recuperação e frame advantage.',
-    'No Ranked, preservar stamina no fim do round vale mais que atacar sem parar.',
+    'Preservar stamina no fim do round vale mais que atacar sem parar.',
     'O Super só causa efeito depois que a apresentação da Ultimate termina.'
   ];
 
@@ -81,7 +81,7 @@
         <button class="v7-hub-action" data-v7="training"><b>🥊 TREINO</b><span>Hitbox, frame data e dummy.</span></button>
         <button class="v7-hub-action" data-v7="story"><b>📖 HISTÓRIA</b><span>Continue a campanha narrativa.</span></button>
         <button class="v7-hub-action" data-v7="tournament"><b>🏆 TORNEIO</b><span>Entre direto na chave.</span></button>
-        <button class="v7-hub-action" data-v7="profile"><b>👤 PERFIL</b><span>Rank, histórico e estatísticas.</span></button>
+        <button class="v7-hub-action" data-v7="profile"><b>👤 PERFIL</b><span>Histórico e estatísticas.</span></button>
         <button class="v7-hub-action" data-v7="wardrobe"><b>🎨 VESTIÁRIO</b><span>Skins, molduras e poses.</span></button>
         <button class="v7-hub-action" data-v7="events"><b>⚡ EVENTOS</b><span>Desafios temporários.</span></button>
         <button class="v7-hub-action" data-v7="ach"><b>🏅 CONQUISTAS</b><span>Metas e recompensas.</span></button>
@@ -90,7 +90,7 @@
         <button class="v7-hub-action" data-v7="save"><b>💾 SALVAR</b><span>Força salvamento e backup local.</span></button>
         <button class="v7-hub-action gold" data-v7="daily"><b>🎁 RECOMPENSA DIÁRIA</b><span>${data.daily.claimed?'Resgatada hoje':`Dia ${data.daily.streak} · disponível agora`}</span></button>
       </div>
-      <section class="v7-hub-section"><h3>STATUS DA SESSÃO</h3><div class="v7-hub-row"><div class="v7-hub-stat"><small>CAMPEÃO FAVORITO</small><b>${esc(fav?.name||'ROJO')}</b></div><div class="v7-hub-stat"><small>RANK</small><b>${esc(rankName())}</b></div><div class="v7-hub-stat"><small>ENTRADA</small><b>${inputName()}</b></div><div class="v7-hub-stat"><small>SESSÃO</small><b>${sessionText()}</b></div></div></section>
+      <section class="v7-hub-section"><h3>STATUS DA SESSÃO</h3><div class="v7-hub-row"><div class="v7-hub-stat"><small>CAMPEÃO FAVORITO</small><b>${esc(fav?.name||'ROJO')}</b></div><div class="v7-hub-stat"><small>STATUS</small><b>ARENA</b></div><div class="v7-hub-stat"><small>ENTRADA</small><b>${inputName()}</b></div><div class="v7-hub-stat"><small>SESSÃO</small><b>${sessionText()}</b></div></div></section>
       <section class="v7-hub-section"><h3>IA RÁPIDA</h3><div class="v7-difficulty">${[['facil','FÁCIL'],['normal','NORMAL'],['dificil','DIFÍCIL'],['insano','INSANO']].map(([k,n])=>`<button data-v7-ai="${k}" class="${aiDifficulty()===k?'active':''}">${n}</button>`).join('')}</div></section>
       <section class="v7-hub-section"><h3>ÚLTIMA PARTIDA</h3><div class="v7-hub-row"><div class="v7-hub-stat"><small>RESULTADO</small><b>${r?(r.won?'VITÓRIA':'DERROTA'):'—'}</b></div><div class="v7-hub-stat"><small>CONFRONTO</small><b>${r?`${esc(r.p1n)} × ${esc(r.p2n)}`:'SEM PARTIDA'}</b></div><div class="v7-hub-stat"><small>DANO</small><b>${fmt(r?.damage||0)}</b></div><div class="v7-hub-stat"><small>COMBO</small><b>${fmt(r?.combo||0)}x</b></div></div></section>
       <section class="v7-hub-section"><h3>DICA DA ARENA</h3><div class="v7-hub-stat"><b>${esc(TIPS[Math.floor(Date.now()/12000)%TIPS.length])}</b></div></section>
