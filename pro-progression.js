@@ -31,8 +31,9 @@
 
   const SEASON_DURATION_MS = 28 * 24 * 60 * 60 * 1000;
   // Temporadas globais: todos os jogadores usam o mesmo ciclo de 28 dias.
-  // Temporada 1: 01/09/2026 00:00:00 UTC.
-  const GLOBAL_SEASON_EPOCH_MS = Date.UTC(2026, 8, 1, 0, 0, 0);
+  // Temporada 1: 16/09/2026 01:00:00 no horario de Sao Paulo (UTC-3).
+  // Equivale a 16/09/2026 04:00:00 UTC.
+  const GLOBAL_SEASON_EPOCH_MS = Date.UTC(2026, 8, 16, 4, 0, 0);
   let serverClockOffsetMs = 0;
   let serverClockReady = false;
 
