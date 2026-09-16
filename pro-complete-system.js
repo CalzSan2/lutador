@@ -182,7 +182,10 @@
       vlad:['BANQUETE RUBRO','ECLIPSE DE SANGUE'],klo:['CIRCO QUÂNTICO','PROBABILIDADE ZERO'],
       klopp:['ROSTO DO CAOS','FORMA IMPOSSÍVEL'],frogh:['MUTAÇÃO SUPREMA','MIL FACES'],
       jimmy:['TRONO DO TROVÃO','JULGAMENTO CELESTE'],
-      priya:['TRÍADE TÁTICA','TRÍADE DEMOLIDORA']
+      priya:['TRÍADE TÁTICA','TRÍADE DEMOLIDORA'],
+      kain:['ESPELHO ABISSAL','REFLEXO DO CAOS'],
+      aria:['JARDIM VALFLEUR','PRISÃO VERDANTE'],
+      leo:['CÉU VESPER','CHUVA ENTRE PORTAIS']
     };
     const names=ULTIMATE_NAMES[p.id]||[String(p.name||'CAMPEÃO').toUpperCase(),'ULTIMATE SUPREMA'];
     const el=document.createElement('div');el.className='mega-ultimate-cine '+(p.playerSlot==='p2'?'right':'left');

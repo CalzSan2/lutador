@@ -6186,7 +6186,7 @@ window.addEventListener('keydown', (e) => {
   }
   if ([
     'Space','KeyW','KeyS','KeyA','KeyD','KeyJ','KeyK','KeyL','KeyI','KeyO','KeyP','KeyU',
-    'ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Numpad1','Numpad2','Numpad3','Numpad4','Numpad5','Numpad6'
+    'ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Numpad1','Numpad2','Numpad3','Numpad4','Numpad5','Numpad6','Numpad9','Digit9'
   ].includes(e.code)) e.preventDefault();
 });
 window.addEventListener('keyup', (e) => {
@@ -6450,14 +6450,16 @@ const YTIRI_J_SCALE = 0.55;
   const PEER_OPTIONS={debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}};
   const lan={
     peer:null,conn:null,role:null,connected:false,lastState:0,
-    p1:null,p2:null,roomId:null,visualFight:null,ping:0,lastPingAt:0,remoteName:'',remoteVersion:'',ready:false,matchType:'casual',remoteProfile:null
+    p1:null,p2:null,roomId:null,visualFight:null,ping:0,lastPingAt:0,remoteName:'',remoteVersion:'',ready:false,matchType:'casual',remoteProfile:null,
+    ravamOnly:false
   };
   window.__lan=lan;
 
   const actionToP2={left:'ArrowLeft',right:'ArrowRight',jump:'ArrowUp',crouch:'ArrowDown',power:'Numpad1',guard:'Numpad2',ultimate:'Numpad3',punch:'Numpad5',kick:'Numpad6',hook:'Numpad4',dodge:'Numpad0',taunt:'Numpad7'};
   const defaultP1={left:'KeyA',right:'KeyD',jump:'KeyW',crouch:'KeyS',power:'KeyJ',guard:'KeyK',ultimate:'KeyL',punch:'KeyI',kick:'KeyO',hook:'KeyG',dodge:'KeyQ',taunt:'KeyT'};
-  const p2CanonicalCodes=new Set(Object.values(actionToP2));
+  const p2CanonicalCodes=new Set([...Object.values(actionToP2),'Numpad9']);
   function guestTranslate(code){
+    if(lan.ravamOnly&&code==='KeyH') return 'Numpad9';
     const binds=window.LutadorExpansion?.data?.keybinds?.p1||defaultP1;
     for(const [action,physical] of Object.entries(binds)) if(physical===code && actionToP2[action]) return actionToP2[action];
     for(const [action,physical] of Object.entries(defaultP1)) if(physical===code && actionToP2[action]) return actionToP2[action];
@@ -6510,6 +6512,7 @@ const YTIRI_J_SCALE = 0.55;
   }
 
   function closeLan(){
+    const keepRavam=!!lan.ravamOnly;
     try{lan.conn&&lan.conn.close();}catch(e){}
     try{lan.peer&&lan.peer.destroy();}catch(e){}
     lan.peer=null;
@@ -6520,11 +6523,33 @@ const YTIRI_J_SCALE = 0.55;
     lan.p2=null;
     lan.roomId=null;
     lan.visualFight=null;
-    lan.matchType='casual'; lan.remoteProfile=null;
+    lan.ravamOnly=keepRavam;
+    lan.matchType=keepRavam?'ravam':'casual'; lan.remoteProfile=null;
   }
 
   function roomId(){
     return 'NIAK-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  }
+
+  function resetLanToSelection(){
+    lan.p1=null;
+    lan.p2=null;
+    lan.visualFight=null;
+    fight=null;
+    bestOfThree={p1Wins:0,p2Wins:0,round:1,active:false};
+    renderLanCharacterSelect();
+  }
+
+  function returnLanToSelection(){
+    if(lan.role==='host'){
+      send({type:'lan-select'});
+      resetLanToSelection();
+      return;
+    }
+    if(lan.role==='guest'){
+      send({type:'select-request'});
+      renderLanWaiting('Solicitando ao HOST o retorno à seleção de personagens…');
+    }
   }
 
   function bindConnection(conn){
@@ -6533,7 +6558,7 @@ const YTIRI_J_SCALE = 0.55;
     conn.on('open',()=>{
       lan.connected=true;
       status('✓ P2 conectado! Conexão online estabelecida.',true);
-      if(lan.role==='guest') send({type:'hello',version:ONLINE_VERSION,name:playerName()});
+      if(lan.role==='guest') send({type:'hello',version:ONLINE_VERSION,name:playerName(),ravamOnly:!!lan.ravamOnly});
       updateNetBadge();
       renderLanCharacterSelect();
     });
@@ -6543,14 +6568,16 @@ const YTIRI_J_SCALE = 0.55;
 
       if(msg.type==='hello' && lan.role==='host'){
         lan.remoteVersion=String(msg.version||'');lan.remoteName=String(msg.name||'JOGADOR');
-        if(lan.remoteVersion!==ONLINE_VERSION){send({type:'version-error',expected:ONLINE_VERSION});status('✕ Versões diferentes. Os dois precisam usar V16.');return;}
-        send({type:'hello-ack',version:ONLINE_VERSION,name:playerName()});
+        if(lan.remoteVersion!==ONLINE_VERSION){send({type:'version-error',expected:ONLINE_VERSION});status('✕ Versões diferentes. Os dois precisam usar a mesma versão.');return;}
+        if(!!msg.ravamOnly!==!!lan.ravamOnly){send({type:'mode-error',ravamOnly:!!lan.ravamOnly});status('✕ A sala foi aberta em outro modo. Entre pelo mesmo menu do HOST.');return;}
+        send({type:'hello-ack',version:ONLINE_VERSION,name:playerName(),ravamOnly:!!lan.ravamOnly});
         send({type:'lan-p1',id:lan.p1||null});
         if(lan.p2) send({type:'lan-p2',id:lan.p2});
         return;
       }
-      if(msg.type==='hello-ack'){lan.remoteVersion=String(msg.version||'');lan.remoteName=String(msg.name||'JOGADOR');updateNetBadge();return;}
+      if(msg.type==='hello-ack'){lan.remoteVersion=String(msg.version||'');lan.remoteName=String(msg.name||'JOGADOR');if(!!msg.ravamOnly!==!!lan.ravamOnly){status('✕ O HOST está em outro modo.');return;}updateNetBadge();return;}
       if(msg.type==='version-error'){status('✕ Versão incompatível. Use V'+String(msg.expected||ONLINE_VERSION)+'.');try{lan.conn?.close()}catch(_){};return;}
+      if(msg.type==='mode-error'){status('✕ Esta sala pertence a outro modo. Volte e abra o ONLINE pelo mesmo menu do HOST.');try{lan.conn?.close()}catch(_){};return;}
       if(msg.type==='ping'){send({type:'pong',t:msg.t});return;}
       if(msg.type==='pong'){lan.ping=Math.max(0,performance.now()-Number(msg.t||performance.now()));updateNetBadge();return;}
 
@@ -6593,15 +6620,16 @@ const YTIRI_J_SCALE = 0.55;
         return;
       }
 
+      if(msg.type==='select-request' && lan.role==='host'){
+        send({type:'lan-select'});
+        resetLanToSelection();
+        return;
+      }
+
       // Ao terminar a melhor de 3, o HOST manda os dois jogadores
       // de volta para a seleção de campeões.
       if(msg.type==='lan-select' && lan.role==='guest'){
-        lan.p1=null;
-        lan.p2=null;
-        lan.visualFight=null;
-        fight=null;
-        bestOfThree={p1Wins:0,p2Wins:0,round:1,active:false};
-        renderLanCharacterSelect();
+        resetLanToSelection();
         return;
       }
 
@@ -6628,6 +6656,7 @@ const YTIRI_J_SCALE = 0.55;
         fight=incoming;
         if(msg.sparks) sparks=msg.sparks;
         if(msg.bestOfThree) bestOfThree=msg.bestOfThree;
+        try{window.RavamV17?.syncOnlineUltimate?.(fight)}catch(_){}
 
         if(screen!=='fight') screen='fight';
         try{draw(fight);}catch(e){}
@@ -6635,8 +6664,9 @@ const YTIRI_J_SCALE = 0.55;
       }
 
       if(msg.type==='leave'){
+        const rv=!!lan.ravamOnly;
         closeLan();
-        renderLanLobby();
+        renderLanLobby(rv?'ravam':'standard');
       }
     });
 
@@ -6778,21 +6808,25 @@ const YTIRI_J_SCALE = 0.55;
     });
   }
 
-  function renderLanLobby(){
+  function renderLanLobby(scope='standard'){
+    const wantRavam=scope==='ravam'||scope===true;
     closeLan();
+    lan.ravamOnly=wantRavam;
+    lan.matchType=wantRavam?'ravam':'casual';
     screen='lan-lobby';
     drawCanvas();
 
+    const rv=lan.ravamOnly;
     app.innerHTML=`
-      <div class="card mk-card mk-arena" style="max-width:860px">
-        <div class="emblem"><span>🌐</span></div>
+      <div class="card mk-card mk-arena ${rv?'ravam-online-lobby':''}" style="max-width:860px">
+        <div class="emblem"><span>${rv?'✿':'🌐'}</span></div>
         <h2 class="select-title mk-title">
-          ONLINE <span class="mk-accent">INTERNET</span>
+          ${rv?'R.A.V.A.M <span class="mk-accent">ONLINE P2P</span>':'ONLINE <span class="mk-accent">INTERNET</span>'}
         </h2>
         <p class="select-subtitle">
-          Crie uma sala privada e jogue pela internet. Não precisa de LAN ou Radmin VPN.
+          ${rv?'Duas pessoas pela internet. A sala usa somente Alana Sorelle, Kain e Aria Valfleur.':'Crie uma sala privada e jogue pela internet. Não precisa de LAN ou Radmin VPN.'}
         </p>
-        <div id="v16-net-badge" style="display:inline-flex;margin:0 auto 14px;padding:7px 12px;border:1px solid #2b4968;border-radius:999px;background:#071321;color:#83eaff;font:800 12px Oxanium,system-ui">PRONTO PARA CONECTAR</div>
+        <div id="v16-net-badge" style="display:inline-flex;margin:0 auto 14px;padding:7px 12px;border:1px solid ${rv?'#386b4d':'#2b4968'};border-radius:999px;background:${rv?'#07170f':'#071321'};color:${rv?'#9dffb7':'#83eaff'};font:800 12px Oxanium,system-ui">PRONTO PARA CONECTAR</div>
 
         <div class="lobby-actions">
           <button id="lan-host" class="btn big">CRIAR SALA</button>
@@ -6803,12 +6837,12 @@ const YTIRI_J_SCALE = 0.55;
         <div id="lan-status" style="min-height:24px;margin:12px;font-weight:800"></div>
 
         <div style="padding:14px;border-radius:14px;background:rgba(15,23,42,.7);color:#cbd5e1;font-size:13px">
-          <b>V16 ONLINE ALPHA:</b><br>
-          1. Os dois jogadores precisam estar conectados à internet e usar a mesma V16.<br>
+          <b>${rv?'R.A.V.A.M ONLINE P2P':'V16 ONLINE ALPHA'}:</b><br>
+          1. Os dois jogadores precisam estar conectados à internet e usar a mesma versão.<br>
           2. Jogador 1 clica em <b>Criar sala</b> e envia o código NIAK ao amigo.<br>
           3. Jogador 2 clica em <b>Entrar na sala</b> e cola o código.<br>
-          4. Cada jogador usa os controles de P1 no próprio PC e escolhe seu campeão.<br>
-          5. A partida é casual e o HOST simula a luta. Redes muito restritas podem exigir TURN dedicado.
+          4. Cada jogador usa os controles de P1 no próprio PC e escolhe ${rv?'uma Lenda R.A.V.A.M':'seu campeão'}.<br>
+          5. A partida é P2P e o HOST simula a luta. Redes muito restritas podem exigir TURN dedicado.
         </div>
 
         <button id="lan-back" class="btn" style="margin-top:14px">Voltar</button>
@@ -6816,7 +6850,7 @@ const YTIRI_J_SCALE = 0.55;
 
     document.getElementById('lan-host').onclick=createHost;
     document.getElementById('lan-guest').onclick=showGuest;
-    document.getElementById('lan-back').onclick=renderModes;
+    document.getElementById('lan-back').onclick=()=>rv?window.renderRavamMode?.():renderModes();
   }
 
   function renderLanWaiting(message){
@@ -6835,9 +6869,10 @@ const YTIRI_J_SCALE = 0.55;
       </div>`;
 
     document.getElementById('lan-leave').onclick=()=>{
+      const rv=!!lan.ravamOnly;
       send({type:'leave'});
       closeLan();
-      renderModes();
+      if(rv)window.renderRavamMode?.();else renderModes();
     };
   }
 
@@ -6848,8 +6883,11 @@ const YTIRI_J_SCALE = 0.55;
     const isHost=lan.role==='host';
     const slot=isHost?'P1':'P2';
     const mine=isHost?lan.p1:lan.p2;
-    const roster=CHARACTERS.filter(c=>state.roster.includes(c.id));
-    const name=id=>CHARACTERS.find(c=>c.id===id)?.name||'---';
+    const ravamAll=Array.from(window.RavamStudios?.allCharacters||window.RavamStudios?.characters||[]);
+    const ravamRoster=ravamAll.filter(c=>window.RavamStudios?.isOwned?.(c.id)!==false);
+    const roster=lan.ravamOnly?ravamRoster:CHARACTERS.filter(c=>state.roster.includes(c.id));
+    const pool=lan.ravamOnly?ravamAll:CHARACTERS;
+    const name=id=>pool.find(c=>c.id===id)?.name||'---';
 
     const mineLabel=mine
       ? `${slot} · ${playerName()} · ${name(mine)} ✓`
@@ -6866,7 +6904,7 @@ const YTIRI_J_SCALE = 0.55;
       <div class="card select mk-card mk-arena">
         <div class="emblem"><span>⚔️</span></div>
         <h2 class="select-title mk-title">
-          SELECIONE O <span class="mk-accent">CAMPEÃO</span>
+          ${lan.ravamOnly?'SELECIONE A <span class="mk-accent">LENDA</span>':'SELECIONE O <span class="mk-accent">CAMPEÃO</span>'}
         </h2>
 
         <div class="pick-status">
@@ -6876,7 +6914,7 @@ const YTIRI_J_SCALE = 0.55;
         <div id="v16-net-badge" style="display:inline-flex;margin:4px auto 10px;padding:6px 12px;border:1px solid #2b4968;border-radius:999px;background:#071321;color:#83eaff;font:800 11px Oxanium,system-ui">${connectionLabel()}</div>
 
         <p class="select-subtitle">
-          Escolha seu campeão. Cada jogador usa os controles normais de P1 no próprio computador.
+          ${lan.ravamOnly?'Escolha uma das suas Lendas R.A.V.A.M desbloqueadas, incluindo Leo Vesper quando adquirido. Cada jogador usa os controles normais de P1 no próprio computador.':'Escolha seu campeão. Cada jogador usa os controles normais de P1 no próprio computador.'}
         </p>
 
         <div class="roster mk-roster">
@@ -6885,7 +6923,7 @@ const YTIRI_J_SCALE = 0.55;
                     data-lan-id="${c.id}">
               <div class="mk-portrait"
                    style="background:radial-gradient(circle at 50% 30%,${c.color}cc,${c.color}22 70%,transparent)">
-                <span class="face">${letterFace(c)}</span>
+                ${lan.ravamOnly&&c.portrait?`<img src="${c.portrait}" alt="${c.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 16px 18px #000a)">`:`<span class="face">${letterFace(c)}</span>`}
                 <div class="mk-nameplate"><h3>${c.name}</h3></div>
               </div>
               <div class="mk-body">
@@ -7076,7 +7114,7 @@ const YTIRI_J_SCALE = 0.55;
   window.renderLanLobby=renderLanLobby;
   window.renderLanWaiting=renderLanWaiting;
   window.renderLanCharacterSelect=renderLanCharacterSelect;
-  window.LutadorOnlineV16={version:ONLINE_VERSION,open:renderLanLobby,state:lan,getPing:()=>lan.ping,ensurePeerReady,bindConnection,close:closeLan,send,startIfReady:startLanMatchIfReady,peerOptions:PEER_OPTIONS};
+  window.LutadorOnlineV16={version:ONLINE_VERSION,open:renderLanLobby,openRavam:()=>renderLanLobby('ravam'),state:lan,getPing:()=>lan.ping,ensurePeerReady,bindConnection,close:closeLan,send,startIfReady:startLanMatchIfReady,backToSelect:returnLanToSelection,peerOptions:PEER_OPTIONS};
 })();
 </script>
 
@@ -7307,7 +7345,7 @@ setTimeout(function(){
 </script>
 
 <link rel="stylesheet" href="pro-v16-online-pro.css?v=161">
-<script src="pro-v16-online-pro.js?v=161"></script>
+<script src="pro-v16-online-pro.js?v=180"></script>
 
 </body>
 </html>
@@ -7588,8 +7626,8 @@ setTimeout(function(){
 
 <link rel="stylesheet" href="pro-v8-6-fluid.css?v=v861">
 <script src="pro-v8-6-fluid.js?v=v861"></script>
-<link rel="stylesheet" href="pro-ravam-studios.css?v=ravam11">
-<script src="pro-ravam-studios.js?v=ravam11"></script>
+<link rel="stylesheet" href="pro-ravam-studios.css?v=ravam-180">
+<script src="pro-ravam-studios.js?v=ravam-180"></script>
 <link rel="stylesheet" href="pro-v11-quality.css?v=v110">
 <script src="pro-v11-quality.js?v=v110"></script>
 <link rel="stylesheet" href="pro-v15-suprema.css?v=v150">
@@ -7597,3 +7635,7 @@ setTimeout(function(){
 
 <link rel="stylesheet" href="pro-v16-2-luck.css?v=162">
 <script src="pro-v16-2-luck.js?v=162"></script>
+
+<!-- R.A.V.A.M V17: loaded last on purpose so its animation/shop/online patches win. -->
+<link rel="stylesheet" href="pro-ravam-v17.css?v=180">
+<script src="pro-ravam-v17.js?v=180"></script>

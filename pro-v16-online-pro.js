@@ -169,7 +169,7 @@
     for(const pl of [p1,p2])if(!pl.isHost){const c=tour.conns.get(pl.id);try{c?.send({type:'tour-setup',p1:p1.champion,p2:p2.champion,stage,side:pl.id===p1.id?'p1':'p2',p1Profile:p1,p2Profile:p2})}catch(_){} }
     showOnlineVs(fight,p1,p2)
   }
-  const P2_TO_P1={ArrowLeft:'KeyA',ArrowRight:'KeyD',ArrowUp:'KeyW',ArrowDown:'KeyS',Numpad1:'KeyJ',Numpad2:'KeyK',Numpad3:'KeyL',Numpad5:'KeyI',Numpad6:'KeyO',Numpad4:'KeyG',Numpad0:'KeyQ',Numpad7:'KeyT'};
+  const P2_TO_P1={ArrowLeft:'KeyA',ArrowRight:'KeyD',ArrowUp:'KeyW',ArrowDown:'KeyS',Numpad1:'KeyJ',Numpad2:'KeyK',Numpad3:'KeyL',Numpad5:'KeyI',Numpad6:'KeyO',Numpad4:'KeyG',Numpad0:'KeyQ',Numpad7:'KeyT',Numpad9:'KeyH'};
   function routeTourKey(pid,code,down){if(!tour.current||typeof fight==='undefined'||!fight)return;const side=tour.current.p1.id===pid?'p1':'p2';const out=side==='p1'?(P2_TO_P1[code]||code):code;window.keys=window.keys||{};window.justPressed=window.justPressed||{};if(down&&!window.keys[out])window.justPressed[out]=true;window.keys[out]=!!down}
   function startTourGuestMatch(m,me){tour.guestActive=true;try{startFight(m.p1,'pvp',m.p2,m.stage);fight.v16TournamentGuest=true;fight.p1.v16OnlineSkin=m.p1Profile?.skin;fight.p1.v16PlayerName=m.p1Profile?.name;fight.p1.v16OnlineTitle=m.p1Profile?.title;fight.p2.v16OnlineSkin=m.p2Profile?.skin;fight.p2.v16PlayerName=m.p2Profile?.name;fight.p2.v16OnlineTitle=m.p2Profile?.title}catch(e){console.error('[V16 TOUR guest]',e)};tour.current={side:m.side,p1:m.p1Profile,p2:m.p2Profile};showOnlineVs(fight,m.p1Profile||{},m.p2Profile||{})}
   function receiveTourState(m){if(!tour.guestActive)return;try{fight=m.fight;if(m.bestOfThree)bestOfThree=m.bestOfThree;if(m.sparks)sparks=m.sparks;screen='fight';draw(fight)}catch(_){}}
@@ -196,10 +196,10 @@
     return r
   };
 
-  const GAME_KEYS=new Set(['KeyA','KeyD','KeyW','KeyS','KeyJ','KeyK','KeyL','KeyI','KeyO','KeyG','KeyQ','KeyT']);
+  const GAME_KEYS=new Set(['KeyA','KeyD','KeyW','KeyS','KeyJ','KeyK','KeyL','KeyI','KeyO','KeyG','KeyQ','KeyT','KeyH']);
   document.addEventListener('keydown',e=>{if(tour.mode==='guest'&&tour.guestActive&&GAME_KEYS.has(e.code)){try{tour.hostConn?.send({type:'tour-key',code:guestToP2(e.code),down:true})}catch(_){}e.preventDefault();e.stopImmediatePropagation()}else if(tour.mode==='host'&&tour.current&&!tour.current.p1?.isHost&&!tour.current.p2?.isHost&&GAME_KEYS.has(e.code)){e.preventDefault();e.stopImmediatePropagation()}},true);
   document.addEventListener('keyup',e=>{if(tour.mode==='guest'&&tour.guestActive&&GAME_KEYS.has(e.code)){try{tour.hostConn?.send({type:'tour-key',code:guestToP2(e.code),down:false})}catch(_){}e.preventDefault();e.stopImmediatePropagation()}},true);
-  function guestToP2(code){const map={KeyA:'ArrowLeft',KeyD:'ArrowRight',KeyW:'ArrowUp',KeyS:'ArrowDown',KeyJ:'Numpad1',KeyK:'Numpad2',KeyL:'Numpad3',KeyI:'Numpad5',KeyO:'Numpad6',KeyG:'Numpad4',KeyQ:'Numpad0',KeyT:'Numpad7'};return map[code]||code}
+  function guestToP2(code){const map={KeyA:'ArrowLeft',KeyD:'ArrowRight',KeyW:'ArrowUp',KeyS:'ArrowDown',KeyJ:'Numpad1',KeyK:'Numpad2',KeyL:'Numpad3',KeyI:'Numpad5',KeyO:'Numpad6',KeyG:'Numpad4',KeyQ:'Numpad0',KeyT:'Numpad7',KeyH:'Numpad9'};return map[code]||code}
 
   function cleanModes(){
     ['mode-ranked','mode-online-ranked','mode-chaos','mode-mix','mode-boss','mode-v5-bosses'].forEach(id=>document.getElementById(id)?.remove());
