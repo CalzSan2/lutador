@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamV17?.version)return;
-  const VERSION='18.2.0-tharoth';
+  const VERSION='18.2.1-fastload';
   const SHOP_VERSION=17;
   const ACCESS_COST=Number(window.RavamStudios?.cost)||2500;
   const BASE=window.RavamStudios||{};
@@ -332,7 +332,13 @@
   /* =========================
      ANIMAÇÃO R.A.V.A.M V17
      ========================= */
-  const loadImgs=paths=>paths.map(src=>{const i=new Image();i.decoding='async';i.src=src;return i});
+  const loadImgs=paths=>paths.map(src=>({src,img:null}));
+  function lazySprite(entry){
+    if(!entry)return null;
+    if(!entry.img){const i=new Image();i.decoding='async';i.loading='lazy';i.src=entry.src;entry.img=i;}
+    return entry.img;
+  }
+  const spriteImg=(set,frame)=>lazySprite(set?.imgs?.[frame]);
   const SPRITES={
     priya:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/priya/poses-v17-clean/priya-${i}.png`)),ref:654,guard:5,air:5,punch:3,kick:2,special:3},
     kain:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/kain/poses-v17-clean/kain-${i}.png`)),ref:520,guard:4,air:5,punch:3,kick:5,special:3},
@@ -362,7 +368,7 @@
   }
   function drawFixed(ctx,img,scale,alpha=1){if(!img?.complete||!img.naturalWidth)return false;ctx.globalAlpha*=alpha;const w=img.naturalWidth*scale,h=img.naturalHeight*scale;ctx.drawImage(img,-w/2,-h,w,h);return true}
   function drawR17Fighter(ctx,p){
-    const s=SPRITES[p?.id];if(!s)return false;const pose=poseFor(p,s),img=s.imgs[pose.frame];if(!img?.complete||!img.naturalWidth)return false;
+    const s=SPRITES[p?.id];if(!s)return false;const pose=poseFor(p,s),img=spriteImg(s,pose.frame);if(!img?.complete||!img.naturalWidth)return false;
     const H=226,scale=H/s.ref,floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),time=performance.now()/1000;
     const air=Math.max(0,Number(p.y)||0),sh=Math.max(.32,1-air/420);
     ctx.save();ctx.globalAlpha=.32*sh;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,GROUND_Y+4,41*sh,8*sh,0,0,Math.PI*2);ctx.fill();ctx.restore();
@@ -372,7 +378,7 @@
     const motion=window.ProMotion?.motionFor?.(p);
     const locomotion=motion&&['idle','walk','jump','land'].includes(motion.kind)&&!pose.strike&&!pose.cast&&!pose.guard&&!pose.hurt&&!pose.ko;
     if(locomotion){
-      const base=s.imgs[0];
+      const base=spriteImg(s,0);
       if(base?.complete&&base.naturalWidth){
         const box={sx:0,sy:0,sw:base.naturalWidth,sh:base.naturalHeight};
         try{window.ProMotion.paint(ctx,`r17-${p.id}`,base,box,motion,H);ctx.restore();return true}catch(_){}
@@ -419,7 +425,7 @@
     for(const e of (f.leoFx||[])){const a=clamp(e.life/(e.maxLife||1),0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';ctx.font='900 13px Oxanium,Arial';ctx.fillStyle=e.color||'#7dffc6';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText(e.text,e.x,e.y);ctx.restore()}
   }
   function drawTharothClone(ctx,c){
-    const s=SPRITES.tharoth;if(!s)return;const img=s.imgs[c.struck?3:0];if(!img?.complete||!img.naturalWidth)return;
+    const s=SPRITES.tharoth;if(!s)return;const img=spriteImg(s,c.struck?3:0);if(!img?.complete||!img.naturalWidth)return;
     const H=226,scale=H/s.ref,floor=GROUND_Y,pulse=1+Math.sin(performance.now()/120+(c.pulse||0))*0.035;
     ctx.save();ctx.translate(c.x,floor);ctx.scale(c.dir||1,1);ctx.globalAlpha=(c.life<.4?c.life/.4:.38)+.10*Math.sin(performance.now()/170);ctx.globalCompositeOperation='lighter';ctx.shadowBlur=26;ctx.shadowColor='#ff4f62';ctx.filter='brightness(1.08) saturate(0.6)';ctx.scale(pulse,pulse);drawFixed(ctx,img,scale,.78);ctx.restore();
   }
@@ -515,9 +521,10 @@
     {id:'air',name:'AR',accent:'#d6f1ff'}
   ];
   const KSPR={
-    imgs:Array.from({length:6},(_,i)=>{const im=new Image();im.decoding='async';im.src=`ai-assets/ravam/ktrak/poses-v17-clean/ktrak-${i}.png`;return im}),
+    imgs:Array.from({length:6},(_,i)=>({src:`ai-assets/ravam/ktrak/poses-v17-clean/ktrak-${i}.png`,img:null})),
     ref:590,guard:4,air:5,punch:2,kick:5,special:2
   };
+  function ktrakSprite(frame){const e=KSPR.imgs[frame];if(!e)return null;if(!e.img){const im=new Image();im.decoding='async';im.loading='lazy';im.src=e.src;e.img=im;}return e.img;}
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
   const easeOut=t=>1-Math.pow(1-clamp(t,0,1),3);
   const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
@@ -656,7 +663,7 @@
     const prev=window.RavamStudios||{};
     const chars=ravamCharList();
     const lookup=Object.fromEntries(chars.map(c=>[c.id,c]));
-    const api={...prev,...lookup,version:(prev.version||'18.2.0')+'-ktrak',allCharacters:chars,all:chars,cost:prev.cost||2500,
+    const api={...prev,...lookup,version:(prev.version||'18.2.0')+'-ktrak-fast',allCharacters:chars,all:chars,cost:prev.cost||2500,
       isOwned:rIsOwned,unlockedIds:()=>{ensureRavamEconomy(); return (state?.ravamRoster||[]).filter(id=>chars.some(c=>c.id===id));},
       displayName:rDisplay,
       render:()=>window.renderRavamMode?.(),
@@ -814,7 +821,7 @@
   }
   function drawFixed(ctx,img,scale,alpha=1){ if(!img?.complete||!img.naturalWidth) return false; ctx.globalAlpha*=alpha; const w=img.naturalWidth*scale,h=img.naturalHeight*scale; ctx.drawImage(img,-w/2,-h,w,h); return true; }
   function drawKtrak(ctx,p){
-    const pose=ktrakPose(p), img=KSPR.imgs[pose.frame]; if(!img?.complete||!img.naturalWidth) return false;
+    const pose=ktrakPose(p), img=ktrakSprite(pose.frame); if(!img?.complete||!img.naturalWidth) return false;
     const H=230, scale=H/KSPR.ref, floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0), time=performance.now()/1000;
     const air=Math.max(0,Number(p.y)||0), sh=Math.max(.32,1-air/420), avatar=(p.ktrakAvatarT||0)>0;
     ctx.save(); ctx.globalAlpha=.32*sh; ctx.fillStyle='#000'; ctx.beginPath(); ctx.ellipse(p.x,GROUND_Y+4,41*sh,8*sh,0,0,Math.PI*2); ctx.fill(); ctx.restore();

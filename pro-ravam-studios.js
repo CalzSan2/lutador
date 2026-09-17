@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamStudios?.version)return;
-  const VERSION='1.8.4-ravam-nature';
+  const VERSION='1.8.2-fastload';
   const ACCESS_COST=2500;
   const PRIYA=Object.freeze({
     id:'priya',name:'Alana Sorelle',color:'#d85b42',hp:1940,dmg:32,speed:82,price:0,
@@ -21,7 +21,7 @@
   const RAVAM_IDS=Object.freeze(['priya','kain','aria']);
   const ABILITY=Object.freeze({flag:'RAVAM',role:'Atiradora Tática',tag:'PRECISÃO',desc:'J dispara tiros rápidos com o rifle. O executa o Chute Tático. L ativa o super TRÍADE DEMOLIDORA e lança 3 bombas guiadas exatamente sobre a posição do rival.'});
   const KAIN_ABILITY=Object.freeze({flag:'RAVAM',role:'Mímico do Caos',tag:'PODER ATIVO',desc:'J usa o poder selecionado. H no P1 / 9 no P2 alterna entre 10 poderes: Voo, Gelo, Cura, Choque, Repulsão, Troca de Controles, Fogo, Teleporte, Roubo de Vida e Gravidade. L ativa ESPELHO ABISSAL: usa um dos poderes e devolve o super do rival contra ele.'});
-  const ARIA_ABILITY=Object.freeze({flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J alterna entre RAJADA DE FOLHAS e RAIZ SELVAGEM. São ataques leves e fluidos de natureza, sem efeitos pesados. L invoca PRISÃO VERDANTE: um cipó nasce sob o rival, causa impacto e o mantém preso por um curto período.'});
+  const ARIA_ABILITY=Object.freeze({flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J alterna entre 2 poderes da natureza: ESPOROS VALFLEUR e LÂMINA DE CIPÓ. L ativa PRISÃO VERDANTE: um cipó nasce sob o rival, causa impacto e o mantém preso por um curto período.'});
   const PORTRAIT='ai-assets/characters/priya.png';
   const KAIN_PORTRAIT='ai-assets/characters/kain.png';
   const ARIA_PORTRAIT='ai-assets/characters/aria.png';
@@ -31,9 +31,14 @@
   const POSE_PATHS=Array.from({length:6},(_,i)=>`ai-assets/ravam/poses/priya-${i}.png`);
   const KAIN_POSE_PATHS=Array.from({length:6},(_,i)=>`ai-assets/ravam/kain/poses/kain-${i}.png`);
   const ARIA_POSE_PATHS=Array.from({length:6},(_,i)=>`ai-assets/ravam/aria/poses/aria-${i}.png`);
-  const poseImages=POSE_PATHS.map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});
-  const kainPoseImages=KAIN_POSE_PATHS.map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});
-  const ariaPoseImages=ARIA_POSE_PATHS.map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});
+  const poseImages=POSE_PATHS.map(src=>({src,img:null}));
+  const kainPoseImages=KAIN_POSE_PATHS.map(src=>({src,img:null}));
+  const ariaPoseImages=ARIA_POSE_PATHS.map(src=>({src,img:null}));
+  function poseImage(list,index){
+    const entry=list[index]; if(!entry)return null;
+    if(!entry.img){const im=new Image();im.decoding='async';im.loading='lazy';im.src=entry.src;entry.img=im;}
+    return entry.img;
+  }
   const KAIN_POWER_LABELS=Object.freeze({flight:'VOO',ice:'GELO',heal:'RECUPERAR VIDA',shock:'CHOQUE',repel:'REPELIR ATAQUE',swap:'TROCAR CONTROLES',fire:'FOGO',teleport:'TELEPORTE',drain:'ROUBO DE VIDA',gravity:'GRAVIDADE'});
   const KAIN_POWER_POOL=Object.freeze(Object.keys(KAIN_POWER_LABELS));
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
@@ -75,7 +80,7 @@
       if(typeof MOVES!=='undefined'){
         if(!MOVES.priya)MOVES.priya=[['J','Tiro de precisão com rifle'],['O','Chute Tático'],['L','TRÍADE DEMOLIDORA · 3 bombas guiadas no rival']];
         if(!MOVES.kain)MOVES.kain=[['J','Usar poder selecionado'],['H / P2 9','Trocar entre 10 poderes'],['I','Soco Sombrio'],['O','Chute Sombrio'],['L','ESPELHO ABISSAL · poder + super do rival']];
-        if(!MOVES.aria)MOVES.aria=[['J','Alterna: Rajada de Folhas / Raiz Selvagem'],['I','Soco'],['O','Chute'],['L','PRISÃO VERDANTE · cipó prende o rival']];
+        if(!MOVES.aria)MOVES.aria=[['J','Alterna: Esporos / Lâmina de Cipó'],['I','Soco'],['O','Chute'],['L','PRISÃO VERDANTE · cipó prende o rival']];
       }
       return fn();
     }finally{
@@ -94,7 +99,7 @@
           if(typeof fight!=='undefined'&&fight){
             fight.ravamStudios=true;fight.priyaBullets=[];fight.priyaBombs=[];
             fight.kainIceShots=[];fight.kainFireShots=[];fight.kainBolts=[];fight.kainMirrorCasts=[];fight.kainFx=[];
-            fight.ariaFlowers=[];fight.ariaGrass=[];fight.ariaNatureShots=[];fight.ariaVines=[];fight.ariaFx=[];fight.priyaExplosions=[];fight.ravamVersion=VERSION;
+            fight.ariaFlowers=[];fight.ariaGrass=[];fight.ariaVines=[];fight.ariaFx=[];fight.priyaExplosions=[];fight.ravamVersion=VERSION;
             for(const q of [fight.p1,fight.p2]){
               if(q?.id==='kain')q.kainFlightT=0,q.kainRepelT=0,q.kainControlSwapT=0,q.kainPowerFxT=0,q.kainSuperT=0,q.kainLastRandomPower='',q.kainPowerIndex=0,q.kainSelectedPower=KAIN_POWER_POOL[0],q.kainPowerSwitchCd=0;
               if(q?.id==='aria')q.ariaCastT=0,q.ariaSuperT=0,q.ariaAttackAlt=0;
@@ -115,7 +120,7 @@
         <div class="ravam-copy"><small>UNIVERSO PREMIUM</small><h2>R.A.V.A.M <span>STUDIOS</span></h2><p>Um elenco separado dos campeões tradicionais, com identidade e progressão próprias. O acesso é permanente depois da compra.</p><div class="ravam-price">🟪 ${fmt(ACCESS_COST)} VANDAIS</div><div class="ravam-wallet-line">SALDO ATUAL · 🟪 ${fmt(state.vandais||0)} VANDAIS</div></div>
         <img src="${ARIA_PORTRAIT}" alt="Aria Valfleur">
       </section>
-      <section class="ravam-unlock-card"><div><small>3 LENDAS INCLUÍDAS</small><h3>ALANA SORELLE + KAIN + ARIA VALFLEUR</h3><p>Alana domina a precisão, Kain controla poderes do caos e Aria usa flores venenosas e cipós para controlar a arena.</p></div><button id="ravam-buy-access" class="btn big" ${can?'':'disabled'}>${can?'🟪 ADQUIRIR MODO R.A.V.A.M':'VANDAIS INSUFICIENTES'}</button></section>
+      <section class="ravam-unlock-card"><div><small>3 LENDAS INCLUÍDAS</small><h3>ALANA SORELLE + KAIN + ARIA VALFLEUR</h3><p>Alana domina a precisão, Kain controla poderes do caos e Aria alterna entre esporos venenosos e lâminas de cipó para controlar a arena.</p></div><button id="ravam-buy-access" class="btn big" ${can?'':'disabled'}>${can?'🟪 ADQUIRIR MODO R.A.V.A.M':'VANDAIS INSUFICIENTES'}</button></section>
       <button id="ravam-back" class="btn">← VOLTAR AOS MODOS</button>
     </div>`;
     const buy=document.getElementById('ravam-buy-access');
@@ -161,7 +166,7 @@
     const moves=isKain
       ? '<span><kbd>J</kbd> USAR PODER</span><span><kbd>H</kbd> TROCAR PODER</span><span><kbd>I</kbd> SOCO</span><span><kbd>O</kbd> CHUTE</span><span><kbd>L</kbd> ESPELHO</span>'
       : isAria
-        ? '<span><kbd>J</kbd> 2 FLORES</span><span><kbd>I</kbd> SOCO</span><span><kbd>O</kbd> CHUTE</span><span><kbd>L</kbd> CIPÓ</span>'
+        ? '<span><kbd>J</kbd> ESPOROS / CIPÓ</span><span><kbd>I</kbd> SOCO</span><span><kbd>O</kbd> CHUTE</span><span><kbd>L</kbd> PRISÃO</span>'
         : '<span><kbd>J</kbd> RIFLE</span><span><kbd>I</kbd> SOCO</span><span><kbd>O</kbd> CHUTE</span><span><kbd>L</kbd> 3 BOMBAS</span>';
     const cls=isKain?'kain':isAria?'aria':'alana';
     const tag=isKain?'CAOS':isAria?'NATUREZA':'PRECISÃO';
@@ -178,7 +183,7 @@
         <div class="ravam-brand-lockup"><small>R.A.V.A.M STUDIOS · ACESSO ATIVO</small><h2>ESCOLHA O <span>MODO</span></h2><p>Primeiro defina a batalha. A seleção das Lendas vem na tela seguinte.</p></div>
         <div class="ravam-head-wallet"><span>CARTEIRA R.A.V.A.M</span><b>🟪 ${fmt(state.vandais||0)}</b><small>VANDAIS</small></div>
       </section>
-      <section class="ravam-mode-showcase"><div><small>ELENCO ATUAL · 3 LENDAS</small><h3>ALANA <i>·</i> KAIN <i>·</i> ARIA</h3><p>Precisão, caos e natureza. Escolha o formato da luta e depois monte o confronto.</p></div><div class="ravam-dual-art ravam-triple-art"><img src="${PORTRAIT}" alt="Alana Sorelle"><img src="${KAIN_PORTRAIT}" alt="Kain"><img src="${ARIA_PORTRAIT}" alt="Aria Valfleur"></div></section>
+      <section class="ravam-mode-showcase"><div><small>ELENCO ATUAL · 3 LENDAS</small><h3>ALANA <i>·</i> KAIN <i>·</i> ARIA</h3><p>Precisão, caos e natureza viva. Escolha o formato da luta e depois monte o confronto.</p></div><div class="ravam-dual-art ravam-triple-art"><img src="${PORTRAIT}" alt="Alana Sorelle"><img src="${KAIN_PORTRAIT}" alt="Kain"><img src="${ARIA_PORTRAIT}" alt="Aria Valfleur"></div></section>
       <div class="ravam-section-title battle"><span>01</span><div><small>PASSO UM</small><h3>ESCOLHA COMO LUTAR</h3></div></div>
       <section class="ravam-battle-grid">
         <button id="ravam-cpu" class="ravam-battle-card cpu"><span class="ravam-battle-icon">◈</span><small>COMBATE SOLO</small><h3>1P <b>× CPU</b></h3><p>Escolha sua Lenda na próxima tela. A CPU joga com a outra.</p><em>ESCOLHER LUTADOR →</em></button>
@@ -266,7 +271,7 @@
     const note=isKain
       ? 'Idle · caminhada em 8 tempos · soco com preparação/impacto/recuperação · chute com arco de impacto · guarda · salto. Todas as poses usam a mesma escala corporal.'
       : isAria
-        ? 'Idle · dois passos de caminhada · conjuração de natureza · guarda · salto. O J alterna Rajada de Folhas e Raiz Selvagem com efeitos leves para manter a luta fluida.'
+        ? 'Idle · dois passos de caminhada · conjuração dos poderes da natureza · guarda · salto. Os quadros preservam a escala original do sprite para Aria não mudar de tamanho durante a luta.'
         : 'Idle · caminhada corrigida · pulo completo · preparação · tiro · guarda · chute tático. A caminhada usa passos por distância e o pulo possui impulso, subida, ápice, queda e aterrissagem.';
     d.innerHTML=`<header><div><small>${displayName(id)}</small><h2>ANIMAÇÕES DE COMBATE</h2></div><button>×</button></header>${preview}<p>${note}</p>`;
     d.querySelector('header button').onclick=()=>d.close();d.showModal();
@@ -293,9 +298,8 @@
     p.alanaShotCounter=((Number(p.alanaShotCounter)||0)%3)+1;
     const superShot=p.alanaShotCounter===3;
     const y=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82)-18;
-    const shotSpeed=superShot?1040:1160;
-    f.priyaBullets.push({x:p.x+p.facing*56,y,prevX:p.x+p.facing*56,vx:p.facing*shotSpeed,owner:p,life:1.55,dead:false,superShot,dmg:p.dmg*(superShot?2.05:1.22),age:0});
-    p.throwCd=p.human?(superShot?.50:.34):.48;setState(p,'throw');
+    f.priyaBullets.push({x:p.x+p.facing*56,y,vx:p.facing*(superShot?1320:1180),owner:p,life:1.35,dead:false,superShot,dmg:p.dmg*(superShot?2.05:1.22)});
+    p.throwCd=p.human?(superShot?.42:.34):.48;setState(p,'throw');
     try{spark(p.x+p.facing*58,y,superShot?'#fff0a6':'#ffd49b',superShot?22:13)}catch(_){}
     if(superShot)try{ariaFx(p,'SUPER TIRO · 3º DISPARO','#ffd86a',.72)}catch(_){}
     try{SFX?.play?.('attack_light',superShot?.9:.7)}catch(_){}
@@ -311,12 +315,12 @@
     for(let i=0;i<3;i++){
       f.priyaBombs.push({
         x:baseX,y:baseY,startX:baseX,startY:baseY,owner:p,target,offset:offsets[i],
-        elapsed:-i*.14,duration:1.12+i*.12,arc:250+30*i,life:3.1,dead:false,exploded:false,
+        elapsed:-i*.11,duration:.72+i*.06,arc:230+28*i,life:2.4,dead:false,exploded:false,
         r:12,dmg:p.dmg*1.82,serial:i
       });
     }
-    p.specialCd=5.35;setState(p,'special');
-    p.ravamBombCastT=.78;
+    p.specialCd=5.1;setState(p,'special');
+    p.ravamBombCastT=.62;
     try{spark(baseX,baseY,'#ff6b45',25)}catch(_){}
   }
 
@@ -326,45 +330,47 @@
     if(!Array.isArray(f.priyaExplosions))f.priyaExplosions=[];
     f.ariaFx.push({x:p.x,y:(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-80)-58,text,color,life,maxLife:life});
   }
-  // ARIA V18.4 — dois poderes de natureza que se alternam no J.
-  // Cada uso cria somente UM objeto de ataque para manter a luta fluida.
-  function ariaNatureAttack(p){
+  function ariaSporeBurst(p){
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;
-    if(!Array.isArray(f.ariaNatureShots))f.ariaNatureShots=[];
-    const dir=p.facing||1;
-    const body=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82);
-    const alt=Number(p.ariaAttackAlt)||0;
-    p.ariaAttackAlt=(alt+1)%2;
-
-    if(alt===0){
-      // RAJADA DE FOLHAS: rápida, reta e sem perseguição.
-      f.ariaNatureShots.push({
-        kind:'leaves',owner:p,x:p.x+dir*50,y:body-8,vx:dir*900,vy:0,
-        life:1.15,maxLife:1.15,dead:false,dmg:p.dmg*.92,dir,age:0
+    if(!Array.isArray(f.ariaFlowers))f.ariaFlowers=[];
+    const y=(typeof bodyY==='function'?bodyY(p):GROUND_Y-p.y-82)-12;
+    for(let i=0;i<2;i++){
+      f.ariaFlowers.push({
+        kind:'spore',x:p.x+p.facing*(46+i*10),y:y+(i?7:-6),vx:p.facing*(760+i*70),vy:(i?-18:14),
+        owner:p,life:1.3,dead:false,dmg:p.dmg*.60,poison:1.15,spin:(i?1:-1)*4.4,wobble:Math.random()*Math.PI*2
       });
-      p.throwCd=p.human?.42:.56;p.ariaCastT=.18;setState(p,'throw');
-      ariaFx(p,'RAJADA DE FOLHAS','#9dffae',.58);
-      try{spark(p.x+dir*46,body-8,'#8cff9d',8);SFX?.play?.('attack_light',.62)}catch(_){}
-    }else{
-      // RAIZ SELVAGEM: onda baixa de raízes/espinhos que corre pelo chão.
-      f.ariaNatureShots.push({
-        kind:'root',owner:p,x:p.x+dir*42,y:GROUND_Y-8,vx:dir*610,vy:0,
-        life:1.35,maxLife:1.35,dead:false,dmg:p.dmg*1.08,dir,age:0
-      });
-      p.throwCd=p.human?.50:.64;p.ariaCastT=.22;setState(p,'throw');
-      ariaFx(p,'RAIZ SELVAGEM','#66e884',.62);
-      try{spark(p.x+dir*38,GROUND_Y-6,'#62e879',9);SFX?.play?.('attack_heavy',.52)}catch(_){}
     }
+    p.throwCd=p.human?.48:.62;p.ariaCastT=.20;setState(p,'throw');
+    ariaFx(p,'ESPOROS VALFLEUR','#98ffb6',.74);
+    try{spark(p.x+p.facing*48,y,'#8cffad',12)}catch(_){ }
+    try{SFX?.play?.('attack_light',.68)}catch(_){ }
   }
-  function ariaFlowerShot(p){ariaNatureAttack(p)}
+  function ariaThornLance(p){
+    const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;
+    if(!Array.isArray(f.ariaGrass))f.ariaGrass=[];
+    const target=p===f.p1?f.p2:f.p1;
+    const dir=target&&target.x!==p.x?(target.x>p.x?1:-1):(p.facing||1);
+    const x=p.x+dir*36;
+    f.ariaGrass.push({kind:'lance',owner:p,x,y:GROUND_Y-20,vx:dir*690,life:.95,maxLife:.95,age:0,dead:false,dmg:p.dmg*.92,poison:.55,hit:false,spin:dir*.18});
+    p.throwCd=p.human?.52:.68;p.ariaCastT=.20;setState(p,'throw');
+    ariaFx(p,'LÂMINA DE CIPÓ','#7ef18f',.76);
+    try{spark(x,GROUND_Y-8,'#62e879',14)}catch(_){ }
+    try{SFX?.play?.('attack_light',.70)}catch(_){ }
+  }
+  function ariaFlowerShot(p){
+    const mode=((Number(p.ariaAttackAlt)||0)%2);
+    p.ariaAttackAlt=(mode+1)%2;
+    if(mode===0){ariaSporeBurst(p);return;}
+    ariaThornLance(p);
+  }
   function ariaVineSuper(p){
     const f=typeof fight!=='undefined'?fight:null;if(!f||!p||p.state==='ko')return;
     const target=p===f.p1?f.p2:f.p1;if(!target||target.state==='ko')return;
     if(!Array.isArray(f.ariaVines))f.ariaVines=[];
-    f.ariaVines.push({owner:p,target,delay:.34,hold:2.05,life:2.65,active:false,dead:false,x:target.x,age:0});
+    f.ariaVines.push({owner:p,target,delay:.34,hold:2.05,life:2.65,active:false,dead:false,x:target.x});
     p.specialCd=6.2;p.ariaSuperT=.82;setState(p,'special');
     ariaFx(p,'PRISÃO VERDANTE','#9dff9f',1.0);
-    try{spark(target.x,GROUND_Y-4,'#65e88b',24)}catch(_){}
+    try{spark(target.x,GROUND_Y-4,'#65e88b',24)}catch(_){ }
   }
 
   function ravamOpponent(p){
@@ -570,7 +576,6 @@
     if(!Array.isArray(f.kainFx))f.kainFx=[];
     if(!Array.isArray(f.ariaFlowers))f.ariaFlowers=[];
     if(!Array.isArray(f.ariaGrass))f.ariaGrass=[];
-    if(!Array.isArray(f.ariaNatureShots))f.ariaNatureShots=[];
     if(!Array.isArray(f.ariaVines))f.ariaVines=[];
     if(!Array.isArray(f.ariaFx))f.ariaFx=[];
     if(!Array.isArray(f.priyaExplosions))f.priyaExplosions=[];
@@ -666,67 +671,41 @@
     }
 
     for(const z of f.ariaFlowers){
-      if(z.dead)continue;
-      z.prevX=Number.isFinite(z.x)?z.x:z.prevX;z.age=(z.age||0)+dt;z.x+=z.vx*dt;z.life-=dt;
-      z.y=(z.baseY??z.y)+Math.sin((z.age||0)*13+(z.lane||1)*1.3)*7;
+      if(z.dead)continue;z.x+=z.vx*dt;z.y+=Math.sin((z.age=(z.age||0)+dt)*9+(z.wobble||0))*18*dt+(z.vy||0)*dt*.18;z.life-=dt;
       const victim=z.owner===f.p1?f.p2:f.p1;
-      if(victim&&victim.state!=='ko'&&Math.abs(z.x-victim.x)<46&&hitboxY(victim,z.y,17)){
-        damageTarget(victim,z.dmg,z,z.vx>0?1:-1,'aria-flower');
+      if(victim&&victim.state!=='ko'&&Math.abs(z.x-victim.x)<46&&hitboxY(victim,z.y,18)){
+        damageTarget(victim,z.dmg,z,z.vx>0?1:-1,'aria-spore');
         victim.ariaPoisonT=Math.max(victim.ariaPoisonT||0,z.poison||1);
-        victim.ariaPoisonOwner=z.owner;victim.ariaPoisonDamage=Math.max(victim.ariaPoisonDamage||0,(z.owner?.dmg||31)*.115);
-        ariaFx(victim,'VENENO · 1s','#7dff9f',.72);z.dead=true;
-        try{spark(z.x,z.y,'#7dff9f',18)}catch(_){}
+        victim.ariaPoisonOwner=z.owner;victim.ariaPoisonDamage=Math.max(victim.ariaPoisonDamage||0,(z.owner?.dmg||31)*.11);
+        ariaFx(victim,'ESPOROS','#92ffb0',.72);z.dead=true;
+        try{spark(z.x,z.y,'#7dff9f',18)}catch(_){ }
       }
       if(z.life<=0||z.x<-90||z.x>W+90)z.dead=true;
     }
     f.ariaFlowers=f.ariaFlowers.filter(z=>!z.dead);
 
     for(const g of f.ariaGrass){
-      if(g.dead)continue;g.life-=dt;g.age=(g.age||0)+dt;g.tick=(g.tick||0)+dt;
-      const victim=g.owner===f.p1?f.p2:f.p1;
-      const grow=clamp(g.age/.28,0,1),end=g.x1+(g.x2-g.x1)*(grow*grow*(3-2*grow));
-      g.currentEnd=end;
-      if(victim&&victim.state!=='ko'){
-        const lo=Math.min(g.x1,end)-22,hi=Math.max(g.x1,end)+22;
-        if(victim.x>=lo&&victim.x<=hi&&(victim.y||0)<70){
-          while(g.tick>=.25&&victim.state!=='ko'){
-            g.tick-=.25;const dot=2.5;victim.hp-=dot;victim.hitFlash=Math.max(victim.hitFlash||0,.018);
-            if(victim.hp<=0){victim.hp=0;victim.state='ko';victim.stateT=0;try{endRound(f,g.owner&&g.owner.state!=='ko'?g.owner:(victim===f.p1?f.p2:f.p1),victim)}catch(_){}break;}
-          }
-        }else g.tick=Math.min(g.tick,.25);
-      }
-      if(g.life<=0)g.dead=true;
+      if(g.dead)continue;g.life-=dt;g.age=(g.age||0)+dt;
+      if(g.kind==='lance'){
+        g.x+=g.vx*dt;g.y=GROUND_Y-22+Math.sin(g.age*20)*2;
+        const victim=g.owner===f.p1?f.p2:f.p1;
+        if(!g.hit&&victim&&victim.state!=='ko'&&Math.abs(g.x-victim.x)<52&&hitboxY(victim,g.y,22)){
+          g.hit=true;
+          damageTarget(victim,g.dmg,g.owner,g.vx>0?1:-1,'aria-thorn');
+          victim.ariaPoisonT=Math.max(victim.ariaPoisonT||0,g.poison||.55);
+          victim.ariaPoisonOwner=g.owner;victim.ariaPoisonDamage=Math.max(victim.ariaPoisonDamage||0,(g.owner?.dmg||31)*.08);
+          victim.vx+=(g.vx>0?1:-1)*110;
+          ariaFx(victim,'CIPÓ CORTANTE','#8fff9f',.75);
+          try{spark(g.x,g.y,'#72ef80',20)}catch(_){ }
+          g.dead=true;
+        }
+        if(g.life<=0||g.x<-100||g.x>W+100)g.dead=true;
+      }else if(g.life<=0)g.dead=true;
     }
     f.ariaGrass=f.ariaGrass.filter(g=>!g.dead);
 
-    for(const n of f.ariaNatureShots){
-      if(n.dead)continue;
-      n.age=(n.age||0)+dt;n.life-=dt;n.x+=(n.vx||0)*dt;n.y+=(n.vy||0)*dt;
-      const victim=n.owner===f.p1?f.p2:f.p1;
-      if(victim&&victim.state!=='ko'){
-        const nearX=Math.abs(n.x-victim.x)<(n.kind==='root'?54:48);
-        const nearY=n.kind==='root'?((victim.y||0)<72):hitboxY(victim,n.y,20);
-        if(nearX&&nearY){
-          const hitDir=n.dir||Math.sign(n.vx||1)||1;
-          damageTarget(victim,n.dmg,n,hitDir,n.kind==='root'?'aria-root':'aria-leaves');
-          if(n.kind==='root'){
-            victim.freezeT=Math.max(victim.freezeT||0,.16);
-            victim.vx*=.45;
-            ariaFx(victim,'ESPINHOS DE RAIZ','#73f090',.48);
-            try{spark(n.x,GROUND_Y-10,'#78f596',16)}catch(_){}
-          }else{
-            victim.vx+=hitDir*62;
-            try{spark(n.x,n.y,'#b4ffc0',12)}catch(_){}
-          }
-          n.dead=true;
-        }
-      }
-      if(n.life<=0||n.x<-100||n.x>W+100)n.dead=true;
-    }
-    f.ariaNatureShots=f.ariaNatureShots.filter(n=>!n.dead);
-
     for(const v of f.ariaVines){
-      if(v.dead)continue;v.life-=dt;v.delay-=dt;v.age=(v.age||0)+dt;
+      if(v.dead)continue;v.life-=dt;v.delay-=dt;
       if(v.target&&v.target.state!=='ko')v.x=v.target.x;
       if(!v.active&&v.delay<=0){
         v.active=true;
@@ -747,7 +726,7 @@
     f.ariaFx=f.ariaFx.filter(e=>e.life>0);
 
     for(const b of f.priyaBullets){
-      if(b.dead)continue;b.prevX=b.x;b.age=(b.age||0)+dt;b.x+=b.vx*dt;b.life-=dt;
+      if(b.dead)continue;b.x+=b.vx*dt;b.life-=dt;
       const enemy=b.owner===f.p1?f.p2:f.p1;
       if(enemy&&enemy.state!=='ko'&&Math.abs(b.x-enemy.x)<44&&hitboxY(enemy,b.y,b.superShot?22:14)){
         damageTarget(enemy,b.dmg,b,b.vx>0?1:-1,b.superShot?'rifle-super':'rifle');b.dead=true;
@@ -851,13 +830,7 @@
   function drawRavamFx(ctx,f){
     if(!f)return;
     for(const b of (f.priyaBullets||[])){
-      const dir=Math.sign(b.vx||1),trail=b.superShot?82:48;
-      ctx.save();ctx.globalCompositeOperation='lighter';
-      const grad=ctx.createLinearGradient(b.x-dir*trail,b.y,b.x,b.y);grad.addColorStop(0,'rgba(255,150,90,0)');grad.addColorStop(1,b.superShot?'#fff0a6':'#ffd59b');
-      ctx.strokeStyle=grad;ctx.lineWidth=b.superShot?7:3.5;ctx.shadowBlur=b.superShot?30:14;ctx.shadowColor=b.superShot?'#ffc83d':'#ff9e62';ctx.lineCap='round';
-      ctx.beginPath();ctx.moveTo(b.x-dir*trail,b.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-      if(b.superShot){ctx.globalAlpha=.55;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x-dir*58,b.y-10);ctx.lineTo(b.x-dir*8,b.y-2);ctx.moveTo(b.x-dir*58,b.y+10);ctx.lineTo(b.x-dir*8,b.y+2);ctx.stroke();ctx.globalAlpha=1;}
-      ctx.fillStyle='#fff7dd';ctx.beginPath();ctx.arc(b.x,b.y,b.superShot?7:3.4,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=b.superShot?'#ffe66f':'#ffd59b';ctx.lineWidth=b.superShot?6:3;ctx.shadowBlur=b.superShot?28:16;ctx.shadowColor=b.superShot?'#ffc83d':'#ff9e62';ctx.beginPath();ctx.moveTo(b.x-b.vx*(b.superShot?.028:.018),b.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.fillStyle='#fff7dd';ctx.beginPath();ctx.arc(b.x,b.y,b.superShot?6:3.2,0,Math.PI*2);ctx.fill();ctx.restore();
     }
     for(const x of (f.priyaExplosions||[])){const t=1-clamp(x.life/(x.maxLife||1),0,1);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-t;ctx.strokeStyle='#ffe56d';ctx.shadowBlur=28;ctx.shadowColor='#ff9f43';ctx.lineWidth=6*(1-t)+1;ctx.beginPath();ctx.arc(x.x,x.y,18+70*t,0,Math.PI*2);ctx.stroke();ctx.restore();}
     for(const b of (f.priyaBombs||[])){
@@ -868,45 +841,29 @@
       ctx.save();ctx.translate(b.x,b.y);ctx.rotate((performance.now()/110)+(b.x*.01));ctx.fillStyle='#171b22';ctx.strokeStyle='#ff664a';ctx.lineWidth=3;ctx.shadowBlur=13;ctx.shadowColor='#ff3f2f';ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#ff6b45';ctx.fillRect(-10,-2,20,4);ctx.strokeStyle='#c9d1de';ctx.lineWidth=2;ctx.beginPath();ctx.arc(7,-11,6,0,Math.PI*1.4);ctx.stroke();ctx.restore();
     }
     for(const z of (f.ariaFlowers||[])){
-      const dir=Math.sign(z.vx||1);ctx.save();ctx.globalCompositeOperation='lighter';
-      const tg=ctx.createLinearGradient(z.x-dir*54,z.y,z.x,z.y);tg.addColorStop(0,'rgba(92,255,133,0)');tg.addColorStop(1,'rgba(132,255,169,.68)');ctx.strokeStyle=tg;ctx.lineWidth=4;ctx.shadowBlur=12;ctx.shadowColor='#70ff9a';ctx.beginPath();ctx.moveTo(z.x-dir*54,z.y);ctx.quadraticCurveTo(z.x-dir*27,z.y-(z.lane||1)*8,z.x,z.y);ctx.stroke();
-      ctx.translate(z.x,z.y);ctx.rotate((z.age||0)*(z.spin||1)*2.6);ctx.shadowBlur=15;ctx.fillStyle='#d9ffe2';
-      for(let i=0;i<5;i++){ctx.rotate(Math.PI*2/5);ctx.beginPath();ctx.ellipse(0,-7,3.5,7,0,0,Math.PI*2);ctx.fill();}
-      ctx.fillStyle='#f4d968';ctx.beginPath();ctx.arc(0,0,3.5,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.save();ctx.translate(z.x,z.y);ctx.rotate(performance.now()/210*(z.spin||1));ctx.globalCompositeOperation='lighter';
+      ctx.shadowBlur=16;ctx.shadowColor='#70ff9a';ctx.fillStyle='#d9ffe2';
+      for(let i=0;i<4;i++){ctx.rotate(Math.PI*2/4);ctx.beginPath();ctx.ellipse(0,-7,3.5,7,0,0,Math.PI*2);ctx.fill();}
+      ctx.fillStyle='#7af59a';ctx.beginPath();ctx.arc(0,0,4.2,0,Math.PI*2);ctx.fill();ctx.restore();
     }
     for(const g of (f.ariaGrass||[])){
-      const end=Number.isFinite(g.currentEnd)?g.currentEnd:g.x1,lo=Math.min(g.x1,end),hi=Math.max(g.x1,end),len=Math.max(1,hi-lo),fade=clamp(g.life/(g.maxLife||1),0,1);
-      ctx.save();ctx.globalAlpha=Math.min(1,fade*1.35);ctx.strokeStyle='#51d96f';ctx.fillStyle='#79f38f';ctx.shadowBlur=10;ctx.shadowColor='#62ef80';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(lo,GROUND_Y-3);ctx.lineTo(hi,GROUND_Y-3);ctx.stroke();
-      const n=Math.min(12,Math.max(3,Math.floor(len/34)));for(let i=0;i<=n;i++){const x=lo+len*i/n,h=10+((i*7)%10);ctx.beginPath();ctx.moveTo(x-5,GROUND_Y-3);ctx.quadraticCurveTo(x-1,GROUND_Y-3-h*.62,x,GROUND_Y-3-h);ctx.quadraticCurveTo(x+2,GROUND_Y-3-h*.55,x+5,GROUND_Y-3);ctx.closePath();ctx.fill();}
+      if(g.kind!=='lance')continue;
+      const fade=clamp(g.life/(g.maxLife||1),0,1),dir=Math.sign(g.vx||1)||1;
+      ctx.save();ctx.translate(g.x,g.y);ctx.scale(dir,1);ctx.globalAlpha=Math.min(1,fade*1.4);ctx.globalCompositeOperation='lighter';
+      ctx.strokeStyle='#4fe073';ctx.fillStyle='#7bff98';ctx.shadowBlur=14;ctx.shadowColor='#62ef80';ctx.lineWidth=4;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(-26,4);ctx.quadraticCurveTo(-6,-10,26,0);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(10,-7);ctx.lineTo(32,0);ctx.lineTo(10,7);ctx.closePath();ctx.fill();
+      for(let i=0;i<3;i++){const ox=-18+i*11;ctx.beginPath();ctx.ellipse(ox,-6-(i%2)*3,7,3,-.55,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(ox,6+(i%2)*2,7,3,.55,0,Math.PI*2);ctx.fill();}
       ctx.restore();
-    }
-    for(const n of (f.ariaNatureShots||[])){
-      if(n.kind==='leaves'){
-        const dir=n.dir||1,t=(n.age||0);
-        ctx.save();ctx.translate(n.x,n.y);ctx.scale(dir,1);ctx.globalCompositeOperation='lighter';
-        ctx.globalAlpha=.92;ctx.strokeStyle='#8cff9f';ctx.shadowColor='#72f28f';ctx.shadowBlur=14;ctx.lineWidth=3.5;ctx.lineCap='round';
-        ctx.beginPath();ctx.moveTo(-58,0);ctx.quadraticCurveTo(-28,-7,8,0);ctx.stroke();
-        ctx.fillStyle='#caffd1';
-        for(let i=0;i<4;i++){const ox=-30+i*13,oy=Math.sin(t*12+i)*6;ctx.save();ctx.translate(ox,oy);ctx.rotate((i%2?-.55:.55)+t*3);ctx.beginPath();ctx.ellipse(0,0,7,2.7,0,0,Math.PI*2);ctx.fill();ctx.restore();}
-        ctx.restore();
-      }else{
-        const dir=n.dir||1,pulse=1+Math.sin((n.age||0)*18)*.08;
-        ctx.save();ctx.translate(n.x,GROUND_Y-5);ctx.scale(dir,1);ctx.globalCompositeOperation='lighter';
-        ctx.strokeStyle='#55d875';ctx.fillStyle='#a0ffad';ctx.shadowColor='#58e978';ctx.shadowBlur=12;ctx.lineWidth=4;
-        ctx.beginPath();ctx.moveTo(-42,0);ctx.quadraticCurveTo(-20,-10,5,-2);ctx.stroke();
-        ctx.scale(pulse,pulse);
-        for(let i=0;i<3;i++){const x=-4+i*10,h=12+i*4;ctx.beginPath();ctx.moveTo(x-4,0);ctx.lineTo(x,-h);ctx.lineTo(x+4,0);ctx.closePath();ctx.fill();}
-        ctx.restore();
-      }
     }
     for(const v of (f.ariaVines||[])){
       if(!v.active&&v.delay>0){
         ctx.save();ctx.globalAlpha=.28+.12*Math.sin(performance.now()/90);ctx.strokeStyle='#78f08d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(v.x,GROUND_Y-3,34,9,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
-      const t=v.target;if(!t)continue;const cy=typeof bodyY==='function'?bodyY(t):GROUND_Y-t.y-70,grow=clamp(((v.age||0)-.30)/.24,0,1),top=GROUND_Y+(cy-26-GROUND_Y)*grow;
-      ctx.save();ctx.strokeStyle='#4bd66c';ctx.shadowBlur=14;ctx.shadowColor='#58e978';ctx.lineWidth=7;ctx.lineCap='round';
-      for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(t.x+i*15,GROUND_Y+5);ctx.bezierCurveTo(t.x-24+i*10,GROUND_Y+(cy+45-GROUND_Y)*grow,t.x+30-i*8,GROUND_Y+(cy+10-GROUND_Y)*grow,t.x+i*10,top);ctx.stroke();}
-      ctx.fillStyle='#8cff9c';const leaves=Math.max(1,Math.floor(5*grow));for(let i=0;i<leaves;i++){const yy=GROUND_Y-(28+i*28)*grow;ctx.beginPath();ctx.ellipse(t.x+(i%2?18:-18)*grow,yy,8,3,(i%2?-.5:.5),0,Math.PI*2);ctx.fill();}
+      const t=v.target;if(!t)continue;const cy=typeof bodyY==='function'?bodyY(t):GROUND_Y-t.y-70;
+      ctx.save();ctx.strokeStyle='#4bd66c';ctx.shadowBlur=15;ctx.shadowColor='#58e978';ctx.lineWidth=7;ctx.lineCap='round';
+      for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(t.x+i*15,GROUND_Y+5);ctx.bezierCurveTo(t.x-24+i*10,cy+45,t.x+30-i*8,cy+10,t.x+i*10,cy-26);ctx.stroke();}
+      ctx.fillStyle='#8cff9c';for(let i=0;i<5;i++){const yy=GROUND_Y-28-i*28;ctx.beginPath();ctx.ellipse(t.x+(i%2?18:-18),yy,8,3,(i%2?-.5:.5),0,Math.PI*2);ctx.fill();}
       ctx.restore();
     }
     for(const q of [f.p1,f.p2])if((q?.ariaPoisonT||0)>0&&q.state!=='ko'){
@@ -993,7 +950,7 @@
     ctx.restore();
   }
   function drawPriya(ctx,p){
-    const pose=priyaPose(p),img=poseImages[pose.frame];
+    const pose=priyaPose(p),img=poseImage(poseImages,pose.frame);
     if(!img?.complete||!img.naturalWidth)return false;
     const floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),height=218;
 
@@ -1062,7 +1019,7 @@
     return {frame:0,idle:true};
   }
   function drawAria(ctx,p){
-    const pose=ariaPose(p),img=ariaPoseImages[pose.frame];if(!img?.complete||!img.naturalWidth)return false;
+    const pose=ariaPose(p),img=poseImage(ariaPoseImages,pose.frame);if(!img?.complete||!img.naturalWidth)return false;
     const floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),height=238;
     const baselineOffset=height*(20/222);
     ctx.save();ctx.globalAlpha=.34;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,GROUND_Y+4,38,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
@@ -1173,7 +1130,7 @@
   }
 
   function drawKain(ctx,p){
-    const pose=kainPose(p),img=kainPoseImages[pose.frame];
+    const pose=kainPose(p),img=poseImage(kainPoseImages,pose.frame);
     if(!img?.complete||!img.naturalWidth)return false;
     const floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),height=226;
     const air=Math.max(0,Number(p.y)||0),shadowScale=Math.max(.3,1-air/390);

@@ -722,7 +722,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 /* loading screen */
 #game-loading{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#04050b;color:#fff;transition:opacity .55s ease,visibility .55s ease;}
 #game-loading.hide{opacity:0;visibility:hidden;pointer-events:none}
-.loading-bg{position:absolute;inset:0;background:#020308 url('lutador-assets/capa-sorte-niak-16x9.png') center center / 100% 100% no-repeat;transform:none;filter:saturate(1.05) brightness(.78);}
+.loading-bg{position:absolute;inset:0;background:#020308 url('lutador-assets/capa-sorte-niak-16x9.webp') center center / 100% 100% no-repeat;transform:none;filter:saturate(1.05) brightness(.78);}
 .loading-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.20),rgba(0,0,0,.34));}
 .loading-grid{display:none;position:absolute;inset:0;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:55px 55px;transform:perspective(500px) rotateX(58deg) scale(1.5);transform-origin:center bottom;}
 .loading-content{position:relative;text-align:center;width:min(720px,86vw);display:flex;align-items:center;justify-content:center;}
@@ -6218,10 +6218,12 @@ window.addEventListener('keyup', (e) => {
 renderMenu();
 (function bootLoading(){
   const loader=document.getElementById('game-loading');
-  // Carregamento curto: apresenta a capa sem parecer que o jogo travou.
-  const finish=()=>{loader?.classList.add('hide');setTimeout(()=>loader?.remove(),420);};
-  // Imagens locais já são carregadas pelo navegador; 2,2s é apenas a apresentação visual.
-  setTimeout(finish,2200);
+  const started=performance.now(); let done=false;
+  const finish=()=>{if(done)return;done=true;loader?.classList.add('hide');setTimeout(()=>loader?.remove(),220);};
+  const release=()=>setTimeout(finish,Math.max(0,420-(performance.now()-started)));
+  // Espera apenas o HTML/JS essencial. Imagens pesadas agora carregam sob demanda.
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',release,{once:true}); else release();
+  setTimeout(finish,1100);
 })();
 
 function drawCharacterSkin(ctx,p,x,y){
@@ -7465,7 +7467,7 @@ setTimeout(function(){
   :root{--pro-cyan:#71edff;--pro-violet:#ae8aff;--pro-red:#ff596f;--pro-ink:#050713}
   body{background:radial-gradient(circle at 12% 4%,#34215a 0,transparent 24%),radial-gradient(circle at 84% 86%,#063e4c 0,transparent 25%),#050713}
   #game{border:1px solid rgba(255,255,255,.17);box-shadow:0 30px 100px rgba(0,0,0,.68),0 0 55px rgba(126,84,255,.14)}
-  .menu{background-image:linear-gradient(90deg,rgba(5,7,18,.95) 0%,rgba(5,7,18,.67) 45%,rgba(5,7,18,.26)),url('lutador-assets/lutador-keyart-ai.png')!important;background-position:center!important;background-size:cover!important}
+  .menu{background-image:linear-gradient(90deg,rgba(5,7,18,.95) 0%,rgba(5,7,18,.67) 45%,rgba(5,7,18,.26)),url('lutador-assets/lutador-keyart-ai.webp')!important;background-position:center!important;background-size:cover!important}
   .menu:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,rgba(4,6,15,.75),transparent 48%);z-index:0}
   .menu>*{position:relative;z-index:1}
   .logo{filter:drop-shadow(0 8px 20px rgba(0,0,0,.5));letter-spacing:8px!important}
@@ -7508,7 +7510,16 @@ setTimeout(function(){
   }
 
   const art={};
-  Object.entries(stagePaths).forEach(([id,path])=>{const image=new Image();image.decoding='async';image.src=path;art[id]=image});
+  Object.entries(stagePaths).forEach(([id,path])=>{art[id]={path,image:null,loading:false}});
+  function getStageArt(id){
+    const item=art[id]; if(!item) return null;
+    if(!item.image){
+      const image=new Image(); image.decoding='async'; image.loading='lazy'; image.src=item.path;
+      item.image=image; item.loading=true;
+      image.onload=image.onerror=()=>{item.loading=false; stageRenderCache=null;};
+    }
+    return item.image;
+  }
   window.LUTADOR_PRO_STAGE_ART=art;
 
   // Mantém o seletor original e apenas aplica thumbnails ilustradas às arenas IA.
@@ -7553,7 +7564,7 @@ setTimeout(function(){
     const ctx=canvas.getContext('2d');
     ctx.clearRect(0,0,W,H);
     const stage=f.stage||STAGES[0];
-    const stageArt=window.LUTADOR_PRO_STAGE_ART?.[stage.id]||null;
+    const stageArt=getStageArt(stage.id);
     const layers=cachedStageLayers(stage,stageArt);
     ctx.drawImage(layers.background,0,0);
     const t=performance.now()/1000;
@@ -7592,7 +7603,7 @@ setTimeout(function(){
 
 
 <style id="lutador-pro-upgrade-correction">
-  .menu{background-image:linear-gradient(90deg,rgba(5,7,18,.95) 0%,rgba(5,7,18,.67) 45%,rgba(5,7,18,.26)),url('lutador-assets/keyart-lutador-ai.png')!important}
+  .menu{background-image:linear-gradient(90deg,rgba(5,7,18,.95) 0%,rgba(5,7,18,.67) 45%,rgba(5,7,18,.26)),url('lutador-assets/keyart-lutador-ai.webp')!important}
 </style>
 <script id="lutador-pro-stage-copy">
 (()=>{
@@ -7613,12 +7624,12 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-character-design.css">
 <script src="pro-character-design.js?v=gancho1"></script>
 <link rel="stylesheet" href="pro-progression.css?v=season28">
-<link rel="stylesheet" href="pro-lobby.css?v=season28">
+<link rel="stylesheet" href="pro-lobby.css?v=fastload1">
 <link rel="stylesheet" href="pro-sprite-animation.css">
 <script src="pro-progression.js?v=season28-global-20260916-0100"></script>
 <script src="pro-lobby.js?v=season28"></script>
 <script src="pro-motion.js?v=combate4"></script>
-<script src="pro-sprite-animation.js?v=gancho1"></script>
+<script src="pro-sprite-animation.js?v=fastload1"></script>
 <link rel="stylesheet" href="pro-audio.css?v=combate4">
 <link rel="stylesheet" href="pro-combat-system.css?v=combate4">
 <script src="pro-audio.js?v=lobby61"></script>
@@ -7640,13 +7651,13 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-v7-polish.css?v=v70">
 <script src="pro-v7-polish.js?v=v70"></script>
 
-<link rel="stylesheet" href="pro-v8-supreme.css?v=v81">
+<link rel="stylesheet" href="pro-v8-supreme.css?v=fastload1">
 <script src="pro-v8-supreme.js?v=v81"></script>
 
 <link rel="stylesheet" href="pro-v8-6-fluid.css?v=v861">
 <script src="pro-v8-6-fluid.js?v=v861"></script>
 <link rel="stylesheet" href="pro-ravam-studios.css?v=ravam-180">
-<script src="pro-ravam-studios.js?v=ravam-184"></script>
+<script src="pro-ravam-studios.js?v=fastload1"></script>
 <link rel="stylesheet" href="pro-v11-quality.css?v=v110">
 <script src="pro-v11-quality.js?v=v110"></script>
 <link rel="stylesheet" href="pro-v15-suprema.css?v=v150">
@@ -7657,4 +7668,4 @@ setTimeout(function(){
 
 <!-- R.A.V.A.M V17: loaded last on purpose so its animation/shop/online patches win. -->
 <link rel="stylesheet" href="pro-ravam-v17.css?v=180">
-<script src="pro-ravam-v17.js?v=184"></script>
+<script src="pro-ravam-v17.js?v=fastload1"></script>
