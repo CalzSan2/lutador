@@ -23,24 +23,7 @@
   let readyCount=0,decorateQueued=false,lastDetailId='rojo';
 
   function character(id){return typeof CHARACTERS!=='undefined'?CHARACTERS.find(item=>item.id===id):null}
-  const loadQueue=[]; let loadBusy=false;
-  function pumpLoadQueue(){
-    if(loadBusy||!loadQueue.length)return;
-    loadBusy=true;
-    const {file,image}=loadQueue.shift();
-    image.onload=()=>{readyCount++;loadBusy=false;queueDecorate();setTimeout(pumpLoadQueue,45)};
-    image.onerror=()=>{failed.add(file);loadBusy=false;setTimeout(pumpLoadQueue,45)};
-    image.src=imageRoot+file;
-  }
-  function ensureImage(file,priority=false){
-    let image=images.get(file);
-    if(image)return image;
-    image=new Image();image.decoding='async';image.loading='lazy';images.set(file,image);
-    const job={file,image}; if(priority)loadQueue.unshift(job); else loadQueue.push(job);
-    pumpLoadQueue();
-    return image;
-  }
-  function source(id,priority=false){const data=atlas[id];return data?{file:data[0],row:data[1],image:ensureImage(data[0],priority)}:null}
+  function source(id){const data=atlas[id];return data?{file:data[0],row:data[1],image:images.get(data[0])}:null}
   function cell(sourceInfo,frame){
     const image=sourceInfo.image,cellWidth=image.naturalWidth/COLS,cellHeight=image.naturalHeight/ROWS;
     return{sx:cellWidth*frame,sy:cellHeight*sourceInfo.row,sw:cellWidth,sh:cellHeight};
@@ -141,15 +124,14 @@
   function decorateDetail(){const host=document.querySelector('.mk-dportrait');if(host&&lastDetailId)mountPortrait(host,lastDetailId,'detail')}
   function decorateAll(){decorateQueued=false;decorateCards();decorateShop();decorateDetail();if(readyCount===sourceNames.length)document.body.classList.add('pro-sprites-ready')}
   function queueDecorate(){if(decorateQueued)return;decorateQueued=true;requestAnimationFrame(decorateAll)}
-  function warmFighter(id){const info=source(id,true);if(info?.image?.complete&&info.image.naturalWidth)window.ProMotion?.warm(id,info.image,frame=>cell(info,frame))}
+  function warmFighter(id){const info=source(id);if(info?.image?.complete&&info.image.naturalWidth)window.ProMotion?.warm(id,info.image,frame=>cell(info,frame))}
   function wrap(name,after){const base=window[name];if(typeof base!=='function'||base.__spriteV2Wrapped)return;const wrapped=function(...args){const result=base.apply(this,args);after(...args);return result};wrapped.__spriteV2Wrapped=true;window[name]=wrapped}
   ['renderMenu','renderModes','renderSelect','renderShop','renderShopChampions'].forEach(name=>wrap(name,queueDecorate));
   wrap('startFight',()=>{if(typeof fight!=='undefined'&&fight){warmFighter(fight.p1.id);warmFighter(fight.p2.id)}});
   const detailBase=window.renderCharacterDetail;
   if(typeof detailBase==='function'&&!detailBase.__spriteV2Wrapped){const wrapped=function(id,...args){lastDetailId=id||lastDetailId;const result=detailBase.call(this,id,...args);queueDecorate();return result};wrapped.__spriteV2Wrapped=true;window.renderCharacterDetail=wrapped}
   const observer=new MutationObserver(queueDecorate);const app=document.getElementById('app');if(app)observer.observe(app,{childList:true,subtree:true});
-  // Sem preload global: os atlases de 2–3 MB são carregados apenas quando aparecem
-  // na seleção, loja ou luta. Isso evita dezenas de MB no primeiro carregamento.
+  sourceNames.forEach(file=>{const image=new Image();image.decoding='async';image.onload=()=>{readyCount++;queueDecorate()};image.onerror=()=>failed.add(file);image.src=imageRoot+file;images.set(file,image)});
   queueDecorate();
-  window.ProSpriteAnimator=Object.freeze({version:'3.1.0-fastload',fighters:Object.keys(atlas).length,sourceFrames:Object.keys(atlas).length*COLS,ready:()=>readyCount===sourceNames.length,frameFor:stateFrame,refresh:queueDecorate});
+  window.ProSpriteAnimator=Object.freeze({version:'3.0.0',fighters:Object.keys(atlas).length,sourceFrames:Object.keys(atlas).length*COLS,ready:()=>readyCount===sourceNames.length,frameFor:stateFrame,refresh:queueDecorate});
 })();

@@ -100,7 +100,7 @@ body.pro-lobby-surface{display:block!important;overflow:auto!important;min-width
 .pro-lobby-ready .pro-profile-copy strong{font-size:14px;letter-spacing:.5px}
 .pro-lobby-ready .pro-profile-wallet strong{font-size:20px}
 .pro-lobby-content{display:grid;grid-template-columns:minmax(0,1.14fr) minmax(300px,1fr) minmax(275px,.86fr);gap:18px;min-height:0;min-width:0}
-.pro-lobby-hero{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;min-width:0;min-height:0;padding:28px 24px;border:1px solid #ffffff19;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#080d1899 0%,#080d1820 42%,#080d18ed 100%),url('lutador-assets/keyart-lutador-ai.webp') 58% center/cover}
+.pro-lobby-hero{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;min-width:0;min-height:0;padding:28px 24px;border:1px solid #ffffff19;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#080d1899 0%,#080d1820 42%,#080d18ed 100%),url('lutador-assets/keyart-lutador-ai.png') 58% center/cover}
 .pro-lobby-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,#070d1880,transparent 70%);pointer-events:none}
 .pro-hero-copy{min-width:0}
 .pro-lobby-ready .lutador-brand{justify-content:flex-start;flex-wrap:wrap;gap:7px;margin:0 0 20px;font-size:9px;letter-spacing:1.8px}
@@ -232,7 +232,7 @@ body.pro-lobby-surface{display:block!important;overflow:auto!important;min-width
 /* ===== SORTEP NIAK FINAL LOBBY ===== */
 .menu.pro-lobby-ready{padding:20px!important;overflow:hidden}
 .pro-lobby-content{display:grid!important;grid-template-columns:minmax(210px,270px) minmax(340px,1fr) minmax(260px,330px)!important;gap:18px!important;align-items:stretch!important;width:100%!important;max-width:1480px!important;margin:0 auto!important}
-.pro-lobby-hero{grid-column:2!important;grid-row:1!important;min-height:540px!important;justify-content:center!important;align-items:center!important;text-align:center!important;background:linear-gradient(180deg,rgba(8,11,24,.15),rgba(8,11,24,.42)),url('lutador-assets/keyart-lutador-ai.webp') center/cover!important;border-radius:24px!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 22px 70px rgba(0,0,0,.42)!important}
+.pro-lobby-hero{grid-column:2!important;grid-row:1!important;min-height:540px!important;justify-content:center!important;align-items:center!important;text-align:center!important;background:linear-gradient(180deg,rgba(8,11,24,.15),rgba(8,11,24,.42)),url('lutador-assets/keyart-lutador-ai.png') center/cover!important;border-radius:24px!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 22px 70px rgba(0,0,0,.42)!important}
 .pro-combat-menu{grid-column:1!important;grid-row:1!important;align-self:center!important;padding:18px!important;background:linear-gradient(180deg,rgba(10,14,29,.96),rgba(4,7,17,.97))!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:22px!important}
 .pro-lobby-dashboard{grid-column:3!important;grid-row:1!important;display:block!important;min-width:0!important}
 .pro-side-stack{display:flex!important;flex-direction:column!important;gap:14px!important;height:100%!important}

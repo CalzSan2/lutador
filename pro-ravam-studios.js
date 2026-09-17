@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamStudios?.version)return;
-  const VERSION='1.8.2-fastload';
+  const VERSION='1.8.1-ravam-aria-fix';
   const ACCESS_COST=2500;
   const PRIYA=Object.freeze({
     id:'priya',name:'Alana Sorelle',color:'#d85b42',hp:1940,dmg:32,speed:82,price:0,
@@ -31,14 +31,9 @@
   const POSE_PATHS=Array.from({length:6},(_,i)=>`ai-assets/ravam/poses/priya-${i}.png`);
   const KAIN_POSE_PATHS=Array.from({length:6},(_,i)=>`ai-assets/ravam/kain/poses/kain-${i}.png`);
   const ARIA_POSE_PATHS=Array.from({length:6},(_,i)=>`ai-assets/ravam/aria/poses/aria-${i}.png`);
-  const poseImages=POSE_PATHS.map(src=>({src,img:null}));
-  const kainPoseImages=KAIN_POSE_PATHS.map(src=>({src,img:null}));
-  const ariaPoseImages=ARIA_POSE_PATHS.map(src=>({src,img:null}));
-  function poseImage(list,index){
-    const entry=list[index]; if(!entry)return null;
-    if(!entry.img){const im=new Image();im.decoding='async';im.loading='lazy';im.src=entry.src;entry.img=im;}
-    return entry.img;
-  }
+  const poseImages=POSE_PATHS.map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});
+  const kainPoseImages=KAIN_POSE_PATHS.map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});
+  const ariaPoseImages=ARIA_POSE_PATHS.map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});
   const KAIN_POWER_LABELS=Object.freeze({flight:'VOO',ice:'GELO',heal:'RECUPERAR VIDA',shock:'CHOQUE',repel:'REPELIR ATAQUE',swap:'TROCAR CONTROLES',fire:'FOGO',teleport:'TELEPORTE',drain:'ROUBO DE VIDA',gravity:'GRAVIDADE'});
   const KAIN_POWER_POOL=Object.freeze(Object.keys(KAIN_POWER_LABELS));
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
@@ -950,7 +945,7 @@
     ctx.restore();
   }
   function drawPriya(ctx,p){
-    const pose=priyaPose(p),img=poseImage(poseImages,pose.frame);
+    const pose=priyaPose(p),img=poseImages[pose.frame];
     if(!img?.complete||!img.naturalWidth)return false;
     const floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),height=218;
 
@@ -1019,7 +1014,7 @@
     return {frame:0,idle:true};
   }
   function drawAria(ctx,p){
-    const pose=ariaPose(p),img=poseImage(ariaPoseImages,pose.frame);if(!img?.complete||!img.naturalWidth)return false;
+    const pose=ariaPose(p),img=ariaPoseImages[pose.frame];if(!img?.complete||!img.naturalWidth)return false;
     const floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),height=238;
     const baselineOffset=height*(20/222);
     ctx.save();ctx.globalAlpha=.34;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,GROUND_Y+4,38,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
@@ -1130,7 +1125,7 @@
   }
 
   function drawKain(ctx,p){
-    const pose=kainPose(p),img=poseImage(kainPoseImages,pose.frame);
+    const pose=kainPose(p),img=kainPoseImages[pose.frame];
     if(!img?.complete||!img.naturalWidth)return false;
     const floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),height=226;
     const air=Math.max(0,Number(p.y)||0),shadowScale=Math.max(.3,1-air/390);

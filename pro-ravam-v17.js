@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamV17?.version)return;
-  const VERSION='18.2.1-fastload';
+  const VERSION='18.2.0-tharoth';
   const SHOP_VERSION=17;
   const ACCESS_COST=Number(window.RavamStudios?.cost)||2500;
   const BASE=window.RavamStudios||{};
@@ -30,18 +30,18 @@
   const ALL_IDS=Object.freeze(ALL.map(c=>c.id));
   const COSTS=Object.freeze({priya:0,kain:700,aria:650,leo:800,tharoth:900});
   const ABILITY={
-    priya:BASE.ability||{flag:'RAVAM',role:'Atiradora Tática',tag:'PRECISÃO',desc:'J dispara com o rifle. L lança a Tríade Demolidora.'},
+    priya:BASE.ability||{flag:'RAVAM',role:'Atiradora Tática',tag:'ARMAS',desc:'J usa rifle tático; o 3º tiro é explosivo. L ativa uma rajada de 6 disparos, terminando em munição explosiva.'},
     kain:BASE.kainAbility||{flag:'RAVAM',role:'Mímico do Caos',tag:'CAOS',desc:'J usa o poder atual. H troca o poder. L ativa o Espelho Abissal.'},
-    aria:BASE.ariaAbility||{flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J lança duas flores venenosas. L prende o rival com cipós.'},
-    leo:Object.freeze({flag:'RAVAM',role:'Arquiteto de Portais',tag:'PORTAIS',desc:'J lança 2 pedras: a primeira vai reta e a segunda entra num portal e sai por trás do inimigo para acertá-lo direto. L abre o CÉU VESPER e faz cair 2 facas, 2 espadas e 2 pedras.'}),
-    tharoth:Object.freeze({flag:'RAVAM',role:'Avatar da Umbra',tag:'SOMBRAS',desc:'J arremessa areia negra no inimigo. L cria 1 clone de sombra invulnerável por 3 segundos; ele surge em campo, ataca e desaparece quando o tempo acaba.'})
+    aria:BASE.ariaAbility||{flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J alterna Lâminas de Folha, Semente Venenosa e Raiz Selvagem. L cria o Jardim Vivo: prende, causa pulsos de dano e cura Aria.'},
+    leo:Object.freeze({flag:'RAVAM',role:'Arquiteto de Portais',tag:'PORTAIS',desc:'J usa pedras através de portais; a cada 3º ataque surge um portal cruzado. L cria uma tempestade de portais no céu e nas laterais.'}),
+    tharoth:Object.freeze({flag:'RAVAM',role:'Avatar da Umbra',tag:'ESCURIDÃO',desc:'J lança areia sombria que escurece e desacelera. L cria um clone invulnerável por 3s que ataca a cada 0,50s.'})
   };
   const META={
-    priya:{name:'ALANA SORELLE',tag:'PRECISÃO',accent:'#ff765e',portrait:'ai-assets/characters/priya.png',stats:[32,82,1940],moves:[['J','RIFLE'],['I','SOCO'],['O','CHUTE'],['L','3 BOMBAS']]},
+    priya:{name:'ALANA SORELLE',tag:'ARMAS',accent:'#ff765e',portrait:'ai-assets/characters/priya.png',stats:[32,82,1940],moves:[['J','RIFLE · 3º EXPLOSIVO'],['I','SOCO'],['O','CHUTE'],['L','RAJADA TÁTICA · 6 TIROS']]},
     kain:{name:'KAIN',tag:'CAOS',accent:'#c0c7ff',portrait:'ai-assets/characters/kain.png',stats:[35,88,2180],moves:[['J','USAR PODER'],['H / P2 9','TROCAR PODER'],['I','SOCO'],['O','CHUTE'],['L','ESPELHO']]},
-    aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','2 FLORES'],['I','SOCO'],['O','CHUTE'],['L','CIPÓ']]},
-    leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','PEDRA + PORTAL'],['I','SOCO'],['O','CHUTE'],['L','CHUVA VESPER']]},
-    tharoth:{name:'THAROTH UMBRA',tag:'SOMBRAS',accent:'#ff4d62',portrait:'ai-assets/characters/tharoth.png',stats:[35,84,2120],moves:[['J','AREIA NEGRA'],['I','SOCO'],['O','CHUTE'],['L','CLONE DE SOMBRA']]}
+    aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','FOLHA · SEMENTE · RAIZ'],['I','SOCO'],['O','CHUTE'],['L','JARDIM VIVO']]},
+    leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','PEDRAS ENTRE PORTAIS'],['I','SOCO'],['O','CHUTE'],['L','COLAPSO DE PORTAIS']]},
+    tharoth:{name:'THAROTH UMBRA',tag:'ESCURIDÃO',accent:'#ff4d62',portrait:'ai-assets/characters/tharoth.png',stats:[35,84,2120],moves:[['J','AREIA SOMBRIA'],['I','SOCO'],['O','CHUTE'],['L','CLONE · 20 / 0,50s · 3s']]}
   };
 
   function toast(text,tone='normal',ms=2200){
@@ -332,13 +332,7 @@
   /* =========================
      ANIMAÇÃO R.A.V.A.M V17
      ========================= */
-  const loadImgs=paths=>paths.map(src=>({src,img:null}));
-  function lazySprite(entry){
-    if(!entry)return null;
-    if(!entry.img){const i=new Image();i.decoding='async';i.loading='lazy';i.src=entry.src;entry.img=i;}
-    return entry.img;
-  }
-  const spriteImg=(set,frame)=>lazySprite(set?.imgs?.[frame]);
+  const loadImgs=paths=>paths.map(src=>{const i=new Image();i.decoding='async';i.src=src;return i});
   const SPRITES={
     priya:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/priya/poses-v17-clean/priya-${i}.png`)),ref:654,guard:5,air:5,punch:3,kick:2,special:3},
     kain:{imgs:loadImgs(Array.from({length:6},(_,i)=>`ai-assets/ravam/kain/poses-v17-clean/kain-${i}.png`)),ref:520,guard:4,air:5,punch:3,kick:5,special:3},
@@ -368,7 +362,7 @@
   }
   function drawFixed(ctx,img,scale,alpha=1){if(!img?.complete||!img.naturalWidth)return false;ctx.globalAlpha*=alpha;const w=img.naturalWidth*scale,h=img.naturalHeight*scale;ctx.drawImage(img,-w/2,-h,w,h);return true}
   function drawR17Fighter(ctx,p){
-    const s=SPRITES[p?.id];if(!s)return false;const pose=poseFor(p,s),img=spriteImg(s,pose.frame);if(!img?.complete||!img.naturalWidth)return false;
+    const s=SPRITES[p?.id];if(!s)return false;const pose=poseFor(p,s),img=s.imgs[pose.frame];if(!img?.complete||!img.naturalWidth)return false;
     const H=226,scale=H/s.ref,floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0),time=performance.now()/1000;
     const air=Math.max(0,Number(p.y)||0),sh=Math.max(.32,1-air/420);
     ctx.save();ctx.globalAlpha=.32*sh;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,GROUND_Y+4,41*sh,8*sh,0,0,Math.PI*2);ctx.fill();ctx.restore();
@@ -378,7 +372,7 @@
     const motion=window.ProMotion?.motionFor?.(p);
     const locomotion=motion&&['idle','walk','jump','land'].includes(motion.kind)&&!pose.strike&&!pose.cast&&!pose.guard&&!pose.hurt&&!pose.ko;
     if(locomotion){
-      const base=spriteImg(s,0);
+      const base=s.imgs[0];
       if(base?.complete&&base.naturalWidth){
         const box={sx:0,sy:0,sw:base.naturalWidth,sh:base.naturalHeight};
         try{window.ProMotion.paint(ctx,`r17-${p.id}`,base,box,motion,H);ctx.restore();return true}catch(_){}
@@ -425,7 +419,7 @@
     for(const e of (f.leoFx||[])){const a=clamp(e.life/(e.maxLife||1),0,1);ctx.save();ctx.globalAlpha=a;ctx.textAlign='center';ctx.font='900 13px Oxanium,Arial';ctx.fillStyle=e.color||'#7dffc6';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText(e.text,e.x,e.y);ctx.restore()}
   }
   function drawTharothClone(ctx,c){
-    const s=SPRITES.tharoth;if(!s)return;const img=spriteImg(s,c.struck?3:0);if(!img?.complete||!img.naturalWidth)return;
+    const s=SPRITES.tharoth;if(!s)return;const img=s.imgs[c.struck?3:0];if(!img?.complete||!img.naturalWidth)return;
     const H=226,scale=H/s.ref,floor=GROUND_Y,pulse=1+Math.sin(performance.now()/120+(c.pulse||0))*0.035;
     ctx.save();ctx.translate(c.x,floor);ctx.scale(c.dir||1,1);ctx.globalAlpha=(c.life<.4?c.life/.4:.38)+.10*Math.sin(performance.now()/170);ctx.globalCompositeOperation='lighter';ctx.shadowBlur=26;ctx.shadowColor='#ff4f62';ctx.filter='brightness(1.08) saturate(0.6)';ctx.scale(pulse,pulse);drawFixed(ctx,img,scale,.78);ctx.restore();
   }
@@ -494,463 +488,4 @@
 
   ensureEconomy();
   window.RavamV17=Object.freeze({version:VERSION,leo:LEO,tharoth:THAROTH,renderHub,renderShop,renderSelect,isOwned,all:ALL,syncOnlineUltimate});
-})();
-
-
-/* ===== KTRAK CALZSAN / AVATAR PATCH ===== */
-(()=>{
-  'use strict';
-  const KTRAK = Object.freeze({
-    id:'ktrak',name:'Ktrak Calzsan',color:'#ff7d28',hp:2060,dmg:33,speed:85,price:0,
-    weapon:'ktrakElement',special:'ktrakAvatarMode',portrait:'ai-assets/characters/ktrak.png',secret:true
-  });
-  const KTRAK_META = Object.freeze({
-    name:'KTRAK CALZSAN',tag:'AVATAR',accent:'#61bcff',portrait:'ai-assets/characters/ktrak.png',
-    stats:[33,85,2060],
-    moves:[['J','PODER ELEMENTAL'],['H / P2 9','ALTERNA ÁGUA · TERRA · FOGO · AR'],['I','SOCO'],['O','CHUTE'],['L','MODO AVATAR · 10s']]
-  });
-  const oldRenderRavamMode = window.renderRavamMode;
-  const KTRAK_ABILITY = Object.freeze({
-    flag:'ELM',role:'Mestre dos 4 Elementos',tag:'AVATAR',
-    desc:'J lança o elemento atual. H alterna entre Água, Terra, Fogo e Ar. Água congela por 1 segundo, Terra derruba uma grande rocha por cima, Fogo causa queimadura progressiva por 1 segundo e Ar empurra causando dano. L ativa o Modo Avatar por 10 segundos, dobrando o dano dos ataques e deixando os olhos azuis brilhantes.'
-  });
-  const ELS=[
-    {id:'water',name:'ÁGUA',accent:'#5ecbff'},
-    {id:'earth',name:'TERRA',accent:'#d8a46a'},
-    {id:'fire',name:'FOGO',accent:'#ff7f32'},
-    {id:'air',name:'AR',accent:'#d6f1ff'}
-  ];
-  const KSPR={
-    imgs:Array.from({length:6},(_,i)=>({src:`ai-assets/ravam/ktrak/poses-v17-clean/ktrak-${i}.png`,img:null})),
-    ref:590,guard:4,air:5,punch:2,kick:5,special:2
-  };
-  function ktrakSprite(frame){const e=KSPR.imgs[frame];if(!e)return null;if(!e.img){const im=new Image();im.decoding='async';im.loading='lazy';im.src=e.src;e.img=im;}return e.img;}
-  const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
-  const easeOut=t=>1-Math.pow(1-clamp(t,0,1),3);
-  const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
-  const save=()=>{try{typeof persist==='function'?persist():saveState?.(state)}catch(_){}};
-  const fmt=n=>Math.max(0,Math.floor(Number(n)||0)).toLocaleString('pt-BR');
-  function ensureRegistered(){
-    try{ if(typeof CHARACTERS!=='undefined' && !CHARACTERS.some(c=>c.id==='ktrak')) CHARACTERS.push({...KTRAK}); }catch(_){}
-    try{ if(typeof ABILITIES!=='undefined') ABILITIES.ktrak = KTRAK_ABILITY; }catch(_){}
-    try{ if(typeof MOVES!=='undefined') MOVES.ktrak = KTRAK_META.moves.map(x=>[x[0],x[1]]); }catch(_){}
-    try{ if(typeof state!=='undefined' && !Array.isArray(state.ravamRoster)) state.ravamRoster=[]; }catch(_){}
-  }
-  ensureRegistered();
-
-  function ktrakElementIndex(p){
-    if(typeof p.ktrakElementIndex!=='number') p.ktrakElementIndex=0;
-    return p.ktrakElementIndex;
-  }
-  function ktrakElement(p){ return ELS[ktrakElementIndex(p)%ELS.length]; }
-  function ktrakFx(p,text,color,life=.9){
-    try{
-      const f=typeof fight!=='undefined'?fight:null; if(!f||!p) return;
-      f.ktrakFx=f.ktrakFx||[];
-      f.ktrakFx.push({x:p.x,y:(typeof bodyY==='function'?bodyY(p):GROUND_Y-(p.y||0)-76)-58,text,color,life,maxLife:life});
-    }catch(_){}
-  }
-  function toggleKtrakElement(p){
-    if(!p || p.id!=='ktrak') return;
-    p.ktrakElementIndex=(ktrakElementIndex(p)+1)%ELS.length;
-    const el=ktrakElement(p);
-    p.ktrakSwapCd=.18;
-    p.ktrakIndicatorT=1.6;
-    p.ktrakIndicatorLabel=el.name;
-    p.ktrakIndicatorColor=el.accent;
-    ktrakFx(p,el.name,el.accent,.82);
-    try{SFX?.play?.('menu_select',.84)}catch(_){ }
-  }
-
-  // ===== códigos =====
-  const oldRenderCodes = typeof renderCodes==='function' ? renderCodes : null;
-  renderCodes = function(){
-    screen = 'codes';
-    try{ drawCanvas(); }catch(_){}
-    app.innerHTML = `
-      <div class="card mk-card mk-arena codes-screen">
-        <div class="emblem"><span>🔐</span></div>
-        <h2 class="select-title mk-title">CÓDIGOS <span class="mk-accent">SECRETOS</span></h2>
-        <p class="select-subtitle">Digite um código para liberar recursos e personagens especiais.</p>
-        <div style="max-width:470px;margin:24px auto">
-          <input id="code-input" class="code-input" maxlength="24" autocomplete="off" placeholder="Digite o código...">
-          <button id="btn-code-submit" class="btn big" style="margin-top:12px">DESBLOQUEAR</button>
-          <div id="code-status" style="margin-top:14px;min-height:24px;font-weight:700"></div>
-        </div>
-        <div class="v6-code-hint"><b>CÓDIGOS ATIVOS</b><span>00011 · liberar todos os campeões</span><span>121200 · 99.999 Gold</span><span>01010101 · 99.999 Vandais</span><span>96051 · liberar KTRAK CALZSAN (Normal + R.A.V.A.M)</span></div>
-        <button id="btn-back" class="btn">Voltar</button>
-      </div>`;
-    const input=document.getElementById('code-input'), status=document.getElementById('code-status');
-    const submit=()=>{
-      const code=input.value.trim();
-      if(!code){status.textContent='❌ Digite um código.';status.style.color='#f87171';return;}
-      if(code==='00011'){
-        CHARACTERS.forEach(c=>{if(c.ravamOnly)return;if(!state.roster.includes(c.id))state.roster.push(c.id);});
-        state.ztaaaUnlocked=true;state.froghUnlocked=true;state.kloppUnlocked=true;
-        status.textContent='🔓 TODOS OS CAMPEÕES FORAM LIBERADOS!';status.style.color='#7dd3fc';
-      }else if(code==='121200'){
-        state.coins=Math.max(Number(state.coins)||0,99999);
-        status.textContent='💰 99.999 GOLD LIBERADO!';status.style.color='#facc15';
-      }else if(code==='01010101'){
-        state.vandais=Math.max(Number(state.vandais)||0,99999);
-        status.textContent='🟪 99.999 VANDAIS LIBERADOS!';status.style.color='#d8b4fe';
-      }else if(code==='96051'){
-        ensureRegistered();
-        if(!Array.isArray(state.roster)) state.roster=[];
-        if(!Array.isArray(state.ravamRoster)) state.ravamRoster=[];
-        if(!state.roster.includes('ktrak')) state.roster.push('ktrak');
-        if(!state.ravamRoster.includes('ktrak')) state.ravamRoster.push('ktrak');
-        status.textContent='🌊⛰🔥💨 KTRAK CALZSAN LIBERADO NO MODO NORMAL E NO R.A.V.A.M!';status.style.color='#7dd3fc';
-      }else{
-        status.textContent='❌ Código inválido.';status.style.color='#f87171';try{SFX.play('menu_select');}catch(_){} return;
-      }
-      if(!Array.isArray(state.redeemedCodes))state.redeemedCodes=[];
-      if(!state.redeemedCodes.includes(code))state.redeemedCodes.push(code);
-      save(); try{SFX.play('menu_confirm');}catch(_){}
-    };
-    document.getElementById('btn-code-submit').onclick=submit;
-    input.addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
-    document.getElementById('btn-back').onclick=renderMenu; input.focus();
-  };
-
-  // ===== UI RAVAM custom =====
-  function ravamCharList(){
-    const base=window.RavamStudios||{};
-    const ids=['priya','kain','aria','leo','tharoth'];
-    const arr=[];
-    for(const id of ids){ if(base[id]) arr.push(base[id]); }
-    if(!arr.some(c=>c.id==='ktrak')) arr.push({...KTRAK,ravamOnly:true});
-    return arr;
-  }
-  function ravamMetaMap(){
-    const base=window.RavamStudios||{};
-    return {
-      priya:{name:'ALANA SORELLE',tag:'PRECISÃO',accent:'#ff765e',portrait:'ai-assets/characters/priya.png',stats:[32,82,1940],moves:[['J','RIFLE'],['I','SOCO'],['O','CHUTE'],['L','3 BOMBAS']]},
-      kain:{name:'KAIN',tag:'CAOS',accent:'#c0c7ff',portrait:'ai-assets/characters/kain.png',stats:[35,88,2180],moves:[['J','USAR PODER'],['H / P2 9','TROCAR PODER'],['I','SOCO'],['O','CHUTE'],['L','ESPELHO']]},
-      aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','NATUREZA'],['I','SOCO'],['O','CHUTE'],['L','CIPÓS']]},
-      leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','PEDRAS + PORTAL'],['I','SOCO'],['O','CHUTE'],['L','CHUVA DE ARMAS']]},
-      tharoth:{name:'THAROTH UMBRA',tag:'SOMBRAS',accent:'#ff4d62',portrait:'ai-assets/characters/tharoth.png',stats:[35,84,2120],moves:[['J','AREIA NEGRA'],['I','SOCO'],['O','CHUTE'],['L','CLONE DE SOMBRA']]},
-      ktrak:KTRAK_META
-    };
-  }
-  function ensureRavamEconomy(){
-    try{
-      if(typeof state==='undefined') return;
-      if(!Array.isArray(state.ravamRoster)) state.ravamRoster=[];
-      if(state.ravamModeUnlocked && !state.ravamRoster.includes('priya')) state.ravamRoster.unshift('priya');
-      state.ravamRoster=[...new Set(state.ravamRoster)];
-    }catch(_){ }
-  }
-  function rHasAccess(){ try{return !!state?.ravamModeUnlocked}catch(_){return false} }
-  function rIsOwned(id){ ensureRavamEconomy(); try{return !!state?.ravamModeUnlocked && state.ravamRoster.includes(id)}catch(_){return false} }
-  function rDisplay(id){ const m=ravamMetaMap()[id]; return m?.name || String(id||'').toUpperCase(); }
-  function rRandomRival(id){ const pool=ravamCharList().map(c=>c.id).filter(x=>x!==id); return pool[Math.floor(Math.random()*pool.length)]||'kain'; }
-  function rStoryRival(id){ return ({priya:'aria',aria:'kain',kain:'leo',leo:'tharoth',tharoth:'ktrak',ktrak:'priya'})[id] || 'kain'; }
-  let rPick1='', rPick2='', rMode='cpu';
-  function rLegendCard(id, selected=false, slot=''){
-    const meta=ravamMetaMap()[id]||KTRAK_META; const owned=rIsOwned(id); const char=ravamCharList().find(c=>c.id===id)||KTRAK;
-    const moves=(meta.moves||[]).slice(0,5).map(([k,t])=>`<span><kbd>${k}</kbd>${t}</span>`).join('');
-    const badge = owned ? (slot?`<b class="r17-slot-badge">${slot}</b>`:'<b class="r17-slot-badge">✓</b>') : '<b class="r17-slot-badge">🔒</b>';
-    return `<button class="ravam-legend-card ${id} ${selected?'selected':''} ${owned?'owned':'locked'}" data-r18-char="${id}" aria-pressed="${selected}">
-      <div class="ravam-portrait"><img src="${meta.portrait}" alt="${meta.name}">${badge}</div>
-      <div class="ravam-legend-meta"><small>${meta.tag}</small><h3>${meta.name}</h3><p>${(ABILITIES[id]?.desc)||(window.RavamStudios?.[id+'Ability']?.desc)||KTRAK_ABILITY.desc}</p></div>
-      <div class="ravam-legend-stats"><span><b>${meta.stats[0]}</b>DANO</span><span><b>${meta.stats[1]}</b>AGIL</span><span><b>${meta.stats[2]}</b>VIDA</span></div>
-      <div class="ravam-legend-moves">${moves}</div>
-      <div class="ravam-legend-foot">${owned?'PRONTO PARA LUTAR':'LENDA BLOQUEADA'}</div>
-    </button>`;
-  }
-  function patchRavamObject(){
-    const prev=window.RavamStudios||{};
-    const chars=ravamCharList();
-    const lookup=Object.fromEntries(chars.map(c=>[c.id,c]));
-    const api={...prev,...lookup,version:(prev.version||'18.2.0')+'-ktrak-fast',allCharacters:chars,all:chars,cost:prev.cost||2500,
-      isOwned:rIsOwned,unlockedIds:()=>{ensureRavamEconomy(); return (state?.ravamRoster||[]).filter(id=>chars.some(c=>c.id===id));},
-      displayName:rDisplay,
-      render:()=>window.renderRavamMode?.(),
-      openShop:()=>renderKtrakRavamShop()};
-    Object.defineProperty(api,'characters',{enumerable:true,get:()=>chars});
-    window.RavamStudios=api;
-    window.RavamV17={...(window.RavamV17||{}),ktrak:KTRAK,all:chars,renderHub:renderKtrakRavamHub,renderShop:renderKtrakRavamShop,renderSelect:renderKtrakRavamSelect};
-  }
-  function renderKtrakRavamHub(){
-    patchRavamObject(); ensureRavamEconomy(); screen='ravam'; try{drawCanvas();}catch(_){}
-    const a=document.getElementById('app'); if(!a) return;
-    a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen r17-screen ravam-panel">
-      <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>R.A.V.A.M STUDIOS</small><h2>ESCOLHA O <span>MODO</span></h2><p>Agora com Ktrak Calzsan no elenco e código 96051 para desbloqueio.</p></div><div class="ravam-head-wallet"><span>LENDA(S)</span><b>${(state?.ravamRoster||[]).length}/6</b><small>DESBLOQUEADAS</small></div></section>
-      <section class="r17-battle-grid">
-        <button id="r18-cpu" class="ravam-battle-card cpu"><span class="ravam-battle-icon">⚔</span><small>SOLO</small><h3>1P<b>×CPU</b></h3><p>Escolha sua Lenda e enfrente a CPU.</p><em>SELECIONAR →</em></button>
-        <button id="r18-pvp" class="ravam-battle-card pvp"><span class="ravam-battle-icon">◎</span><small>DUELO LOCAL</small><h3>1P<b>×2P</b></h3><p>Escolha P1 e depois P2.</p><em>SELECIONAR →</em></button>
-        <button id="r18-story" class="ravam-battle-card story"><span class="ravam-battle-icon">✦</span><small>CAPÍTULO</small><h3>MODO <b>HISTÓRIA</b></h3><p>Escolha um protagonista e lute num capítulo próprio.</p><em>SELECIONAR →</em></button>
-        <button id="r18-online" class="ravam-battle-card online"><span class="ravam-battle-icon">◎</span><small>INTERNET</small><h3>ONLINE <b>2P2</b></h3><p>Crie ou entre numa sala online com a seleção R.A.V.A.M.</p><em>CRIAR / ENTRAR →</em></button>
-      </section>
-      <div class="r17-hub-actions"><button id="r18-shop" class="btn big r17-shop-btn">🛒 LOJA R.A.V.A.M</button><button id="r18-back" class="btn">← VOLTAR AOS MODOS</button></div>
-    </div>`;
-    document.getElementById('r18-cpu').onclick=()=>renderKtrakRavamSelect('cpu');
-    document.getElementById('r18-pvp').onclick=()=>renderKtrakRavamSelect('pvp');
-    document.getElementById('r18-story').onclick=()=>renderKtrakRavamSelect('story');
-    document.getElementById('r18-shop').onclick=renderKtrakRavamShop;
-    document.getElementById('r18-online').onclick=()=>{const net=window.LutadorOnlineV16; try{SFX?.play?.('menu_confirm')}catch(_){} if(net?.openRavam)net.openRavam(); else alert('Modo online indisponível.');};
-    document.getElementById('r18-back').onclick=()=>window.renderModes?.();
-  }
-  function renderKtrakRavamShop(){
-    patchRavamObject(); ensureRavamEconomy(); screen='ravam'; try{drawCanvas();}catch(_){}
-    const a=document.getElementById('app'); if(!a) return;
-    const chars=ravamCharList(), meta=ravamMetaMap();
-    a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen r17-screen r17-shop-screen">
-      <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>COLEÇÃO R.A.V.A.M</small><h2>LOJA DE <span>LENDAS</span></h2><p>Ktrak Calzsan é liberado com o código <b>96051</b>.</p></div><div class="ravam-head-wallet"><span>SALDO</span><b>🟪 ${fmt(state?.vandais||0)}</b><small>VANDAIS</small></div></section>
-      <div class="r17-shop-grid">${chars.map(c=>{const id=c.id,m=meta[id]||KTRAK_META,owned=rIsOwned(id),cost=id==='priya'?0:(id==='ktrak'?96051:({kain:700,aria:650,leo:800,tharoth:900}[id]||0));
-        let btn='';
-        if(id==='priya') btn='<button class="btn" disabled>LENDA INICIAL</button>';
-        else if(id==='ktrak' && !owned) btn='<button class="btn" disabled>🔐 USE O CÓDIGO 96051</button>';
-        else if(owned) btn='<button class="btn" disabled>✓ DESBLOQUEADA</button>';
-        else btn=`<button class="btn big r18-buy-legend" data-id="${id}" ${Number(state?.vandais||0)>=cost?'':'disabled'}>🟪 COMPRAR · ${fmt(cost)}</button>`;
-        return `<article class="r17-shop-card ${id} ${owned?'owned':'locked'}"><div class="r17-shop-art"><img src="${m.portrait}" alt="${m.name}"><span>${owned?'✓ SUA LENDA':'🔒 BLOQUEADA'}</span></div><div class="r17-shop-body"><small>${m.tag}</small><h3>${m.name}</h3><p>${(ABILITIES[id]?.desc)||KTRAK_ABILITY.desc}</p><div class="r17-shop-stats"><span><b>${m.stats[0]}</b>DANO</span><span><b>${m.stats[1]}</b>AGIL</span><span><b>${m.stats[2]}</b>VIDA</span></div>${btn}</div></article>`;}).join('')}</div>
-      <div class="r17-hub-actions"><button id="r18-shop-back" class="btn big">← VOLTAR AO R.A.V.A.M</button></div>
-    </div>`;
-    document.querySelectorAll('.r18-buy-legend').forEach(b=>b.onclick=()=>{
-      const id=b.dataset.id,cost=({kain:700,aria:650,leo:800,tharoth:900}[id]||0); if(rIsOwned(id)) return;
-      if((Number(state.vandais)||0)<cost){ alert('VANDAIS INSUFICIENTES'); return; }
-      state.vandais=Math.max(0,(Number(state.vandais)||0)-cost); state.ravamRoster.push(id); state.ravamRoster=[...new Set(state.ravamRoster)]; save(); renderKtrakRavamShop();
-    });
-    document.getElementById('r18-shop-back').onclick=renderKtrakRavamHub;
-  }
-  function renderKtrakRavamSelect(mode='cpu'){
-    patchRavamObject(); ensureRavamEconomy(); rMode=mode; screen='ravam'; try{drawCanvas();}catch(_){}
-    const a=document.getElementById('app'); if(!a) return;
-    const p1=rPick1,p2=rPick2,pickingP2=mode==='pvp'&&!!p1&&!p2,ready=mode==='pvp'?!!(p1&&p2):!!p1;
-    const opponent=mode==='cpu'&&p1?rRandomRival(p1):mode==='story'&&p1?rStoryRival(p1):'';
-    a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen ravam-v15 r17-screen select-mode-${mode}">
-      <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>${mode==='pvp'?'DUELO LOCAL':mode==='story'?'CAPÍTULO R.A.V.A.M':'COMBATE SOLO'}</small><h2>SELEÇÃO DE <span>LENDAS</span></h2><p>${mode==='pvp'?'Escolha primeiro o P1 e depois o P2.':mode==='story'?'Escolha o protagonista do capítulo.':'Escolha sua Lenda para enfrentar a CPU.'}</p></div><button id="r18-change-mode" class="ravam-mini-back">← TROCAR MODO</button></section>
-      <section class="ravam-match-slots ${mode}"><div class="ravam-slot p1 ${p1?'filled':''} ${!p1||(!pickingP2&&mode!=='pvp')?'active':''}"><small>${mode==='story'?'PROTAGONISTA':'JOGADOR 1'}</small><b>${p1?rDisplay(p1):'AGUARDANDO'}</b><span>${p1?'PRONTO':'ESCOLHA UMA LENDA'}</span></div><div class="ravam-versus">VS</div><div class="ravam-slot p2 ${(p2||opponent)?'filled':''} ${pickingP2?'active':''}"><small>${mode==='pvp'?'JOGADOR 2':mode==='story'?'RIVAL DO CAPÍTULO':'CPU'}</small><b>${mode==='pvp'?(p2?rDisplay(p2):'AGUARDANDO'):(opponent?rDisplay(opponent):'AGUARDANDO')}</b><span>${mode==='pvp'?(p2?'PRONTO':'ESCOLHA UMA LENDA'):(p1?'DEFINIDO AUTOMATICAMENTE':'AGUARDANDO')}</span></div></section>
-      <div class="ravam-section-title"><span>02</span><div><small>PASSO DOIS</small><h3>${pickingP2?'P2 · ESCOLHA SUA LENDA':'ESCOLHA SUA LENDA'}</h3></div></div>
-      <section class="ravam-roster-grid ravam-pick-grid r17-pick-grid">${ravamCharList().map(c=>rLegendCard(c.id,mode==='pvp'?(p1===c.id||p2===c.id):p1===c.id,mode==='pvp'?(p1===c.id?'P1':p2===c.id?'P2':''):(p1===c.id?'P1':''))).join('')}</section>
-      <div class="ravam-selection-help">Lendas com cadeado precisam ser adquiridas na Loja R.A.V.A.M. Ktrak é desbloqueado com o código 96051.</div>
-      <div class="ravam-footer-actions"><button id="r18-confirm" class="btn big" ${ready?'':'disabled'}>${mode==='story'?'INICIAR HISTÓRIA':mode==='pvp'?'INICIAR 1P × 2P':'INICIAR 1P × CPU'}</button><button id="r18-open-shop" class="btn">🛒 LOJA R.A.V.A.M</button></div>
-    </div>`;
-    document.querySelectorAll('[data-r18-char]').forEach(el=>el.onclick=()=>{
-      const id=el.dataset.r18Char; if(!rIsOwned(id)){ renderKtrakRavamShop(); return; }
-      try{SFX?.play?.('menu_select')}catch(_){}
-      if(mode==='pvp'){
-        if(!rPick1 || rPick2){ rPick1=id; rPick2=''; }
-        else if(id===rPick1){ return; }
-        else rPick2=id;
-      } else rPick1=id;
-      renderKtrakRavamSelect(mode);
-    });
-    document.getElementById('r18-change-mode').onclick=()=>{rPick1='';rPick2='';renderKtrakRavamHub();};
-    document.getElementById('r18-open-shop').onclick=renderKtrakRavamShop;
-    const c=document.getElementById('r18-confirm'); if(c&&!c.disabled) c.onclick=()=>{
-      const a=rPick1; if(!a||!rIsOwned(a)) return;
-      const b=mode==='pvp'?rPick2:mode==='story'?rStoryRival(a):rRandomRival(a); if(!b) return;
-      try{SFX?.play?.('menu_confirm')}catch(_){}
-      window.startFight(a,mode==='pvp'?'pvp':'ravam',b);
-      try{ if(fight){ fight.ravamStudios=true; fight.ravamSelectionMode=mode; } }catch(_){}
-    };
-  }
-  window.renderRavamMode=function(){ patchRavamObject(); ensureRavamEconomy(); rPick1=''; rPick2=''; if(!rHasAccess()){ if(typeof oldRenderRavamMode==='function') return oldRenderRavamMode.apply(this,arguments); return renderKtrakRavamHub(); } renderKtrakRavamHub(); };
-  patchRavamObject();
-
-  const oldRenderModes = typeof window.renderModes==='function' ? window.renderModes : null;
-  if(oldRenderModes){
-    window.renderModes=function(){
-      const r=oldRenderModes.apply(this,arguments);
-      setTimeout(()=>{const card=document.getElementById('mode-ravam'); if(!card)return; const p=card.querySelector('p'); if(p)p.textContent=rHasAccess()?`Loja própria · ${(state?.ravamRoster||[]).length}/6 Lendas desbloqueadas · Ktrak via código 96051.`:'Adquira o modo. Ktrak é desbloqueado com o código 96051 e pode ser usado também no normal.';},0);
-      return r;
-    }
-  }
-
-  // ===== combate / input =====
-  function opp(p,f=typeof fight!=='undefined'?fight:null){return f?(p===f.p1?f.p2:f.p1):null}
-  function baseDmg(p,m=1){ return (Number(p?.dmg)||33) * (p?.ktrakAvatarT>0 ? 2 : 1) * m; }
-  function addBurn(victim,owner,dur=1){ victim.ktrakBurnT=Math.max(victim.ktrakBurnT||0,dur); victim.ktrakBurnTick=0.2; victim.ktrakBurnOwner=owner; }
-  function ktrakAttack(p){
-    const f=typeof fight!=='undefined'?fight:null; if(!f||!p||p.state==='ko') return; const t=opp(p,f); if(!t) return;
-    f.ktrakShots=f.ktrakShots||[]; f.ktrakRocks=f.ktrakRocks||[]; f.ktrakFx=f.ktrakFx||[];
-    const el=ktrakElement(p), dir=p.facing||1, sy=(typeof bodyY==='function'?bodyY(p):GROUND_Y-(p.y||0)-82)-10;
-    const avatar= p.ktrakAvatarT>0;
-    if(el.id==='earth'){
-      f.ktrakRocks.push({ownerSlot:p.playerSlot,targetSlot:t.playerSlot,x:t.x,y:58,vy:0,spin:(Math.random()>.5?1:-1)*(1.8+Math.random()*1.2),life:1.7,dmg:baseDmg(p,1.0),dead:false,owner:p,dust:0});
-      ktrakFx(p,'TERRA',el.accent,.85);
-    }else{
-      const speed=el.id==='air'?980:el.id==='water'?790:845;
-      f.ktrakShots.push({ownerSlot:p.playerSlot,targetSlot:t.playerSlot,x:p.x+dir*58,y:sy,vx:dir*speed,vy:0,life:1.3,el:el.id,dmg:baseDmg(p,el.id==='air'?.75:el.id==='water'?.78:el.id==='fire'?.76:.82),dir,dead:false,phase:Math.random()*6.28,trail:[]});
-      ktrakFx(p,el.name,el.accent,.8);
-    }
-    p.throwCd=p.human?.56:.7; p.ktrakCastT=.28; try{setState?.(p,'throw')}catch(_){}; try{SFX?.play?.('attack_light',.78)}catch(_){}
-  }
-  function ktrakAvatar(p){
-    if(!p||p.state==='ko') return;
-    p.ktrakAvatarT=10; p.ktrakAvatarCastT=.95; p.specialCd=9.2;
-    try{setState?.(p,'special')}catch(_){};
-    ktrakFx(p,'MODO AVATAR','#6bc6ff',1.05); try{spark?.(p.x,(typeof bodyY==='function'?bodyY(p):GROUND_Y-(p.y||0)-80)-6,'#6bc6ff',28)}catch(_){}
-  }
-  const oldPlayerInput = typeof playerInput==='function' ? playerInput : null;
-  if(oldPlayerInput) playerInput=function(p){
-    oldPlayerInput.apply(this,arguments);
-    if(!p||p.id!=='ktrak'||p.state==='ko') return;
-    const isP2=p.playerSlot==='p2', alt=isP2?'Numpad9':'KeyH';
-    if(window.justPressed && window.justPressed[alt] && (p.ktrakSwapCd||0)<=0){ toggleKtrakElement(p); window.justPressed[alt]=false; }
-  };
-  const oldThrow = typeof throwProjectile==='function' ? throwProjectile : null;
-  if(oldThrow) throwProjectile=function(p){ if(p?.id==='ktrak'){ktrakAttack(p); return;} return oldThrow.apply(this,arguments); };
-  const oldSpecial = typeof castSpecial==='function' ? castSpecial : null;
-  if(oldSpecial) castSpecial=function(p){ if(p?.id==='ktrak'){ktrakAvatar(p); return;} return oldSpecial.apply(this,arguments); };
-
-  function strikeInfo(p){
-    const kind=p?.proMove?.kind;if(kind!=='punch'&&kind!=='kick'&&kind!=='uppercut')return null;
-    const duration=Math.max(.12,Number(p.proMove?.duration)||.34),n=clamp((Number(p.proMove?.time)||0)/duration,0,1);
-    if(n<.24)return {kind,phase:'windup',t:smooth(n/.24)};
-    if(n<.67)return {kind,phase:'impact',t:easeOut((n-.24)/.43)};
-    return {kind,phase:'recover',t:smooth((n-.67)/.33)};
-  }
-  function ktrakPose(p){
-    const strike=strikeInfo(p); if(strike) return {frame:strike.kind==='kick'?KSPR.kick:KSPR.punch,strike};
-    if(p.state==='ko'||(p.proKnockdownT>0&&p.onGround)) return {frame:KSPR.air,ko:true};
-    if(p.defend||p.state==='defend'||p.state==='crouch') return {frame:KSPR.guard,guard:true};
-    if(p.state==='special'||p.state==='throw'||(p.ktrakCastT||0)>0||(p.ktrakAvatarCastT||0)>0) return {frame:KSPR.special,cast:true};
-    if(p.state==='hurt'||p.hitFlash>.035) return {frame:KSPR.guard,hurt:true};
-    if(!p.onGround) return {frame:KSPR.air,air:true};
-    if(Math.abs(p.vx||0)>7){ const dist=Number(p.walkDistance||p.ravamWalkDist||0),raw=dist/22,step=Math.floor(raw)%6,frames=[0,1,0,2,0,1]; return {frame:frames[step],walk:true,phase:raw*Math.PI/3}; }
-    return {frame:0,idle:true};
-  }
-  function drawFixed(ctx,img,scale,alpha=1){ if(!img?.complete||!img.naturalWidth) return false; ctx.globalAlpha*=alpha; const w=img.naturalWidth*scale,h=img.naturalHeight*scale; ctx.drawImage(img,-w/2,-h,w,h); return true; }
-  function drawKtrak(ctx,p){
-    const pose=ktrakPose(p), frame=pose.frame, img=ktrakSprite(frame); if(!img?.complete||!img.naturalWidth) return false;
-    const H=228, baseScale=H/KSPR.ref, frameScale=[1,.985,.93,.95,.92,.94][frame]||1;
-    const scale=baseScale*frameScale;
-    const floor=typeof groundLevel==='function'?groundLevel(p):GROUND_Y-(p.y||0), time=performance.now()/1000;
-    const air=Math.max(0,Number(p.y)||0), sh=Math.max(.32,1-air/420), avatar=(p.ktrakAvatarT||0)>0;
-    ctx.save(); ctx.globalAlpha=.30*sh; ctx.fillStyle='#000'; ctx.beginPath(); ctx.ellipse(p.x,GROUND_Y+4,40*sh,8*sh,0,0,Math.PI*2); ctx.fill(); ctx.restore();
-    ctx.save(); ctx.translate(p.x,floor); ctx.scale(p.facing||1,1); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
-    if(pose.idle){ const b=Math.sin(time*2.4+(p.playerSlot==='p2'?1.2:0)); ctx.translate(0,-1.8-1.25*b); ctx.rotate(Math.sin(time*1.2)*.008); }
-    if(pose.walk){ const ph=pose.phase||0; ctx.translate(Math.sin(ph)*1.8,-Math.abs(Math.sin(ph))*2.9); ctx.rotate(Math.sin(ph)*.016); }
-    if(pose.air){ const vy=Number(p.vy)||0; ctx.translate(1.5,-4); ctx.rotate(clamp(-vy/980,-.075,.075)); }
-    if(pose.cast){ const t=clamp(Number(p.stateT)||0,0,.55)/.55,e=easeOut(t); ctx.translate(8*e,-3*e); ctx.rotate(-.035*e); }
-    if(pose.strike){ const {kind,phase,t}=pose.strike; if(phase==='windup'){ctx.translate(-10*t,2*t);ctx.rotate(.045*t)} else if(phase==='impact'){ const amt=kind==='kick'?23:18; ctx.translate(8+amt*t,-(kind==='kick'?7:3.5)*t); ctx.rotate((kind==='kick'?-.10:-.068)*(1-.24*t)); } else { const e=1-t; ctx.translate(8*e,-2*e); ctx.rotate(-.028*e); } }
-    if(pose.guard) ctx.translate(-1,0.5); if(pose.hurt){ctx.translate(-5,1);ctx.rotate(.03)} if(pose.ko){ctx.translate(-12,-10);ctx.rotate(-Math.PI/2);ctx.translate(0,H*.34)}
-    if(avatar){
-      ctx.save();
-      ctx.globalCompositeOperation='lighter';
-      ctx.globalAlpha=.11+.05*Math.sin(time*7.8);
-      ctx.shadowColor='#53c8ff';
-      ctx.shadowBlur=18;
-      ctx.fillStyle='#56bbff';
-      ctx.beginPath();ctx.ellipse(0,-116,58,98,0,0,Math.PI*2);ctx.fill();
-      ctx.restore();
-    }
-    drawFixed(ctx,img,scale,1);
-    if(avatar){
-      const glow=.86+.14*Math.sin(performance.now()/88);
-      ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.95*glow;
-      ctx.fillStyle='#8fe1ff'; ctx.shadowColor='#7fd6ff'; ctx.shadowBlur=20;
-      ctx.beginPath(); ctx.arc(-8,-194,5.4,0,Math.PI*2); ctx.arc(8,-194,5.4,0,Math.PI*2); ctx.fill();
-    }
-    ctx.restore();
-    return true;
-  }
-  const oldDrawFighter = typeof drawFighter==='function' ? drawFighter : null;
-  if(oldDrawFighter) drawFighter=function(ctx,p){ if(p?.id==='ktrak'&&drawKtrak(ctx,p)) return; return oldDrawFighter.apply(this,arguments); };
-
-  function hit(victim,amount,src,dir,type){ try{return typeof damage==='function'?damage(victim,amount,src,dir,type):undefined}catch(_){} }
-  function ktrakHitboxY(target,y,margin){ try{return hitboxY(target,y,margin)}catch(_){ const ty=(typeof bodyY==='function'?bodyY(target):GROUND_Y-(target.y||0)-70); return Math.abs(ty-y)<margin; } }
-  function updateKtrak(f,dt){
-    if(!f) return;
-    f.ktrakShots=f.ktrakShots||[]; f.ktrakRocks=f.ktrakRocks||[]; f.ktrakFx=f.ktrakFx||[];
-    for(const p of [f.p1,f.p2]){
-      if(!p) continue;
-      p.ktrakSwapCd=Math.max(0,(p.ktrakSwapCd||0)-dt);
-      p.ktrakCastT=Math.max(0,(p.ktrakCastT||0)-dt);
-      p.ktrakAvatarCastT=Math.max(0,(p.ktrakAvatarCastT||0)-dt);
-      p.ktrakAvatarT=Math.max(0,(p.ktrakAvatarT||0)-dt);
-      p.ktrakIndicatorT=Math.max(0,(p.ktrakIndicatorT||0)-dt);
-      if(p.ktrakBurnT>0){ p.ktrakBurnT-=dt; p.ktrakBurnTick=(p.ktrakBurnTick||0)-dt; if(p.ktrakBurnTick<=0 && p.ktrakBurnT>0){ p.ktrakBurnTick=.25; const owner=p.ktrakBurnOwner || (p===f.p1?f.p2:f.p1); hit(p,4,owner,0,'ktrak-burn'); try{spark?.(p.x,(typeof bodyY==='function'?bodyY(p):GROUND_Y-(p.y||0)-70),'#ff8b3d',8)}catch(_){} } }
-    }
-    for(const s of f.ktrakShots){
-      if(s.dead) continue; s.life-=dt; s.phase=(s.phase||0)+dt*10; s.x+=(s.vx||0)*dt; s.y+=(s.vy||0)*dt + (s.el==='water'?Math.sin(s.phase)*6*dt:s.el==='fire'?Math.sin(s.phase*.7)*2.5*dt:s.el==='air'?Math.sin(s.phase*1.5)*1.8*dt:0);
-      const owner=s.owner|| (s.ownerSlot==='p2'?f.p2:f.p1), target=s.target|| (s.targetSlot==='p2'?f.p2:f.p1);
-      if(target&&target.state!=='ko'&&Math.abs(s.x-target.x)<54&&ktrakHitboxY(target,s.y,26)){
-        s.dead=true; const dir=s.dir||((s.vx||1)>0?1:-1);
-        hit(target,s.dmg,owner,dir,'ktrak-'+s.el);
-        if(s.el==='water'){ target.freezeT=Math.max(target.freezeT||0,1.0); target.vx=0; target.vy=0; }
-        else if(s.el==='fire'){ addBurn(target,owner,1.0); }
-        else if(s.el==='air'){ target.vx += dir*235; }
-        try{spark?.(s.x,s.y,s.el==='water'?'#7dd9ff':s.el==='fire'?'#ff8332':s.el==='air'?'#e8f8ff':'#d6aa6b',18)}catch(_){}
-      }
-      if(s.life<=0||s.x<-100||s.x>W+100) s.dead=true;
-    }
-    f.ktrakShots=f.ktrakShots.filter(s=>!s.dead);
-    for(const r of f.ktrakRocks){
-      if(r.dead) continue; r.life-=dt; r.dust=(r.dust||0)+dt; r.vy=(r.vy||0)+1200*dt; r.y+=(r.vy||0)*dt;
-      const owner=r.owner || (r.ownerSlot==='p2'?f.p2:f.p1), target=r.target || (r.targetSlot==='p2'?f.p2:f.p1);
-      const ty=target?(typeof bodyY==='function'?bodyY(target):GROUND_Y-(target.y||0)-70):GROUND_Y-70;
-      if(target&&target.state!=='ko' && r.y>=ty-10){ r.dead=true; if(Math.abs(r.x-target.x)<78){ hit(target,r.dmg,owner,target.x>=owner.x?1:-1,'ktrak-earth'); target.vx += (target.x>=owner.x?1:-1)*120; } try{spark?.(r.x,ty,'#d8a46a',28)}catch(_){} }
-      if(r.y>GROUND_Y+40||r.life<=0) r.dead=true;
-    }
-    f.ktrakRocks=f.ktrakRocks.filter(r=>!r.dead);
-    for(const fx of f.ktrakFx){ fx.life-=dt; fx.y-=18*dt; } f.ktrakFx=f.ktrakFx.filter(fx=>fx.life>0);
-  }
-  const oldUpdate = typeof update==='function' ? update : null;
-  if(oldUpdate) update=function(f,dt){ const r=oldUpdate.apply(this,arguments); if(!f?.paused) updateKtrak(f,dt); return r; };
-
-  function drawKtrakFx(ctx,f){
-    if(!f) return;
-    for(const s of (f.ktrakShots||[])){
-      ctx.save(); ctx.translate(s.x,s.y); ctx.globalCompositeOperation='lighter';
-      if(s.el==='water'){
-        ctx.shadowColor='#7be5ff'; ctx.shadowBlur=18;
-        for(let i=0;i<3;i++){ ctx.globalAlpha=.25-.06*i; ctx.fillStyle=['#bff7ff','#76dcff','#39bfff'][i]; ctx.beginPath(); ctx.ellipse(-i*6,Math.sin((s.phase||0)+i)*2,16-i*3,8-i*1.5,0,0,Math.PI*2); ctx.fill(); }
-        ctx.globalAlpha=1; ctx.fillStyle='#d6ffff'; ctx.beginPath(); ctx.arc(8,-2,3.4,0,Math.PI*2); ctx.fill();
-      }else if(s.el==='fire'){
-        ctx.shadowColor='#ff8a33'; ctx.shadowBlur=22;
-        for(let i=0;i<4;i++){ const off=-i*6; ctx.globalAlpha=.25-.05*i; ctx.fillStyle=['#fff1ad','#ffb54d','#ff6f2d','#d93a13'][i]; ctx.beginPath(); ctx.ellipse(off,Math.sin((s.phase||0)+i)*2,15-i*2.5,9-i*1.2,0,0,Math.PI*2); ctx.fill(); }
-        ctx.globalAlpha=1;
-      }else if(s.el==='air'){
-        ctx.shadowColor='#dcf8ff'; ctx.shadowBlur=18; ctx.strokeStyle='#eefcff'; ctx.lineWidth=3.2;
-        for(let i=0;i<3;i++){ ctx.globalAlpha=.55-.13*i; ctx.beginPath(); ctx.arc(-4*i,0,8+i*5,-1.2+.22*i,1.1+.18*i); ctx.stroke(); }
-      }
-      ctx.restore();
-    }
-    for(const r of (f.ktrakRocks||[])){
-      ctx.save(); ctx.translate(r.x,r.y); ctx.rotate((performance.now()/520)*(r.spin||1));
-      ctx.shadowBlur=14; ctx.shadowColor='#d6ae77';
-      for(let i=0;i<3;i++){ ctx.globalAlpha=.16-.04*i; ctx.fillStyle=['#f5deb0','#d1a56d','#7a5a3a'][i]; ctx.beginPath(); ctx.moveTo(-24+i*2,-20+i*2); ctx.lineTo(12,-26+i); ctx.lineTo(26,0); ctx.lineTo(10,24-i); ctx.lineTo(-28+i*2,16-i); ctx.closePath(); ctx.fill(); }
-      ctx.globalAlpha=1; ctx.fillStyle='#7a5a3a'; ctx.strokeStyle='#e8c58a'; ctx.lineWidth=2.2; ctx.beginPath(); ctx.moveTo(-22,-19); ctx.lineTo(13,-24); ctx.lineTo(25,1); ctx.lineTo(9,23); ctx.lineTo(-26,14); ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.restore();
-      ctx.save(); ctx.translate(r.x,GROUND_Y+2); ctx.globalAlpha=Math.max(0,.22-Math.abs(r.y-GROUND_Y)/600); ctx.fillStyle='#cda678'; ctx.beginPath(); ctx.ellipse(0,0,34,8,0,0,Math.PI*2); ctx.fill(); ctx.restore();
-    }
-    for(const e of (f.ktrakFx||[])){
-      const a=clamp(e.life/(e.maxLife||1),0,1); ctx.save(); ctx.translate(e.x,e.y); ctx.globalAlpha=a; ctx.fillStyle=e.color||'#fff'; ctx.shadowColor=e.color||'#fff'; ctx.shadowBlur=14; ctx.font='900 16px Oxanium, sans-serif'; ctx.textAlign='center'; ctx.fillText(e.text,0,0); ctx.restore();
-    }
-    // indicador do elemento / avatar acima dos lutadores (aparece e depois some)
-    for(const p of [f.p1,f.p2]){
-      if(!p||p.id!=='ktrak'||p.state==='ko') continue;
-      const showT=(p.ktrakIndicatorT||0);
-      if(showT<=0) continue;
-      const label=p.ktrakIndicatorLabel || ktrakElement(p).name;
-      const color=p.ktrakIndicatorColor || ktrakElement(p).accent;
-      const y=(typeof bodyY==='function'?bodyY(p):GROUND_Y-(p.y||0)-80)-124;
-      const w=Math.max(92, label.length*8 + 28);
-      const alpha=clamp(showT/.22,0,1) * clamp((showT+0.15)/1.0,0,1);
-      const rise=(1-clamp(showT/1.6,0,1))*8;
-      ctx.save();
-      ctx.globalAlpha=.95*alpha;
-      ctx.translate(p.x,y-rise);
-      ctx.textAlign='center';
-      ctx.font='900 12px Oxanium, sans-serif';
-      ctx.fillStyle='rgba(2,6,16,.78)';
-      ctx.strokeStyle=color;
-      ctx.lineWidth=2;
-      ctx.shadowColor=color;
-      ctx.shadowBlur=14;
-      ctx.beginPath();
-      if(ctx.roundRect){ ctx.roundRect(-w/2,-13,w,24,8); } else { ctx.rect(-w/2,-13,w,24); }
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle=color;
-      ctx.fillText(label,0,4);
-      ctx.restore();
-    }
-  }
-  const oldDraw = typeof draw==='function' ? draw : null;
-  if(oldDraw) draw=function(f){ const r=oldDraw.apply(this,arguments); try{ const ctx=canvas.getContext('2d'); drawKtrakFx(ctx,f); }catch(_){} return r; };
 })();
