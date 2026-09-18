@@ -623,6 +623,9 @@ body {
 .fighter-card.mk-fighter[data-id="nine85"]{--char-color:#ff1744}
 .fighter-card.mk-fighter[data-id="ztaaa"]{--char-color:#ff3030}
 .fighter-card.mk-fighter[data-id="hock"]{--char-color:#ff9f1c}
+.fighter-card.mk-fighter[data-id="laranja"]{--char-color:#ff5b22}
+.fighter-card.mk-fighter[data-id="ktrak"]{--char-color:#e65b2a}
+.fighter-card.mk-fighter[data-id="jone"]{--char-color:#c8b79e}
 .fighter-card.mk-fighter[data-id="vlad"]{--char-color:#ef4444}
 
 .fighter-card .mk-portrait .face,.mk-detail .mk-dportrait .face{
@@ -849,6 +852,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <div id="app"></div>
 <script>
 const ROSTER = [
+  { id: 'laranja', name: 'Laranja', color: '#ff5b22', hp: 1880, dmg: 33, speed: 165, price: 0, weapon: 'speedCombo', special: 'speedTornado', secret: true, codeOnly: true, portrait: 'ai-assets/characters/laranja.png' },
+  { id: 'jone', name: 'Jone Pikes', color: '#c8b79e', hp: 1940, dmg: 34, speed: 88, price: 0, weapon: 'jonePoison', special: 'joneSmoke', secret: true, codeOnly: true, portrait: 'ai-assets/characters/jone.png' },
+  { id: 'ktrak', name: 'Ktrak Calzsan', color: '#e65b2a', hp: 2100, dmg: 36, speed: 86, price: 0, weapon: 'ktrakElements', special: 'ktrakAvatar', secret: true, codeOnly: true, portrait: 'ai-assets/characters/ktrak.png' },
   { id: 'ztaaa', name: 'ZTAAA', color: '#ff3030', hp: 7350, dmg: 85, speed: 105, price: 0, weapon: 'knife', special: 'rain', secret: true },
   { id: 'knunka', name: 'Knunka', color: '#3b82f6', hp: 1950, dmg: 34, speed: 88, price: 1800, weapon: 'knunkaDashRay', special: 'knunkaBlackFire' },
   { id: 'nine85', name: '985', color: '#ff1744', hp: 1860, dmg: 44, speed: 80, price: 1800, weapon: 'dataSpear', special: 'systemCrash' },
@@ -879,6 +885,9 @@ const ROSTER = [
 ];
 
 const ABILITIES = {
+  laranja:{ flag:'PRIME', role:'Velocista Supersônico', tag:'PRIME · VELOCIDADE ×3', desc:'Movimento 3× mais rápido. J conecta 4 socos rápidos. L ativa uma Cadeia Relâmpago Suprema com múltiplos impactos e finalização explosiva.' },
+  jone:   { flag:'PRIME', role:'Tático do Veneno', tag:'PRIME', desc:'Jone Pikes arremessa veneno. O super lança uma bomba de névoa tóxica ampliada, causa explosão inicial, envenena e mantém dano progressivo por mais tempo.' },
+  ktrak:  { flag:'PRIME', role:'Mestre dos Quatro Elementos', tag:'PRIME', desc:'J usa o elemento selecionado. L ativa o MODO AVATAR por 8s e dobra o dano; durante o Avatar, J vira um golpe supremo: Água congela 4s, Terra cria paredes e uma rocha esmagadora, Fogo incendeia o mapa e Ar lança um tornado que ergue e derruba o rival.' },
   frogh:  { flag:'MUTA',role:'Sapo Mimético', tag:'SECRETO', desc:'Copia o ataque e o super do inimigo juntos. Com L, vira outro campeão por 5s, cura toda a vida e depois retorna ao normal.' },
   jimmy:  { flag:'THN',role:'Senhor dos Raios', tag:'LENDÁRIO', desc:'Lança um raio para o alto que cai exatamente sobre o inimigo. No super, Jimmy voa por 5 segundos enquanto convoca raios continuamente.' },
   flame:  { flag:'FIRE',role:'Mestre do Fogo',        tag:'OFENSIVO', desc:'Lança bolas de fogo e ergue paredes de fogo que queimam e bloqueiam a arena.' },
@@ -932,7 +941,7 @@ function charSound(p, slot){
 }
 
 function defaultPlayer() {
-  return { coins: 0, psy: 0, vandais: 0, roster: ['rojo'], storyShopAvailable: [], ztaaaUnlocked: false, froghUnlocked: false, kloppUnlocked: false,
+  return { coins: 0, psy: 0, vandais: 0, roster: ['rojo'], storyShopAvailable: [], ztaaaUnlocked: false, froghUnlocked: false, kloppUnlocked: false, ktrakUnlocked: false,
     storyProgress: 0, storyComplete: false };
 }
 
@@ -1182,7 +1191,7 @@ function renderCodes() {
       list.id='secret-code-list';
       list.className='v6-code-hint';
       list.style.cssText='margin-top:18px;transition:opacity .35s ease,transform .35s ease;opacity:1;transform:translateY(0)';
-      list.innerHTML='<b>📋 CÓDIGOS EXISTENTES</b><span><b>010</b> · mostrar esta lista por 10 segundos</span><span><b>00011</b> · liberar todos os campeões principais</span><span><b>121200</b> · 99.999 Gold</span><span><b>01010101</b> · 99.999 Vandais</span>';
+      list.innerHTML='<b>📋 CÓDIGOS EXISTENTES</b><span><b>010</b> · mostrar esta lista por 10 segundos</span><span><b>00011</b> · liberar todos os campeões principais</span><span><b>96051</b> · liberar KTRAK CALZSAN no Normal + R.A.V.A.M</span><span><b>052026</b> · liberar LARANJA no Normal + R.A.V.A.M</span><span><b>09871</b> · liberar JONE PIKES no Normal + R.A.V.A.M</span><span><b>121200</b> · 99.999 Gold</span><span><b>01010101</b> · 99.999 Vandais</span>';
       const back=document.getElementById('btn-back');
       back?.parentNode?.insertBefore(list,back);
       clearTimeout(window.__lutadorCodeListTimer);
@@ -1196,9 +1205,35 @@ function renderCodes() {
       input.value='';SFX.play('menu_confirm');return;
     }
     if(code==='00011'){
-      CHARACTERS.forEach(c=>{if(c.ravamOnly)return;if(!state.roster.includes(c.id))state.roster.push(c.id);});
+      CHARACTERS.forEach(c=>{if(c.ravamOnly||c.codeOnly)return;if(!state.roster.includes(c.id))state.roster.push(c.id);});
       state.ztaaaUnlocked=true;state.froghUnlocked=true;state.kloppUnlocked=true;
       status.textContent='🔓 TODOS OS CAMPEÕES FORAM LIBERADOS!';status.style.color='#7dd3fc';
+    }else if(code==='96051'){
+      if(!Array.isArray(state.roster))state.roster=[];
+      if(!state.roster.includes('ktrak'))state.roster.push('ktrak');
+      state.ktrakUnlocked=true;
+      state.ravamModeUnlocked=true;
+      state.ravamStoreVersion=Math.max(17,Number(state.ravamStoreVersion)||0);
+      if(!Array.isArray(state.ravamRoster))state.ravamRoster=[];
+      if(!state.ravamRoster.includes('priya'))state.ravamRoster.unshift('priya');
+      if(!state.ravamRoster.includes('ktrak'))state.ravamRoster.push('ktrak');
+      status.textContent='🌊🪨🔥🌪️ KTRAK CALZSAN LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#67e8f9';
+    }else if(code==='052026'){
+      if(!Array.isArray(state.roster))state.roster=[];
+      if(!state.roster.includes('laranja'))state.roster.push('laranja');
+      state.ravamModeUnlocked=true;state.ravamStoreVersion=Math.max(17,Number(state.ravamStoreVersion)||0);
+      if(!Array.isArray(state.ravamRoster))state.ravamRoster=[];
+      if(!state.ravamRoster.includes('priya'))state.ravamRoster.unshift('priya');
+      if(!state.ravamRoster.includes('laranja'))state.ravamRoster.push('laranja');
+      status.textContent='🌪️⚡ LARANJA LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#fb923c';
+    }else if(code==='09871'){
+      if(!Array.isArray(state.roster))state.roster=[];
+      if(!state.roster.includes('jone'))state.roster.push('jone');
+      state.ravamModeUnlocked=true;state.ravamStoreVersion=Math.max(17,Number(state.ravamStoreVersion)||0);
+      if(!Array.isArray(state.ravamRoster))state.ravamRoster=[];
+      if(!state.ravamRoster.includes('priya'))state.ravamRoster.unshift('priya');
+      if(!state.ravamRoster.includes('jone'))state.ravamRoster.push('jone');
+      status.textContent='☣️ JONE PIKES LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#d7c7ae';
     }else if(code==='121200'){
       state.coins=Math.max(Number(state.coins)||0,99999);
       status.textContent='💰 99.999 GOLD LIBERADO!';status.style.color='#facc15';
@@ -1707,7 +1742,7 @@ function shopCard(c) {
   return `
     <div class="fighter-card fighter-card mk-fighter shop-fighter ${owned ? 'owned' : 'locked'}" data-id="${c.id}">
       <div class="mk-portrait" style="background:radial-gradient(circle at 50% 30%, ${c.color}cc, ${c.color}22 70%, transparent)">
-        <span class="face">${letterFace(c)}</span>
+        ${portraitInner(c)}
         <div class="mk-portrait-shade"></div>
         <div class="mk-nameplate"><h3>${c.name}</h3></div>
       </div>
@@ -1767,6 +1802,14 @@ function letterFace(c) {
   };
   const [glyph,tag] = face[c.name] || ['◆','FIGHTER'];
   return `<span class="char-glyph">${glyph}</span><span class="char-glyph-tag">${tag}</span>`;
+}
+
+function portraitInner(c, detail=false) {
+  if (c?.portrait) {
+    const cls = detail ? 'face-img detail' : 'face-img';
+    return `<img src="${c.portrait}" alt="${c.name}" class="${cls}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 14px 18px rgba(0,0,0,.62))">`;
+  }
+  return `<span class="face">${letterFace(c)}</span>`;
 }
 
 function renderChaosOpponentSelect(){
@@ -1831,7 +1874,7 @@ function renderSelect(mode = selectedMode) {
           return `
           <div class="fighter-card fighter-card mk-fighter pickable ${owned ? '' : 'locked'}" data-id="${c.id}">
             <div class="mk-portrait" style="background:radial-gradient(circle at 50% 30%, ${c.color}cc, ${c.color}22 70%, transparent)">
-              <span class="face">${letterFace(c)}</span>
+              ${portraitInner(c)}
               <div class="mk-portrait-shade"></div>
               <div class="mk-nameplate"><h3>${c.name}</h3></div>
             </div>
@@ -1867,6 +1910,9 @@ function renderSelect(mode = selectedMode) {
 }
 
 const MOVES = {
+  laranja:[['J','COMBO VELOZ · 4 socos alternando os punhos'],['I','Soco rápido'],['O','Chute supersônico'],['L','CADEIA RELÂMPAGO SUPREMA · múltiplos impactos + explosão final']],
+  jone:   [['J','Ampola tóxica · dano + veneno'],['L','NÉVOA TÓXICA SUPREMA · explosão + área ampliada + dano progressivo']],
+  ktrak:  [['J','Normal: elemento atual · Avatar: golpe elemental supremo'],['H','Alternar Água / Terra / Fogo / Ar'],['L','MODO AVATAR · 8s · dano ×2 · J supremo']],
   frogh:  [['J','Copia ATAQUE + SUPER do inimigo de uma vez'],['L','Vira outro campeão aleatório por 5s + cura total']],
   jimmy:  [['J','Raio: sobe ao céu e cai sobre o jogador'],['L','Voo do Trovão: voa por 5s enquanto chama raios']],
   flame:  [['J','Bola de fogo'],['L','Parede de fogo (barreira)' ]],
@@ -1901,7 +1947,7 @@ function renderCharacterDetail(id) {
   if (!el) return;
   el.innerHTML = `
     <div class="mk-dportrait" style="background:radial-gradient(circle at 50% 30%, ${c.color}cc, ${c.color}18 70%, transparent)">
-      <span class="face">${letterFace(c)}</span>
+      ${portraitInner(c,true)}
     </div>
     <div>
       <h3>${c.name}</h3>
@@ -2399,7 +2445,7 @@ function controlDown(p, code) {
 }
 
 /* ================= KLOPP — MÍMICO ALEATÓRIO ================= */
-const KLOPP_POOL = CHARACTERS.filter(c => c.id !== 'klopp' && c.id !== 'ztaaa' && c.id !== 'frogh');
+const KLOPP_POOL = CHARACTERS.filter(c => c.id !== 'klopp' && c.id !== 'ztaaa' && c.id !== 'frogh' && !c.codeOnly);
 function kloppTransform(p) {
   if (!fight || !p || p.state === 'ko' || !p.isKlopp || !KLOPP_POOL.length) return;
   const current = p.kloppFormId;
@@ -5255,7 +5301,12 @@ function update(f, dt) {
 
 /* ---------------- FX ---------------- */
 
+const MAX_GLOBAL_SPARKS = 72;
 function spark(x, y, color, n) {
+  n = Math.max(0, Math.min(10, Number(n) || 0));
+  if (sparks.length > MAX_GLOBAL_SPARKS) sparks.splice(0, sparks.length - MAX_GLOBAL_SPARKS);
+  const room = Math.max(0, MAX_GLOBAL_SPARKS - sparks.length);
+  n = Math.min(n, room);
   for (let i = 0; i < n; i++) {
     sparks.push({
       x,
@@ -6435,7 +6486,7 @@ function drawFlameEffects(ctx) {
     const dir = r.owner?.facing || 1;
     const fade = Math.max(0, Math.min(1, r.life / .22));
     ctx.globalAlpha = fade;
-    ctx.shadowBlur=28;ctx.shadowColor='#38bdf8';ctx.strokeStyle='#38bdf8';ctx.lineWidth=11;ctx.lineCap='round';
+    ctx.shadowBlur=12;ctx.shadowColor='#38bdf8';ctx.strokeStyle='#38bdf8';ctx.lineWidth=11;ctx.lineCap='round';
     ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+dir*72,r.y);ctx.stroke();
     ctx.strokeStyle='#e0f2fe';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+dir*72,r.y);ctx.stroke();
     ctx.fillStyle='#7dd3fc';ctx.beginPath();ctx.arc(r.x,r.y,8,0,Math.PI*2);ctx.fill();
@@ -6478,7 +6529,7 @@ const YTIRI_J_SCALE = 0.55;
   const defaultP1={left:'KeyA',right:'KeyD',jump:'KeyW',crouch:'KeyS',power:'KeyJ',guard:'KeyK',ultimate:'KeyL',punch:'KeyI',kick:'KeyO',hook:'KeyG',dodge:'KeyQ',taunt:'KeyT'};
   const p2CanonicalCodes=new Set([...Object.values(actionToP2),'Numpad9']);
   function guestTranslate(code){
-    if(lan.ravamOnly&&code==='KeyH') return 'Numpad9';
+    if(code==='KeyH') return 'Numpad9';
     const binds=window.LutadorExpansion?.data?.keybinds?.p1||defaultP1;
     for(const [action,physical] of Object.entries(binds)) if(physical===code && actionToP2[action]) return actionToP2[action];
     for(const [action,physical] of Object.entries(defaultP1)) if(physical===code && actionToP2[action]) return actionToP2[action];
@@ -6923,7 +6974,7 @@ const YTIRI_J_SCALE = 0.55;
       <div class="card select mk-card mk-arena">
         <div class="emblem"><span>⚔️</span></div>
         <h2 class="select-title mk-title">
-          ${lan.ravamOnly?'SELECIONE A <span class="mk-accent">LENDA</span>':'SELECIONE O <span class="mk-accent">CAMPEÃO</span>'}
+          ${lan.ravamOnly?'SELECIONE <span class="mk-accent">LENDA / PRIME</span>':'SELECIONE O <span class="mk-accent">CAMPEÃO</span>'}
         </h2>
 
         <div class="pick-status">
@@ -6933,7 +6984,7 @@ const YTIRI_J_SCALE = 0.55;
         <div id="v16-net-badge" style="display:inline-flex;margin:4px auto 10px;padding:6px 12px;border:1px solid #2b4968;border-radius:999px;background:#071321;color:#83eaff;font:800 11px Oxanium,system-ui">${connectionLabel()}</div>
 
         <p class="select-subtitle">
-          ${lan.ravamOnly?'Escolha uma das suas Lendas R.A.V.A.M desbloqueadas, incluindo Leo Vesper quando adquirido. Cada jogador usa os controles normais de P1 no próprio computador.':'Escolha seu campeão. Cada jogador usa os controles normais de P1 no próprio computador.'}
+          ${lan.ravamOnly?'Escolha uma Lenda R.A.V.A.M ou um Prime desbloqueado; Leo Vesper aparece quando adquirido. Cada jogador usa os controles normais de P1 no próprio computador.':'Escolha seu campeão. Cada jogador usa os controles normais de P1 no próprio computador.'}
         </p>
 
         <div class="roster mk-roster">
@@ -6942,7 +6993,7 @@ const YTIRI_J_SCALE = 0.55;
                     data-lan-id="${c.id}">
               <div class="mk-portrait"
                    style="background:radial-gradient(circle at 50% 30%,${c.color}cc,${c.color}22 70%,transparent)">
-                ${lan.ravamOnly&&c.portrait?`<img src="${c.portrait}" alt="${c.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 16px 18px #000a)">`:`<span class="face">${letterFace(c)}</span>`}
+                ${portraitInner(c)}
                 <div class="mk-nameplate"><h3>${c.name}</h3></div>
               </div>
               <div class="mk-body">
@@ -7579,11 +7630,11 @@ setTimeout(function(){
     window.drawFighter=function(ctx,p){
       if(!p)return;
       const floor=groundLevel(p),time=performance.now()/1000;
-      ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.22+.10*Math.sin(time*4+p.x*.02);ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=28;ctx.beginPath();ctx.ellipse(p.x,floor-43,34+Math.sin(time*3)*5,54,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.22+.10*Math.sin(time*4+p.x*.02);ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=12;ctx.beginPath();ctx.ellipse(p.x,floor-43,34+Math.sin(time*3)*5,54,0,0,Math.PI*2);ctx.fill();ctx.restore();
       ctx.save();ctx.globalAlpha=.35;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,floor+3,36+Math.sin(time*3)*3,7,0,0,Math.PI*2);ctx.fill();ctx.restore();
       baseDrawFighter(ctx,p);
       if(p.state==='throw'||p.state==='special'){
-        ctx.save();ctx.globalAlpha=.35+.2*Math.sin(time*15);ctx.strokeStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=16;ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,groundLevel(p)-48,42+Math.sin(time*16)*5,0,Math.PI*2);ctx.stroke();ctx.restore();
+        ctx.save();ctx.globalAlpha=.35+.2*Math.sin(time*15);ctx.strokeStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(p.x,groundLevel(p)-48,42+Math.sin(time*16)*5,0,Math.PI*2);ctx.stroke();ctx.restore();
       }
     };
   }
@@ -7611,7 +7662,7 @@ setTimeout(function(){
 
 
 <link rel="stylesheet" href="pro-character-design.css">
-<script src="pro-character-design.js?v=gancho1"></script>
+<script src="pro-character-design.js?v=2094"></script>
 <link rel="stylesheet" href="pro-progression.css?v=season28">
 <link rel="stylesheet" href="pro-lobby.css?v=season28">
 <link rel="stylesheet" href="pro-sprite-animation.css">
@@ -7622,8 +7673,8 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-audio.css?v=combate4">
 <link rel="stylesheet" href="pro-combat-system.css?v=combate4">
 <script src="pro-audio.js?v=lobby61"></script>
-<script src="pro-attack-visuals.js?v=combate4"></script>
-<script src="pro-combat-system.js?v=gancho1"></script>
+<script src="pro-attack-visuals.js?v=2093"></script>
+<script src="pro-combat-system.js?v=2093"></script>
 <link rel="stylesheet" href="pro-ultimate.css?v=ultimate4">
 <script src="pro-ultimate.js?v=ultimate4"></script>
 <link rel="stylesheet" href="pro-story-overhaul.css?v=story2">
@@ -7657,5 +7708,32 @@ setTimeout(function(){
 
 <!-- R.A.V.A.M V17: loaded last on purpose so its animation/shop/online patches win. -->
 <link rel="stylesheet" href="pro-ravam-v17.css?v=180">
-<script src="pro-ravam-v17.js?v=1900"></script>
+<script src="pro-ravam-v17.js?v=2094"></script>
 <script src="pro-ravam-v19-powers.js?v=1900"></script>
+
+<style id="v20-6-professional-selection-fix">
+/* V20.6.1 — cards mais limpos: cor correta, retratos sem rosa e sem sprite duplicado */
+.fighter-card[data-id="laranja"] .pro-character-art,
+.fighter-card[data-id="ktrak"] .pro-character-art,
+.fighter-card[data-id="jone"] .pro-character-art,
+.mk-detail:has(.face-img) .pro-detail-art{display:none!important}
+.fighter-card[data-id="laranja"] .mk-portrait,
+.fighter-card[data-id="ktrak"] .mk-portrait,
+.fighter-card[data-id="jone"] .mk-portrait{overflow:hidden;background:radial-gradient(circle at 50% 34%,color-mix(in srgb,var(--fighter-color) 35%,transparent),transparent 62%),linear-gradient(145deg,#090d16,#111827)!important}
+.fighter-card[data-id="jone"]{--char-color:#c8b79e!important;--fighter-color:#c8b79e!important}
+.fighter-card[data-id="laranja"]{--char-color:#ff5b22!important;--fighter-color:#ff5b22!important}
+.fighter-card[data-id="ktrak"]{--char-color:#e65b2a!important;--fighter-color:#e65b2a!important}
+.mk-portrait .face-img{z-index:3;pointer-events:none;transform:scale(.92);filter:drop-shadow(0 14px 16px rgba(0,0,0,.68))!important}
+.fighter-card[data-id="laranja"] .mk-portrait .face-img{transform:scale(.80);object-position:center bottom!important}
+.fighter-card[data-id="jone"] .mk-portrait .face-img{transform:scale(.82);object-position:center bottom!important}
+.fighter-card[data-id="ktrak"] .mk-portrait .face-img{transform:scale(.88);object-position:center bottom!important}
+.mk-detail .mk-dportrait .face-img{z-index:3;transform:scale(.90);object-position:center bottom!important;filter:drop-shadow(0 17px 16px rgba(0,0,0,.70))!important}
+.fighter-card .mk-portrait::before,.mk-detail .mk-dportrait::before{opacity:.32}
+</style>
+<link rel="stylesheet" href="pro-ktrak-v20.css?v=2081">
+<script src="pro-ktrak-v20.js?v=2103"></script>
+<link rel="stylesheet" href="pro-laranja-v20.css?v=2081">
+<script src="pro-laranja-v20.js?v=2094"></script>
+<link rel="stylesheet" href="pro-jone-v20.css?v=2081">
+<script src="pro-jone-v20.js?v=2103"></script>
+<script src="pro-performance-v20.js?v=2093"></script>

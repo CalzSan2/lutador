@@ -4,7 +4,7 @@
 (()=>{
   'use strict';
   if(window.RavamV17?.version)return;
-  const VERSION='18.2.0-tharoth';
+  const VERSION='20.9.4-primes';
   const SHOP_VERSION=17;
   const ACCESS_COST=Number(window.RavamStudios?.cost)||2500;
   const BASE=window.RavamStudios||{};
@@ -26,22 +26,40 @@
     id:'tharoth',name:'Tharoth Umbra',color:'#8d121f',hp:2120,dmg:35,speed:84,price:0,
     weapon:'umbraSand',special:'umbraClone',portrait:'ai-assets/characters/tharoth.png',secret:true,ravamOnly:true
   });
-  const ALL=Object.freeze([oldPriya,oldKain,oldAria,LEO,THAROTH]);
+  const KTRAK=(typeof CHARACTERS!=='undefined'&&CHARACTERS.find(c=>c.id==='ktrak'))||Object.freeze({
+    id:'ktrak',name:'Ktrak Calzsan',color:'#e65b2a',hp:2100,dmg:36,speed:86,price:0,
+    weapon:'ktrakElements',special:'ktrakAvatar',portrait:'ai-assets/characters/ktrak.png',secret:true,codeOnly:true
+  });
+  const LARANJA=(typeof CHARACTERS!=='undefined'&&CHARACTERS.find(c=>c.id==='laranja'))||Object.freeze({
+    id:'laranja',name:'Laranja',color:'#ff5b22',hp:1880,dmg:33,speed:165,price:0,
+    weapon:'speedCombo',special:'speedTornado',portrait:'ai-assets/characters/laranja.png',secret:true,codeOnly:true
+  });
+  const JONE=(typeof CHARACTERS!=='undefined'&&CHARACTERS.find(c=>c.id==='jone'))||Object.freeze({
+    id:'jone',name:'Jone Pikes',color:'#c8b79e',hp:1940,dmg:34,speed:88,price:0,
+    weapon:'jonePoison',special:'joneSmoke',portrait:'ai-assets/characters/jone.png',secret:true,codeOnly:true
+  });
+  const ALL=Object.freeze([oldPriya,oldKain,oldAria,LEO,THAROTH,KTRAK,LARANJA,JONE]);
   const ALL_IDS=Object.freeze(ALL.map(c=>c.id));
-  const COSTS=Object.freeze({priya:0,kain:700,aria:650,leo:800,tharoth:900});
+  const COSTS=Object.freeze({priya:0,kain:700,aria:650,leo:800,tharoth:900,ktrak:0,laranja:0,jone:0});
   const ABILITY={
     priya:BASE.ability||{flag:'RAVAM',role:'Atiradora Tática',tag:'ARMAS',desc:'J usa rifle tático; o 3º tiro é explosivo. L ativa uma rajada de 6 disparos, terminando em munição explosiva.'},
     kain:BASE.kainAbility||{flag:'RAVAM',role:'Mímico do Caos',tag:'CAOS',desc:'J usa o poder atual. H troca o poder. L ativa o Espelho Abissal.'},
     aria:BASE.ariaAbility||{flag:'RAVAM',role:'Feiticeira Botânica',tag:'NATUREZA',desc:'J alterna Lâminas de Folha, Semente Venenosa e Raiz Selvagem. L cria o Jardim Vivo: prende, causa pulsos de dano e cura Aria.'},
     leo:Object.freeze({flag:'RAVAM',role:'Arquiteto de Portais',tag:'PORTAIS',desc:'J usa pedras através de portais; a cada 3º ataque surge um portal cruzado. L cria uma tempestade de portais no céu e nas laterais.'}),
-    tharoth:Object.freeze({flag:'RAVAM',role:'Avatar da Umbra',tag:'ESCURIDÃO',desc:'J lança areia sombria que escurece e desacelera. L cria um clone invulnerável por 3s que ataca a cada 0,50s.'})
+    tharoth:Object.freeze({flag:'RAVAM',role:'Avatar da Umbra',tag:'ESCURIDÃO',desc:'J lança areia sombria que escurece e desacelera. L cria um clone invulnerável por 3s que ataca a cada 0,50s.'}),
+    ktrak:Object.freeze({flag:'PRIME',role:'Mestre dos Quatro Elementos',tag:'AVATAR',desc:'J usa o elemento atual. No Avatar, cada elemento ganha uma versão suprema. H alterna Água, Terra, Fogo e Ar. L ativa o Modo Avatar.'}),
+    laranja:Object.freeze({flag:'PRIME',role:'Velocista Supersônico',tag:'CÓDIGO',desc:'J executa o combo supersônico. L ativa a Cadeia Relâmpago aprimorada. Desbloqueado pelo código 052026 no Normal e no R.A.V.A.M.'}),
+    jone:Object.freeze({flag:'PRIME',role:'Tático do Veneno',tag:'CÓDIGO',desc:'J dispara toxina e aplica veneno. L cria uma nuvem tóxica ampliada com dano progressivo. Desbloqueado pelo código 09871 no Normal e no R.A.V.A.M.'})
   };
   const META={
     priya:{name:'ALANA SORELLE',tag:'ARMAS',accent:'#ff765e',portrait:'ai-assets/characters/priya.png',stats:[32,82,1940],moves:[['J','RIFLE · 3º EXPLOSIVO'],['I','SOCO'],['O','CHUTE'],['L','RAJADA TÁTICA · 6 TIROS']]},
     kain:{name:'KAIN',tag:'CAOS',accent:'#c0c7ff',portrait:'ai-assets/characters/kain.png',stats:[35,88,2180],moves:[['J','USAR PODER'],['H / P2 9','TROCAR PODER'],['I','SOCO'],['O','CHUTE'],['L','ESPELHO']]},
     aria:{name:'ARIA VALFLEUR',tag:'NATUREZA',accent:'#82efa5',portrait:'ai-assets/characters/aria.png',stats:[31,86,1920],moves:[['J','FOLHA · SEMENTE · RAIZ'],['I','SOCO'],['O','CHUTE'],['L','JARDIM VIVO']]},
     leo:{name:'LEO VESPER',tag:'PORTAIS',accent:'#67f3b8',portrait:'ai-assets/characters/leo.png',stats:[34,87,2050],moves:[['J','PEDRAS ENTRE PORTAIS'],['I','SOCO'],['O','CHUTE'],['L','COLAPSO DE PORTAIS']]},
-    tharoth:{name:'THAROTH UMBRA',tag:'ESCURIDÃO',accent:'#ff4d62',portrait:'ai-assets/characters/tharoth.png',stats:[35,84,2120],moves:[['J','AREIA SOMBRIA'],['I','SOCO'],['O','CHUTE'],['L','CLONE · 20 / 0,50s · 3s']]}
+    tharoth:{name:'THAROTH UMBRA',tag:'ESCURIDÃO',accent:'#ff4d62',portrait:'ai-assets/characters/tharoth.png',stats:[35,84,2120],moves:[['J','AREIA SOMBRIA'],['I','SOCO'],['O','CHUTE'],['L','CLONE · 20 / 0,50s · 3s']]},
+    ktrak:{name:'KTRAK CALZSAN',tag:'AVATAR',accent:'#52d7ff',portrait:'ai-assets/characters/ktrak.png',stats:[36,86,2100],moves:[['J','ELEMENTO / SUPREMO NO AVATAR'],['H / P2 9','ÁGUA · TERRA · FOGO · AR'],['I','SOCO'],['O','CHUTE'],['L','MODO AVATAR · 8s · DANO ×2']]},
+    laranja:{name:'LARANJA',tag:'VELOCIDADE ×3',accent:'#ff7a35',portrait:'ai-assets/characters/laranja.png',stats:[33,495,1880],moves:[['J','COMBO VELOZ · 4 SOCOS'],['I','SOCO'],['O','CHUTE SUPERSÔNICO'],['L','CADEIA RELÂMPAGO SUPREMA']]},
+    jone:{name:'JONE PIKES',tag:'VENENO',accent:'#9bea72',portrait:'ai-assets/characters/jone.png',stats:[34,88,1940],moves:[['J','AMPOLA TÓXICA'],['I','SOCO'],['O','CHUTE'],['L','NÉVOA TÓXICA SUPREMA']]}
   };
 
   function toast(text,tone='normal',ms=2200){
@@ -60,6 +78,10 @@
         state.ravamLegendPurchases=[];
         changed=true;
       }
+      // Personagens de código ficam sincronizados entre o elenco Normal e o R.A.V.A.M.
+      const codeLegends=['ktrak','laranja','jone'];
+      if(Array.isArray(state.roster)&&codeLegends.some(id=>state.roster.includes(id))&&!state.ravamModeUnlocked){state.ravamModeUnlocked=true;state.ravamStoreVersion=Math.max(SHOP_VERSION,Number(state.ravamStoreVersion)||0);changed=true}
+      for(const id of codeLegends)if(Array.isArray(state.roster)&&state.roster.includes(id)&&!state.ravamRoster.includes(id)){state.ravamRoster.push(id);changed=true}
       state.ravamRoster=[...new Set(state.ravamRoster.filter(id=>ALL_IDS.includes(id)))];
       if(state.ravamModeUnlocked&&!state.ravamRoster.includes('priya')){state.ravamRoster.unshift('priya');changed=true}
       if(changed)save();
@@ -72,12 +94,15 @@
   function unlockedIds(){ensureEconomy();try{return state.ravamRoster.filter(id=>ALL_IDS.includes(id))}catch(_){return ['priya']}}
   function charOf(id){return ALL.find(c=>c.id===id)||oldPriya}
   function displayName(id){return META[id]?.name||String(id||'AGUARDANDO').toUpperCase()}
-  function randomRival(id){const pool=ALL_IDS.filter(x=>x!==id);return pool[Math.floor(Math.random()*pool.length)]||'kain'}
-  function storyRival(id){return ({priya:'aria',aria:'kain',kain:'leo',leo:'tharoth',tharoth:'priya'})[id]||'kain'}
+  const PRIME_IDS=Object.freeze(['ktrak','laranja','jone']);
+  const isPrime=id=>PRIME_IDS.includes(id);
+  const className=id=>isPrime(id)?'PRIME':'LENDA';
+  function randomRival(id){const pool=ALL_IDS.filter(x=>x!==id&&(!['ktrak','laranja','jone'].includes(x)||isOwned(x)));return pool[Math.floor(Math.random()*pool.length)]||'kain'}
+  function storyRival(id){return ({priya:'aria',aria:'kain',kain:'leo',leo:'tharoth',tharoth:isOwned('ktrak')?'ktrak':'priya',ktrak:isOwned('laranja')?'laranja':'priya',laranja:isOwned('jone')?'jone':'ktrak',jone:'priya'})[id]||'kain'}
 
   // API V17: online enxerga todas as Lendas para resolver nomes, mas a seleção filtra pelo isOwned().
   try{
-    const api={...BASE,version:VERSION,cost:ACCESS_COST,priya:oldPriya,kain:oldKain,aria:oldAria,leo:LEO,tharoth:THAROTH,allCharacters:ALL,isOwned,unlockedIds,displayName};
+    const api={...BASE,version:VERSION,cost:ACCESS_COST,priya:oldPriya,kain:oldKain,aria:oldAria,leo:LEO,tharoth:THAROTH,ktrak:KTRAK,laranja:LARANJA,jone:JONE,allCharacters:ALL,isOwned,unlockedIds,displayName};
     delete api.characters;
     Object.defineProperty(api,'characters',{enumerable:true,get:()=>ALL});
     api.render=()=>window.renderRavamMode?.();
@@ -135,14 +160,14 @@
   function modeCopy(mode){
     if(mode==='pvp')return {eyebrow:'DUELO LOCAL',desc:'Escolha a Lenda do Jogador 1 e depois a Lenda do Jogador 2.'};
     if(mode==='story')return {eyebrow:'CAPÍTULO R.A.V.A.M',desc:'Escolha o protagonista. O rival faz parte do capítulo.'};
-    return {eyebrow:'COMBATE SOLO',desc:'Escolha sua Lenda. A CPU entra com outro personagem R.A.V.A.M.'};
+    return {eyebrow:'COMBATE SOLO',desc:'Escolha sua Lenda ou Prime. A CPU entra com outro personagem R.A.V.A.M.'};
   }
   function legendCard(id,selected=false,slot=''){
     const m=META[id],owned=isOwned(id),cost=COSTS[id]||0;
     const moves=m.moves.map(([k,t])=>`<span><kbd>${k}</kbd>${t}</span>`).join('');
     return `<button class="ravam-legend-card ${id} ${selected?'selected':''} ${owned?'owned':'locked'}" data-r17-char="${id}" aria-pressed="${selected}">
-      <div class="ravam-priya-art"><img src="${m.portrait}" alt="${m.name}">${owned?'':`<div class="r17-lock"><b>🔒 BLOQUEADA</b><span>🟪 ${fmt(cost)} VANDAIS</span><em>ABRIR LOJA</em></div>`}</div>
-      <div class="ravam-priya-info"><small>LENDA R.A.V.A.M · ${m.tag}</small><h3>${m.name}</h3><p>${ABILITY[id].desc}</p><div class="ravam-stats"><span><b>${m.stats[0]}</b>DANO</span><span><b>${m.stats[1]}</b>AGILIDADE</span><span><b>${m.stats[2]}</b>VIDA</span></div><div class="ravam-moves">${moves}</div></div>
+      <div class="ravam-priya-art"><img src="${m.portrait}" alt="${m.name}">${owned?'':['ktrak','laranja','jone'].includes(id)?`<div class="r17-lock ktrak-code-lock"><b>🔐 PRIME DE CÓDIGO</b><span>CÓDIGO ${id==='ktrak'?'96051':id==='laranja'?'052026':'09871'}</span><em>MENU CÓDIGOS</em></div>`:`<div class="r17-lock"><b>🔒 BLOQUEADA</b><span>🟪 ${fmt(cost)} VANDAIS</span><em>ABRIR LOJA</em></div>`}</div>
+      <div class="ravam-priya-info"><small>${isPrime(id)?'PRIME':'LENDA R.A.V.A.M'} · ${m.tag}</small><h3>${m.name}</h3><p>${ABILITY[id].desc}</p><div class="ravam-stats"><span><b>${m.stats[0]}</b>DANO</span><span><b>${m.stats[1]}</b>AGILIDADE</span><span><b>${m.stats[2]}</b>VIDA</span></div><div class="ravam-moves">${moves}</div></div>
       ${owned?`<span class="ravam-selected-mark">${slot||'SELECIONADO'}</span>`:''}
     </button>`;
   }
@@ -150,8 +175,8 @@
     const a=appNode();if(!a)return;
     const can=(Number(state?.vandais)||0)>=ACCESS_COST;
     a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen r17-screen">
-      <section class="ravam-pro-hero locked"><div class="ravam-copy"><small>UNIVERSO PREMIUM</small><h2>R.A.V.A.M <span>STUDIOS</span></h2><p>Adquira o acesso permanente. A primeira Lenda, Alana Sorelle, vem liberada; Kain, Aria, Leo e Tharoth ficam na Loja R.A.V.A.M.</p><div class="ravam-price">🟪 ${fmt(ACCESS_COST)} VANDAIS</div><div class="ravam-wallet-line">SALDO · 🟪 ${fmt(state?.vandais||0)}</div></div><img src="ai-assets/characters/leo.png" alt="Leo Vesper"></section>
-      <section class="ravam-unlock-card"><div><small>ACESSO + 1 LENDA INICIAL</small><h3>ALANA SORELLE</h3><p>Depois da compra, desbloqueie Kain, Aria Valfleur, Leo Vesper e Tharoth Umbra individualmente na Loja R.A.V.A.M.</p></div><button id="r17-buy-access" class="btn big" ${can?'':'disabled'}>${can?'🟪 ADQUIRIR R.A.V.A.M':'VANDAIS INSUFICIENTES'}</button></section>
+      <section class="ravam-pro-hero locked"><div class="ravam-copy"><small>UNIVERSO PREMIUM</small><h2>R.A.V.A.M <span>STUDIOS</span></h2><p>Adquira o acesso permanente. A primeira Lenda, Alana Sorelle, vem liberada; Kain, Aria, Leo e Tharoth ficam na Loja R.A.V.A.M. Ktrak Calzsan, Laranja e Jone Pikes são Primes de código, liberadas por 96051, 052026 e 09871 nos modos Normal e R.A.V.A.M.</p><div class="ravam-price">🟪 ${fmt(ACCESS_COST)} VANDAIS</div><div class="ravam-wallet-line">SALDO · 🟪 ${fmt(state?.vandais||0)}</div></div><img src="ai-assets/characters/leo.png" alt="Leo Vesper"></section>
+      <section class="ravam-unlock-card"><div><small>ACESSO + 1 LENDA INICIAL</small><h3>ALANA SORELLE</h3><p>Depois da compra, desbloqueie Kain, Aria Valfleur, Leo Vesper e Tharoth Umbra na Loja. Ktrak, Laranja e Jone Pikes entram pelos códigos 96051, 052026 e 09871 e ficam disponíveis também no modo Normal.</p></div><button id="r17-buy-access" class="btn big" ${can?'':'disabled'}>${can?'🟪 ADQUIRIR R.A.V.A.M':'VANDAIS INSUFICIENTES'}</button></section>
       <button id="r17-back" class="btn">← VOLTAR AOS MODOS</button>
     </div>`;
     const b=document.getElementById('r17-buy-access');if(b&&can)b.onclick=()=>{state.vandais=Math.max(0,(Number(state.vandais)||0)-ACCESS_COST);state.ravamModeUnlocked=true;state.ravamStoreVersion=SHOP_VERSION;state.ravamRoster=['priya'];state.ravamPurchasedAt=Date.now();save();toast('R.A.V.A.M LIBERADO · ALANA SORELLE DISPONÍVEL','reward',2800);renderHub()};
@@ -161,10 +186,10 @@
     ensureEconomy();const a=appNode();if(!a)return;
     a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen ravam-v15 r17-screen">
       <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>R.A.V.A.M STUDIOS · V17</small><h2>ESCOLHA O <span>MODO</span></h2><p>Monte a luta, compre novas Lendas e entre na arena.</p></div><div class="ravam-head-wallet"><span>CARTEIRA</span><b>🟪 ${fmt(state?.vandais||0)}</b><small>VANDAIS</small></div></section>
-      <section class="r17-showcase"><div><small>5 LENDAS · ${unlockedIds().length} DESBLOQUEADA(S)</small><h3>ALANA · KAIN · ARIA · LEO · <b>THAROTH</b></h3><p>Precisão, caos, natureza, portais e sombras. Lendas bloqueadas precisam ser compradas na Loja R.A.V.A.M.</p></div><div class="r17-art-stack"><img src="ai-assets/characters/priya.png" alt="Alana"><img src="ai-assets/characters/kain.png" alt="Kain"><img src="ai-assets/characters/aria.png" alt="Aria"><img src="ai-assets/characters/leo.png" alt="Leo"></div></section>
+      <section class="r17-showcase"><div><small>5 LENDAS + 3 PRIMES · ${unlockedIds().length} DESBLOQUEADO(S)</small><h3>ALANA · KAIN · ARIA · LEO · THAROTH · <b>KTRAK · LARANJA · JONE</b></h3><p>Precisão, caos, natureza, portais, sombras, quatro elementos, velocidade e toxina. Ktrak, Laranja e Jone são PRIMES liberados por código.</p></div><div class="r17-art-stack r17-art-stack-six"><img src="ai-assets/characters/priya.png" alt="Alana"><img src="ai-assets/characters/kain.png" alt="Kain"><img src="ai-assets/characters/aria.png" alt="Aria"><img src="ai-assets/characters/leo.png" alt="Leo"><img src="ai-assets/characters/ktrak.png" alt="Ktrak"></div></section>
       <div class="ravam-section-title battle"><span>01</span><div><small>PASSO UM</small><h3>ESCOLHA COMO LUTAR</h3></div></div>
       <section class="ravam-battle-grid r17-mode-grid">
-        <button id="r17-cpu" class="ravam-battle-card cpu"><span class="ravam-battle-icon">◈</span><small>COMBATE SOLO</small><h3>1P <b>× CPU</b></h3><p>Escolha sua Lenda e enfrente a CPU.</p><em>SELECIONAR →</em></button>
+        <button id="r17-cpu" class="ravam-battle-card cpu"><span class="ravam-battle-icon">◈</span><small>COMBATE SOLO</small><h3>1P <b>× CPU</b></h3><p>Escolha sua Lenda ou Prime e enfrente a CPU.</p><em>SELECIONAR →</em></button>
         <button id="r17-pvp" class="ravam-battle-card pvp"><span class="ravam-battle-icon">⚔</span><small>DUELO LOCAL</small><h3>1P <b>× 2P</b></h3><p>Dois jogadores no mesmo computador.</p><em>SELECIONAR →</em></button>
         <button id="r17-story" class="ravam-battle-card story"><span class="ravam-battle-icon">◇</span><small>CAPÍTULO R.A.V.A.M</small><h3>MODO <b>HISTÓRIA</b></h3><p>Capítulo próprio para cada Lenda.</p><em>SELECIONAR →</em></button>
         <button id="r17-online" class="ravam-battle-card online"><span class="ravam-battle-icon">◎</span><small>2 JOGADORES · INTERNET</small><h3>ONLINE <b>2P2</b></h3><p>P1 × P2 pela internet, com seleção R.A.V.A.M em cada PC.</p><em>CRIAR / ENTRAR →</em></button>
@@ -181,8 +206,8 @@
   function renderShop(){
     ensureEconomy();const a=appNode();if(!a)return;screen='ravam';drawCanvas?.();
     a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen r17-screen r17-shop-screen">
-      <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>COLEÇÃO R.A.V.A.M</small><h2>LOJA DE <span>LENDAS</span></h2><p>Compre a Lenda uma vez e ela fica disponível nos modos local, história e online.</p></div><div class="ravam-head-wallet"><span>SALDO</span><b>🟪 ${fmt(state?.vandais||0)}</b><small>VANDAIS</small></div></section>
-      <div class="r17-shop-grid">${ALL_IDS.map(id=>{const m=META[id],owned=isOwned(id),cost=COSTS[id]||0;return `<article class="r17-shop-card ${id} ${owned?'owned':'locked'}"><div class="r17-shop-art"><img src="${m.portrait}" alt="${m.name}"><span>${owned?'✓ SUA LENDA':'🔒 BLOQUEADA'}</span></div><div class="r17-shop-body"><small>${m.tag}</small><h3>${m.name}</h3><p>${ABILITY[id].desc}</p><div class="r17-shop-stats"><span><b>${m.stats[0]}</b>DANO</span><span><b>${m.stats[1]}</b>AGIL</span><span><b>${m.stats[2]}</b>VIDA</span></div>${id==='priya'?'<button class="btn" disabled>LENDA INICIAL</button>':owned?'<button class="btn" disabled>✓ DESBLOQUEADA</button>':`<button class="btn big r17-buy-legend" data-id="${id}" ${Number(state?.vandais||0)>=cost?'':'disabled'}>🟪 COMPRAR · ${fmt(cost)}</button>`}</div></article>`}).join('')}</div>
+      <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>COLEÇÃO R.A.V.A.M</small><h2>LOJA DE <span>LENDAS + PRIMES</span></h2><p>Compre a Lenda uma vez; Primes entram por código. Tudo fica disponível nos modos local, história e online.</p></div><div class="ravam-head-wallet"><span>SALDO</span><b>🟪 ${fmt(state?.vandais||0)}</b><small>VANDAIS</small></div></section>
+      <div class="r17-shop-grid">${ALL_IDS.map(id=>{const m=META[id],owned=isOwned(id),cost=COSTS[id]||0;return `<article class="r17-shop-card ${id} ${owned?'owned':'locked'}"><div class="r17-shop-art"><img src="${m.portrait}" alt="${m.name}"><span>${owned?(isPrime(id)?'✓ SEU PRIME':'✓ SUA LENDA'):'🔒 BLOQUEADA'}</span></div><div class="r17-shop-body"><small>${m.tag}</small><h3>${m.name}</h3><p>${ABILITY[id].desc}</p><div class="r17-shop-stats"><span><b>${m.stats[0]}</b>DANO</span><span><b>${m.stats[1]}</b>AGIL</span><span><b>${m.stats[2]}</b>VIDA</span></div>${id==='priya'?'<button class="btn" disabled>LENDA INICIAL</button>':owned?`<button class="btn" disabled>✓ ${isPrime(id)?'PRIME DESBLOQUEADO':'LENDA DESBLOQUEADA'}</button>`:['ktrak','laranja','jone'].includes(id)?`<button class="btn" disabled>🔐 CÓDIGO ${id==='ktrak'?'96051':id==='laranja'?'052026':'09871'}</button>`:`<button class="btn big r17-buy-legend" data-id="${id}" ${Number(state?.vandais||0)>=cost?'':'disabled'}>🟪 COMPRAR · ${fmt(cost)}</button>`}</div></article>`}).join('')}</div>
       <div class="r17-hub-actions"><button id="r17-shop-back" class="btn big">← VOLTAR AO R.A.V.A.M</button></div>
     </div>`;
     document.querySelectorAll('.r17-buy-legend').forEach(b=>b.onclick=()=>{
@@ -197,18 +222,18 @@
     const copy=modeCopy(mode),p1=pickP1,p2=pickP2,pickingP2=mode==='pvp'&&!!p1&&!p2,ready=mode==='pvp'?!!(p1&&p2):!!p1;
     const opponent=mode==='cpu'&&p1?randomRival(p1):mode==='story'&&p1?storyRival(p1):'';
     a.innerHTML=`<div class="card mk-card mk-arena ravam-pro-screen ravam-v15 r17-screen select-mode-${mode}">
-      <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>${copy.eyebrow}</small><h2>SELEÇÃO DE <span>LENDAS</span></h2><p>${copy.desc}</p></div><button id="r17-change-mode" class="ravam-mini-back">← TROCAR MODO</button></section>
+      <section class="ravam-selection-head"><div class="ravam-brand-lockup"><small>${copy.eyebrow}</small><h2>SELEÇÃO DE <span>LENDAS + PRIMES</span></h2><p>${copy.desc}</p></div><button id="r17-change-mode" class="ravam-mini-back">← TROCAR MODO</button></section>
       <section class="ravam-match-slots ${mode}"><div class="ravam-slot p1 ${p1?'filled':''} ${!p1||(!pickingP2&&mode!=='pvp')?'active':''}"><small>${mode==='story'?'PROTAGONISTA':'JOGADOR 1'}</small><b>${p1?displayName(p1):'AGUARDANDO'}</b><span>${p1?'PRONTO':'ESCOLHA UMA LENDA'}</span></div><div class="ravam-versus">VS</div><div class="ravam-slot p2 ${p2||opponent?'filled':''} ${pickingP2?'active':''}"><small>${mode==='pvp'?'JOGADOR 2':mode==='story'?'RIVAL DO CAPÍTULO':'CPU'}</small><b>${mode==='pvp'?(p2?displayName(p2):'AGUARDANDO'):(opponent?displayName(opponent):'AGUARDANDO')}</b><span>${mode==='pvp'?(p2?'PRONTO':'ESCOLHA UMA LENDA'):(p1?'DEFINIDO AUTOMATICAMENTE':'AGUARDANDO')}</span></div></section>
-      <div class="ravam-section-title"><span>02</span><div><small>PASSO DOIS</small><h3>${pickingP2?'P2 · ESCOLHA SUA LENDA':'ESCOLHA SUA LENDA'}</h3></div></div>
+      <div class="ravam-section-title"><span>02</span><div><small>PASSO DOIS</small><h3>${pickingP2?'P2 · ESCOLHA LENDA / PRIME':'ESCOLHA LENDA / PRIME'}</h3></div></div>
       <section class="ravam-roster-grid ravam-pick-grid r17-pick-grid">${ALL_IDS.map(id=>legendCard(id,mode==='pvp'?(p1===id||p2===id):p1===id,mode==='pvp'?(p1===id?'P1':p2===id?'P2':''):(p1===id?'P1':''))).join('')}</section>
-      <div class="ravam-selection-help">Lendas com cadeado precisam ser adquiridas na Loja R.A.V.A.M. ${mode==='pvp'?'Escolha primeiro P1 e depois P2.':''}</div>
+      <div class="ravam-selection-help">Lendas com cadeado são adquiridas na Loja R.A.V.A.M.; Primes são liberados por código. ${mode==='pvp'?'Escolha primeiro P1 e depois P2.':''}</div>
       <div class="ravam-footer-actions"><button id="r17-confirm" class="btn big" ${ready?'':'disabled'}>${mode==='story'?'INICIAR HISTÓRIA':mode==='pvp'?'INICIAR 1P × 2P':'INICIAR 1P × CPU'}</button><button id="r17-open-shop" class="btn">🛒 LOJA R.A.V.A.M</button></div>
     </div>`;
     document.querySelectorAll('[data-r17-char]').forEach(el=>el.onclick=()=>{
-      const id=el.dataset.r17Char;if(!isOwned(id)){renderShop();return}SFX?.play?.('menu_select');
+      const id=el.dataset.r17Char;if(!isOwned(id)){if(['ktrak','laranja','jone'].includes(id)){const code=id==='ktrak'?'96051':id==='laranja'?'052026':'09871';toast(`${displayName(id)} · USE O CÓDIGO ${code} NO MENU CÓDIGOS`,'normal',2600);return}renderShop();return}SFX?.play?.('menu_select');
       if(mode==='pvp'){
         if(!pickP1||pickP2){pickP1=id;pickP2=''}
-        else if(id===pickP1){toast('P1 e P2 precisam usar Lendas diferentes.','normal');return}
+        else if(id===pickP1){toast('P1 e P2 precisam usar personagens diferentes.','normal');return}
         else pickP2=id;
       }else pickP1=id;
       renderSelect(mode);
@@ -222,13 +247,13 @@
     const b=mode==='pvp'?pickP2:mode==='story'?storyRival(a):randomRival(a);if(!b)return;
     SFX?.play?.('menu_confirm');
     window.startFight(a,mode==='pvp'?'pvp':'ravam',b);
-    try{if(fight){fight.ravamStudios=true;fight.ravamSelectionMode=mode;fight.ravamStory=mode==='story';fight.ravamStoryHero=a;fight.ravamStoryRival=b;fight.ravamStoryTitle=a==='leo'?'PORTAIS SOBRE O CREPÚSCULO':a==='kain'?'O ESPELHO SEM ROSTO':a==='aria'?'O JARDIM QUE NÃO DORME':a==='tharoth'?'ECO DA SOMBRA IMORTAL':'A CAÇADORA E O JARDIM'}}catch(_){}
+    try{if(fight){fight.ravamStudios=true;fight.ravamSelectionMode=mode;fight.ravamStory=mode==='story';fight.ravamStoryHero=a;fight.ravamStoryRival=b;fight.ravamStoryTitle=a==='leo'?'PORTAIS SOBRE O CREPÚSCULO':a==='kain'?'O ESPELHO SEM ROSTO':a==='aria'?'O JARDIM QUE NÃO DORME':a==='tharoth'?'ECO DA SOMBRA IMORTAL':a==='ktrak'?'O EQUILÍBRIO DOS QUATRO':a==='laranja'?'A VELOCIDADE LARANJA':a==='jone'?'NÉVOA VERDE':'A CAÇADORA E O JARDIM'}}catch(_){}
   }
   window.renderRavamMode=function(){screen='ravam';drawCanvas?.();ensureEconomy();pickP1='';pickP2='';if(!hasAccess())renderLocked();else renderHub()};
 
   // Atualiza o cartão do menu principal sem desfazer wrappers anteriores.
   const baseModes=window.renderModes;
-  if(typeof baseModes==='function')window.renderModes=function(){const r=baseModes.apply(this,arguments);setTimeout(()=>{const card=document.getElementById('mode-ravam');if(!card)return;const p=card.querySelector('p');if(p)p.textContent=hasAccess()?`Loja própria · ${unlockedIds().length}/5 Lendas desbloqueadas · Online 2P2 + 5ª Lenda.`:'Adquira o modo. Alana e Tharoth vêm inclusos; Kain, Aria, Leo e Tharoth são comprados na Loja R.A.V.A.M.';const badge=card.querySelector('.mode-badge');if(badge)badge.textContent=hasAccess()?'R.A.V.A.M · LOJA DE LENDAS':`🟪 ${fmt(ACCESS_COST)} VANDAIS`;},0);return r};
+  if(typeof baseModes==='function')window.renderModes=function(){const r=baseModes.apply(this,arguments);setTimeout(()=>{const card=document.getElementById('mode-ravam');if(!card)return;const p=card.querySelector('p');if(p)p.textContent=hasAccess()?`Loja própria · ${unlockedIds().length}/8 Lendas desbloqueadas · 3 personagens de código · Online 2P2.`:'Adquira o modo. Alana é inicial; Kain, Aria, Leo e Tharoth ficam na Loja; Ktrak, Laranja e Jone usam códigos secretos.';const badge=card.querySelector('.mode-badge');if(badge)badge.textContent=hasAccess()?'R.A.V.A.M · LOJA DE LENDAS':`🟪 ${fmt(ACCESS_COST)} VANDAIS`;},0);return r};
 
   /* =========================
      LEO VESPER — PODERES
@@ -458,7 +483,7 @@
      ========================= */
   const onlineUltActive={p1:false,p2:false};
   const ULT_NAMES={
-    priya:['TRÍADE TÁTICA','TRÍADE DEMOLIDORA'],kain:['ESPELHO ABISSAL','REFLEXO DO CAOS'],aria:['JARDIM VALFLEUR','PRISÃO VERDANTE'],leo:['CÉU VESPER','CHUVA ENTRE PORTAIS'],tharoth:['UMBRA ETERNA','CLONE DE SOMBRA']
+    priya:['TRÍADE TÁTICA','TRÍADE DEMOLIDORA'],kain:['ESPELHO ABISSAL','REFLEXO DO CAOS'],aria:['JARDIM VALFLEUR','PRISÃO VERDANTE'],leo:['CÉU VESPER','CHUVA ENTRE PORTAIS'],tharoth:['UMBRA ETERNA','CLONE DE SOMBRA'],ktrak:['MODO AVATAR','EQUILÍBRIO DOS QUATRO']
   };
   function remoteUltimate(p,side){
     if(!p)return;const names=ULT_NAMES[p.id]||[String(p.name||'LENDA').toUpperCase(),'ULTIMATE SUPREMA'];
@@ -487,5 +512,5 @@
   }
 
   ensureEconomy();
-  window.RavamV17=Object.freeze({version:VERSION,leo:LEO,tharoth:THAROTH,renderHub,renderShop,renderSelect,isOwned,all:ALL,syncOnlineUltimate});
+  window.RavamV17=Object.freeze({version:VERSION,leo:LEO,tharoth:THAROTH,ktrak:KTRAK,renderHub,renderShop,renderSelect,isOwned,all:ALL,syncOnlineUltimate});
 })();

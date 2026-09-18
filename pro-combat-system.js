@@ -3,6 +3,7 @@
   'use strict';
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const profiles={
+    laranja:['Impacto Supersônico','wind'],
     rojo:['Lâmina Rubra','blade'],knunka:['Arco Voltaico','lightning'],nine85:['Falha Digital','pixel'],
     uiye:['Ruptura de Pedra','rock'],rtess:['Pulso Magnético','ring'],atizz:['Corte Glitch','blade'],
     grizz:['Raio Tático','laser'],ouip:['Maré Ácida','acid'],jetde:['Pressão Celeste','bubble'],
@@ -85,7 +86,7 @@
     return true;
   }
   function impact(f,x,y,color,blocked=false){
-    if(f.proImpacts.length>=36)f.proImpacts.shift();
+    if(f.proImpacts.length>=6)f.proImpacts.shift();
     f.proImpacts.push({x,y,color,blocked,time:0,duration:blocked?.22:.30});
   }
   function targetHit(f,p,target,kind,move,x,y){
@@ -174,7 +175,7 @@
       }
       if(shot.life<=0||shot.x<-60||shot.x>W+60||shot.y>GROUND_Y+80)shot.dead=true;
     }
-    f.proProjectiles=f.proProjectiles.filter(s=>!s.dead);
+    f.proProjectiles=f.proProjectiles.filter(s=>!s.dead).slice(-5);
     for(const effect of f.proImpacts)effect.time+=dt;
     f.proImpacts=f.proImpacts.filter(e=>e.time<e.duration);
     if(f.proTraining){f.timer=360;f.p2.hp=f.p2.maxHp;f.p1.hp=f.p1.maxHp}
@@ -219,13 +220,13 @@
       c.fillStyle='#222d42';c.fillRect(x,y+12,300,6);c.fillStyle=p.proStamina<29?'#ffb867':'#69dece';c.fillRect(x,y+12,3*p.proStamina,6);
       c.font='12px system-ui';c.fillStyle='#c7d5e8';c.fillText(p.proLabelT>0?p.proLastMove:'FÔLEGO  '+Math.round(p.proStamina)+'%  ·  alterne soco e chute',x,y+41);
       if((p.proKnockdownT||0)>0&&p.onGround){
-        c.save();c.textAlign='center';c.font='800 13px system-ui';c.fillStyle='#ffd36a';c.shadowColor='#000';c.shadowBlur=7;
+        c.save();c.textAlign='center';c.font='800 13px system-ui';c.fillStyle='#ffd36a';
         c.fillText('NO CHÃO · SÓ CHUTE CAUSA DANO',p.x,GROUND_Y-54);c.restore();
       }
     }
     for(const e of f.proImpacts){
       const t=e.time/e.duration;c.save();c.translate(e.x,e.y);c.globalAlpha=1-t;c.strokeStyle=e.blocked?'#91dfff':e.color;c.lineWidth=e.blocked?3:4;
-      for(let i=0;i<7;i++){const a=i*Math.PI*2/7,r=12+t*36;c.beginPath();c.moveTo(Math.cos(a)*r*.5,Math.sin(a)*r*.5);c.lineTo(Math.cos(a)*r,Math.sin(a)*r);c.stroke()}
+      for(let i=0;i<2;i++){const a=i*Math.PI,r=12+t*30;c.beginPath();c.moveTo(Math.cos(a)*r*.5,Math.sin(a)*r*.5);c.lineTo(Math.cos(a)*r,Math.sin(a)*r);c.stroke()}
       c.fillStyle='#fff';c.beginPath();c.arc(0,0,Math.max(1,9*(1-t)),0,Math.PI*2);c.fill();c.restore();
     }
     if(f.proTraining){c.textAlign='center';c.fillStyle='#b6fff0';c.font='700 17px system-ui';c.fillText('TREINO LIVRE · VIDA RESTAURADA · SEM RECOMPENSAS',W/2,170)}
