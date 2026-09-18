@@ -998,6 +998,18 @@ function unlockVlad() {
 }
 
 
+
+// Primes secretos: os códigos não são exibidos na interface nem persistidos em texto puro.
+const PRIME_SECRET_IDS = Object.freeze(['ktrak','laranja','jone']);
+const PRIME_SECRET_HASHES = Object.freeze(new Set([3587581260,218689188,1991413406]));
+function primeSecretHash(value){
+  let h=2166136261>>>0;
+  for(const ch of String(value||'')){ h=Math.imul((h^ch.charCodeAt(0))>>>0,16777619)>>>0; }
+  return h>>>0;
+}
+function isPrimeSecretCode(value){ return PRIME_SECRET_HASHES.has(primeSecretHash(value)); }
+function primeIsUnlocked(id){ return PRIME_SECRET_IDS.includes(id) && Array.isArray(state?.roster) && state.roster.includes(id); }
+
 function loadState() {
   const fallback = defaultPlayer();
   const keys = ['lutador-state','lutador-state-backup','lutador-save-v2'];
@@ -1016,7 +1028,11 @@ function loadState() {
       s.roster = Array.from(new Set(Array.isArray(s.roster) ? s.roster : ['rojo']));
       s.storyShopAvailable = Array.from(new Set(Array.isArray(s.storyShopAvailable) ? s.storyShopAvailable.filter(id => STORY_FIGHTERS.includes(id)) : []));
       if (!s.roster.includes('rojo')) s.roster.unshift('rojo');
-      s.redeemedCodes = Array.from(new Set(Array.isArray(s.redeemedCodes) ? s.redeemedCodes : []));
+      s.redeemedCodes = Array.from(new Set(Array.isArray(s.redeemedCodes) ? s.redeemedCodes : []))
+        .filter(v => !isPrimeSecretCode(v));
+      for(const id of PRIME_SECRET_IDS){
+        if(s.roster.includes(id) && !s.redeemedCodes.includes(`prime:${id}`)) s.redeemedCodes.push(`prime:${id}`);
+      }
       s.saveVersion = 2;
       return s;
     } catch (e) {}
@@ -1158,7 +1174,7 @@ function renderCredits() {
       <div class="news-list">
         <article class="news-card featured"><div class="news-badge">👑 CRIADOR</div><h3>KRAK CALZSAN</h3><p>Criação, direção e universo de LUTADOR.</p></article>
         <article class="news-card"><div class="news-badge">🤝 PATROCINADORES</div><h3>CLP OFICIAL</h3><p>R.A.V.AM STUDIOS</p></article>
-        <article class="news-card"><div class="news-badge">⭐ APOIADORES</div><h3>JONE PIKES</h3><p>LARANJA PLAYER<br>S4NTSS</p></article>
+        <article class="news-card"><div class="news-badge">⭐ APOIADORES</div><h3>COMUNIDADE</h3><p>S4NTSS</p></article>
       </div>
       <button id="btn-credits-back" class="btn">← VOLTAR AO LOBBY</button>
     </div>`;
@@ -1172,7 +1188,7 @@ function renderCodes() {
     <div class="card mk-card mk-arena codes-screen">
       <div class="emblem"><span>🔐</span></div>
       <h2 class="select-title mk-title">CÓDIGOS <span class="mk-accent">SECRETOS</span></h2>
-      <p class="select-subtitle">A versão V6 mantém apenas os códigos mestres de progressão.</p>
+      <p class="select-subtitle">Digite um código de desenvolvedor ou de progressão.</p>
       <div style="max-width:470px;margin:24px auto">
         <input id="code-input" class="code-input" maxlength="24" autocomplete="off" placeholder="Digite o código...">
         <button id="btn-code-submit" class="btn big" style="margin-top:12px">DESBLOQUEAR</button>
@@ -1184,6 +1200,8 @@ function renderCodes() {
   const submit=()=>{
     const code=input.value.trim();
     if(!code){status.textContent='❌ Digite um código.';status.style.color='#f87171';return;}
+    const secretSig=primeSecretHash(code);
+    let redeemedTag=code;
     if(code==='010'){
       let list=document.getElementById('secret-code-list');
       if(list)list.remove();
@@ -1191,7 +1209,7 @@ function renderCodes() {
       list.id='secret-code-list';
       list.className='v6-code-hint';
       list.style.cssText='margin-top:18px;transition:opacity .35s ease,transform .35s ease;opacity:1;transform:translateY(0)';
-      list.innerHTML='<b>📋 CÓDIGOS EXISTENTES</b><span><b>010</b> · mostrar esta lista por 10 segundos</span><span><b>00011</b> · liberar todos os campeões principais</span><span><b>96051</b> · liberar KTRAK CALZSAN no Normal + R.A.V.A.M</span><span><b>052026</b> · liberar LARANJA no Normal + R.A.V.A.M</span><span><b>09871</b> · liberar JONE PIKES no Normal + R.A.V.A.M</span><span><b>121200</b> · 99.999 Gold</span><span><b>01010101</b> · 99.999 Vandais</span>';
+      list.innerHTML='<b>📋 CÓDIGOS DE PROGRESSÃO</b><span><b>010</b> · mostrar esta lista por 10 segundos</span><span><b>00011</b> · liberar todos os campeões principais</span><span><b>121200</b> · 99.999 Gold</span><span><b>01010101</b> · 99.999 Vandais</span>';
       const back=document.getElementById('btn-back');
       back?.parentNode?.insertBefore(list,back);
       clearTimeout(window.__lutadorCodeListTimer);
@@ -1201,14 +1219,14 @@ function renderCodes() {
         current.style.opacity='0';current.style.transform='translateY(-8px)';
         setTimeout(()=>current.remove(),360);
       },10000);
-      status.textContent='📋 LISTA DE CÓDIGOS EXISTENTES · SOME EM 10s.';status.style.color='#7dd3fc';
+      status.textContent='📋 LISTA DE PROGRESSÃO · SOME EM 10s.';status.style.color='#7dd3fc';
       input.value='';SFX.play('menu_confirm');return;
     }
     if(code==='00011'){
       CHARACTERS.forEach(c=>{if(c.ravamOnly||c.codeOnly)return;if(!state.roster.includes(c.id))state.roster.push(c.id);});
       state.ztaaaUnlocked=true;state.froghUnlocked=true;state.kloppUnlocked=true;
       status.textContent='🔓 TODOS OS CAMPEÕES FORAM LIBERADOS!';status.style.color='#7dd3fc';
-    }else if(code==='96051'){
+    }else if(secretSig===3587581260){
       if(!Array.isArray(state.roster))state.roster=[];
       if(!state.roster.includes('ktrak'))state.roster.push('ktrak');
       state.ktrakUnlocked=true;
@@ -1217,23 +1235,26 @@ function renderCodes() {
       if(!Array.isArray(state.ravamRoster))state.ravamRoster=[];
       if(!state.ravamRoster.includes('priya'))state.ravamRoster.unshift('priya');
       if(!state.ravamRoster.includes('ktrak'))state.ravamRoster.push('ktrak');
-      status.textContent='🌊🪨🔥🌪️ KTRAK CALZSAN LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#67e8f9';
-    }else if(code==='052026'){
+      redeemedTag='prime:ktrak';
+      status.textContent='🌊🪨🔥🌪️ PRIME SECRETO LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#67e8f9';
+    }else if(secretSig===218689188){
       if(!Array.isArray(state.roster))state.roster=[];
       if(!state.roster.includes('laranja'))state.roster.push('laranja');
       state.ravamModeUnlocked=true;state.ravamStoreVersion=Math.max(17,Number(state.ravamStoreVersion)||0);
       if(!Array.isArray(state.ravamRoster))state.ravamRoster=[];
       if(!state.ravamRoster.includes('priya'))state.ravamRoster.unshift('priya');
       if(!state.ravamRoster.includes('laranja'))state.ravamRoster.push('laranja');
-      status.textContent='🌪️⚡ LARANJA LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#fb923c';
-    }else if(code==='09871'){
+      redeemedTag='prime:laranja';
+      status.textContent='⚡ PRIME SECRETO LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#fb923c';
+    }else if(secretSig===1991413406){
       if(!Array.isArray(state.roster))state.roster=[];
       if(!state.roster.includes('jone'))state.roster.push('jone');
       state.ravamModeUnlocked=true;state.ravamStoreVersion=Math.max(17,Number(state.ravamStoreVersion)||0);
       if(!Array.isArray(state.ravamRoster))state.ravamRoster=[];
       if(!state.ravamRoster.includes('priya'))state.ravamRoster.unshift('priya');
       if(!state.ravamRoster.includes('jone'))state.ravamRoster.push('jone');
-      status.textContent='☣️ JONE PIKES LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#d7c7ae';
+      redeemedTag='prime:jone';
+      status.textContent='☣️ PRIME SECRETO LIBERADO NO NORMAL + R.A.V.A.M!';status.style.color='#d7c7ae';
     }else if(code==='121200'){
       state.coins=Math.max(Number(state.coins)||0,99999);
       status.textContent='💰 99.999 GOLD LIBERADO!';status.style.color='#facc15';
@@ -1244,7 +1265,9 @@ function renderCodes() {
       status.textContent='❌ Código inválido.';status.style.color='#f87171';SFX.play('menu_select');return;
     }
     if(!Array.isArray(state.redeemedCodes))state.redeemedCodes=[];
-    if(!state.redeemedCodes.includes(code))state.redeemedCodes.push(code);
+    // Nunca salva os códigos dos Primes em texto puro.
+    state.redeemedCodes=state.redeemedCodes.filter(v=>!isPrimeSecretCode(v));
+    if(!state.redeemedCodes.includes(redeemedTag))state.redeemedCodes.push(redeemedTag);
     persist();SFX.play('menu_confirm');
   };
   document.getElementById('btn-code-submit').onclick=submit;
@@ -6955,6 +6978,7 @@ const YTIRI_J_SCALE = 0.55;
     const mine=isHost?lan.p1:lan.p2;
     const ravamAll=Array.from(window.RavamStudios?.allCharacters||window.RavamStudios?.characters||[]);
     const ravamRoster=ravamAll.filter(c=>window.RavamStudios?.isOwned?.(c.id)!==false);
+    const hasRavamPrime=ravamRoster.some(c=>PRIME_SECRET_IDS.includes(c.id));
     const roster=lan.ravamOnly?ravamRoster:CHARACTERS.filter(c=>state.roster.includes(c.id));
     const pool=lan.ravamOnly?ravamAll:CHARACTERS;
     const name=id=>pool.find(c=>c.id===id)?.name||'---';
@@ -6974,7 +6998,7 @@ const YTIRI_J_SCALE = 0.55;
       <div class="card select mk-card mk-arena">
         <div class="emblem"><span>⚔️</span></div>
         <h2 class="select-title mk-title">
-          ${lan.ravamOnly?'SELECIONE <span class="mk-accent">LENDA / PRIME</span>':'SELECIONE O <span class="mk-accent">CAMPEÃO</span>'}
+          ${lan.ravamOnly?(hasRavamPrime?'SELECIONE <span class="mk-accent">LENDA / PRIME</span>':'SELECIONE A <span class="mk-accent">LENDA</span>'):'SELECIONE O <span class="mk-accent">CAMPEÃO</span>'}
         </h2>
 
         <div class="pick-status">
@@ -6984,7 +7008,7 @@ const YTIRI_J_SCALE = 0.55;
         <div id="v16-net-badge" style="display:inline-flex;margin:4px auto 10px;padding:6px 12px;border:1px solid #2b4968;border-radius:999px;background:#071321;color:#83eaff;font:800 11px Oxanium,system-ui">${connectionLabel()}</div>
 
         <p class="select-subtitle">
-          ${lan.ravamOnly?'Escolha uma Lenda R.A.V.A.M ou um Prime desbloqueado; Leo Vesper aparece quando adquirido. Cada jogador usa os controles normais de P1 no próprio computador.':'Escolha seu campeão. Cada jogador usa os controles normais de P1 no próprio computador.'}
+          ${lan.ravamOnly?(hasRavamPrime?'Escolha uma Lenda R.A.V.A.M ou um Prime já desbloqueado. Cada jogador usa os controles normais de P1 no próprio computador.':'Escolha uma Lenda R.A.V.A.M. Cada jogador usa os controles normais de P1 no próprio computador.'):'Escolha seu campeão. Cada jogador usa os controles normais de P1 no próprio computador.'}
         </p>
 
         <div class="roster mk-roster">
@@ -7708,7 +7732,7 @@ setTimeout(function(){
 
 <!-- R.A.V.A.M V17: loaded last on purpose so its animation/shop/online patches win. -->
 <link rel="stylesheet" href="pro-ravam-v17.css?v=180">
-<script src="pro-ravam-v17.js?v=2094"></script>
+<script src="pro-ravam-v17.js?v=2104"></script>
 <script src="pro-ravam-v19-powers.js?v=1900"></script>
 
 <style id="v20-6-professional-selection-fix">
@@ -7731,7 +7755,7 @@ setTimeout(function(){
 .fighter-card .mk-portrait::before,.mk-detail .mk-dportrait::before{opacity:.32}
 </style>
 <link rel="stylesheet" href="pro-ktrak-v20.css?v=2081">
-<script src="pro-ktrak-v20.js?v=2103"></script>
+<script src="pro-ktrak-v20.js?v=2104"></script>
 <link rel="stylesheet" href="pro-laranja-v20.css?v=2081">
 <script src="pro-laranja-v20.js?v=2094"></script>
 <link rel="stylesheet" href="pro-jone-v20.css?v=2081">

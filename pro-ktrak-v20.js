@@ -1,5 +1,5 @@
 /* SORTEP NIAK — KTRAK CALZSAN V20.9.1 — AVATAR SUPREMO
- * Personagem secreto disponível no modo Normal e R.A.V.A.M pelo código 96051.
+ * Personagem Prime secreto disponível somente após desbloqueio de desenvolvedor.
  * J = poder elemental atual | H / P2 9 = alternar Água > Terra > Fogo > Ar
  * L = Modo Avatar por 8s, dano x2 e versões supremas do J.
  * Avatar + J: Água congela 4s; Terra cria paredes + rocha esmagadora; Fogo incendeia o mapa; Ar cria tornado com queda.
@@ -7,7 +7,7 @@
 (()=>{
   'use strict';
   if(window.KtrakV20?.version)return;
-  const VERSION='20.10.3-avatar-lava-7s';
+  const VERSION='20.10.4-secret-primes';
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
   const ELEMENTS=Object.freeze(['water','earth','fire','air','lightning','lava','heal']);
   const LABELS=Object.freeze({water:'ÁGUA',earth:'TERRA',fire:'FOGO',air:'AR',lightning:'RAIO AZUL',lava:'LAVA',heal:'CURA'});
@@ -583,7 +583,12 @@
   try{
     if(window.RavamStudios){
       const old=window.RavamStudios,ability={flag:'RAVAM',role:'Mestre dos Elementos',tag:'AVATAR PLUS',desc:'J alterna entre Água, Terra, Fogo, Ar, Raio Azul, Lava e Cura. Água sai do chão e vira uma onda até a cintura do inimigo; Terra rompe o solo e lança rocha; Fogo sai em jato frontal; Ar vira corte rasteiro; Raio Azul cruza na horizontal; Lava abre uma fenda persistente; Cura faz a água subir sobre o próprio Ktrak e recuperar o último dano sofrido. L ativa o Avatar por 8s com dano dobrado e versões supremas.'};
-      window.RavamStudios={...old,version:VERSION,ktrak:old.ktrak||((typeof CHARACTERS!=='undefined'&&CHARACTERS.find(c=>c.id==='ktrak'))||null),ktrakAbility:ability,r19Abilities:{...(old.r19Abilities||{}),ktrak:ability}};
+      // Mantém os getters dinâmicos do R.A.V.A.M: Prime secreto só entra nas listas depois do desbloqueio.
+      const allDesc=Object.getOwnPropertyDescriptor(old,'allCharacters'),charsDesc=Object.getOwnPropertyDescriptor(old,'characters');
+      const api={...old,version:VERSION,ktrak:old.ktrak||((typeof CHARACTERS!=='undefined'&&CHARACTERS.find(c=>c.id==='ktrak'))||null),ktrakAbility:ability,r19Abilities:{...(old.r19Abilities||{}),ktrak:ability}};
+      if(allDesc?.get){delete api.allCharacters;Object.defineProperty(api,'allCharacters',allDesc)}
+      if(charsDesc?.get){delete api.characters;Object.defineProperty(api,'characters',charsDesc)}
+      window.RavamStudios=api;
     }
   }catch(_){}
 
