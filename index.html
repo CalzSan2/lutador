@@ -7441,6 +7441,210 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-v16-online-pro.css?v=161">
 <script src="pro-v16-online-pro.js?v=180"></script>
 
+
+<style id="v20-10-5-victory-horizontal">
+.match-result-overlay{
+  position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:24px;
+  background:
+    radial-gradient(circle at 18% 20%,rgba(74,222,128,.11),transparent 24%),
+    radial-gradient(circle at 82% 18%,rgba(56,189,248,.10),transparent 22%),
+    radial-gradient(circle at 50% 100%,rgba(250,204,21,.08),transparent 30%),
+    rgba(2,4,12,.88)!important;
+  animation:rouletteWin .35s ease;
+}
+.match-result-card{
+  width:min(1180px,96vw)!important;max-width:1180px;padding:22px!important;border-radius:28px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:linear-gradient(145deg,#10182e,#07101d 58%,#050a14)!important;
+  box-shadow:0 35px 120px rgba(0,0,0,.62), inset 0 0 0 1px rgba(255,255,255,.03)!important;
+  display:grid!important;grid-template-columns:minmax(290px,.92fr) minmax(520px,1.3fr);gap:18px;text-align:left!important;
+  overflow:hidden;position:relative;
+}
+.match-result-card::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.04),transparent 18%,transparent 78%,rgba(255,255,255,.03));pointer-events:none}
+.match-result-card.win{border-color:rgba(74,222,128,.35)!important;box-shadow:0 35px 120px rgba(0,0,0,.62),0 0 45px rgba(74,222,128,.10)!important}
+.match-result-card.loss{border-color:rgba(248,113,113,.24)!important;box-shadow:0 35px 120px rgba(0,0,0,.62),0 0 45px rgba(248,113,113,.08)!important}
+.match-result-hero{position:relative;padding:26px;border-radius:22px;background:linear-gradient(180deg,rgba(15,26,49,.98),rgba(7,12,24,.98));border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;justify-content:space-between;min-height:420px}
+.match-result-hero::after{content:"";position:absolute;inset:auto -35% -30% auto;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(74,222,128,.18),transparent 64%);pointer-events:none}
+.match-result-card.loss .match-result-hero::after{background:radial-gradient(circle,rgba(248,113,113,.16),transparent 64%)}
+.match-result-kicker{font:800 11px Oxanium,Arial!important;letter-spacing:4px;color:#9fb2d9;text-transform:uppercase}
+.match-result-title{font:900 clamp(52px,6vw,92px) Anton,Arial;margin:8px 0 4px;letter-spacing:4px;line-height:.94;color:#52f29d;text-shadow:0 0 28px rgba(74,222,128,.22)}
+.match-result-card.loss .match-result-title{color:#ff7d7d;text-shadow:0 0 28px rgba(248,113,113,.18)}
+.match-result-subline{font:800 15px Oxanium,Arial;color:#eef5ff;margin:6px 0 14px}
+.match-result-lead{color:#a8b7d8;line-height:1.55;margin:0 0 16px;font-size:14px}
+.match-result-badges{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 14px}
+.match-pill{padding:9px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.05);color:#f8fbff;font:800 11px Oxanium;letter-spacing:1px}
+.match-pill.reward{background:linear-gradient(135deg,rgba(250,204,21,.18),rgba(251,146,60,.12));border-color:rgba(250,204,21,.35);color:#ffe69a}
+.match-pill.good{background:linear-gradient(135deg,rgba(74,222,128,.16),rgba(34,197,94,.08));border-color:rgba(74,222,128,.32);color:#b7f5cb}
+.match-result-scorebar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));margin-top:12px}
+.match-fighter-name{font:900 17px Anton,Arial;letter-spacing:1px;color:#fff;max-width:32%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.match-score-core{display:flex;align-items:center;gap:10px;color:#fff;font:900 17px Oxanium,Arial}
+.match-score-number{display:grid;place-items:center;min-width:52px;height:52px;border-radius:15px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font:900 24px Anton,Arial}
+.match-score-x{font:900 22px Anton,Arial;color:#9fb2d9}
+.match-result-main{display:flex;flex-direction:column;gap:16px}
+.match-result-toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.match-result-heading{display:flex;flex-direction:column;gap:5px}
+.match-result-heading h3{margin:0;font:900 34px Anton,Arial;letter-spacing:2px;color:#fff}
+.match-result-heading small{font:800 11px Oxanium,Arial;letter-spacing:3px;color:#8da0c6;text-transform:uppercase}
+.match-result-mini{display:flex;gap:10px;flex-wrap:wrap}
+.match-result-mini .mini-card{min-width:128px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04)}
+.match-result-mini b{display:block;font:900 20px Anton,Arial;color:#fff}
+.match-result-mini span{font:800 10px Oxanium,Arial;letter-spacing:1.4px;color:#8ea0c5}
+.match-result-stats{display:grid;grid-template-columns:repeat(4,minmax(110px,1fr));gap:12px}
+.match-stat-card{padding:15px 14px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));box-shadow:inset 0 1px rgba(255,255,255,.03)}
+.match-stat-card .label{font:800 10px Oxanium,Arial;letter-spacing:1.5px;color:#8ea0c5;text-transform:uppercase}
+.match-stat-card .value{margin-top:6px;font:900 28px Anton,Arial;color:#fff;line-height:1}
+.match-stat-card .sub{margin-top:6px;color:#a9b8d8;font:700 11px Oxanium,Arial;line-height:1.35}
+.match-result-focus{padding:16px 18px;border-radius:20px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,rgba(20,29,54,.78),rgba(8,14,28,.92));display:grid;grid-template-columns:1.1fr .95fr;gap:16px;align-items:center}
+.match-focus-bar{height:12px;border-radius:999px;background:#04070d;border:1px solid rgba(255,255,255,.08);overflow:hidden;margin-top:10px}
+.match-focus-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#f97316,#facc15,#67e8f9)}
+.match-focus-text h4,.match-focus-side h4{margin:0 0 8px;font:900 19px Anton,Arial;letter-spacing:1px;color:#fff}
+.match-focus-text p,.match-focus-side p{margin:0;color:#aebcda;font-size:13px;line-height:1.55}
+.match-focus-side{padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.match-result-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:auto!important}
+.match-result-actions .btn{min-width:0!important;height:60px;border-radius:16px!important;font:900 13px Oxanium,Arial!important;letter-spacing:1px}
+.match-result-actions .btn.primary-win{background:linear-gradient(135deg,#ef4444,#fb7185)!important;border:none!important;color:#fff!important}
+.match-result-actions .btn.secondary-dark{background:linear-gradient(180deg,#18243b,#0f1729)!important;border:1px solid rgba(255,255,255,.1)!important;color:#fff!important}
+@media(max-width:980px){
+  .match-result-card{grid-template-columns:1fr!important}
+  .match-result-hero{min-height:auto}
+  .match-result-stats{grid-template-columns:repeat(2,minmax(120px,1fr))}
+  .match-result-focus{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .match-result-overlay{padding:12px}
+  .match-result-card{padding:14px!important;border-radius:22px!important}
+  .match-result-hero{padding:18px;border-radius:18px}
+  .match-result-title{font-size:54px}
+  .match-result-scorebar{flex-wrap:wrap;justify-content:center}
+  .match-fighter-name{max-width:none;width:100%;text-align:center}
+  .match-result-stats{grid-template-columns:1fr 1fr}
+  .match-result-actions{grid-template-columns:1fr!important}
+}
+</style>
+<style id="v20-10-5-hide-f9-panels">
+#knunkaInfo,#ytiriInfo,#trefohInfo,#aiBadge,#flameInfo{display:none!important}
+[id*="f9"],[class*="f9"],[data-hotkey="F9"],[data-key="F9"]{display:none!important}
+</style>
+<script id="v20-10-5-ui-patch">
+(()=>{
+  const escapeHtml=(v='')=>String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+  const stripF9Panels=()=>{
+    const selectors=['[id*="f9"]','[class*="f9"]','[data-hotkey="F9"]','[data-key="F9"]','.pro-combat-guide','.combat-guide','.hotkeys-panel','.hotkey-panel','.controls-float','.help-float'];
+    selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{
+      const txt=(el.textContent||'').toLowerCase();
+      if(sel.includes('guide')||sel.includes('panel')||txt.includes('f9')) el.remove();
+    }));
+    document.querySelectorAll('div,aside,section,button,span').forEach(el=>{
+      const txt=(el.textContent||'').trim().toLowerCase();
+      if(!txt || !txt.includes('f9')) return;
+      const st=getComputedStyle(el);
+      if(st.position==='fixed' || st.position==='sticky') el.remove();
+    });
+  };
+  window.addEventListener('keydown',e=>{
+    if(e.key==='F9'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      stripF9Panels();
+      return false;
+    }
+  },true);
+  setInterval(stripF9Panels,900);
+  stripF9Panels();
+
+  removeMatchResult=function(){document.getElementById('match-result-overlay')?.remove();};
+  showMatchResult=function(playerWon,options={}){
+    const current=fight;
+    if(!current||current.mode==='story'||current.matchResultShown)return;
+    current.matchResultShown=true;
+    const reward=current.earned||0;
+    if(typeof window.settleFightReward==='function') window.settleFightReward(current);
+    removeMatchResult();
+
+    const overlay=document.createElement('div');
+    overlay.id='match-result-overlay';overlay.className='match-result-overlay';
+
+    const p1=current.p1||{}; const p2=current.p2||{};
+    const stageName=current.stage?.name||'Arena Padrão';
+    const stageIcon=current.stage?.icon||'⚔️';
+    const totalRounds=(bestOfThree?.p1Wins||0)+(bestOfThree?.p2Wins||0);
+    const combo=Math.max(0,current.bestCombo||p1.combo||0);
+    const timeLeft=Math.max(0,Math.ceil(current.timer||0));
+    const life=Math.max(0,Math.ceil(p1.hp||0));
+    const dealt=p1.superHitsDealt||0;
+    const taken=p1.superHitsTaken||0;
+    const superPct=Math.max(0,Math.min(100,Math.round((p1.superMeter||0)*100)));
+    const focusPct=Math.max(18,Math.min(100,playerWon?76+Math.min(combo,10):34+Math.min(combo,12)));
+    const rewardText=options.rewardText||`+${Number(reward||0).toLocaleString('pt-BR')} GOLD`;
+    const modeLabel=(options.headline||'RESULTADO DA PARTIDA');
+    const detail=options.detail||`${playerWon?p1.name||'Seu campeão':p2.name||'O adversário'} venceu a melhor de três.`;
+
+    overlay.innerHTML=`<section class="match-result-card ${playerWon?'win':'loss'}">
+      <div class="match-result-hero">
+        <div>
+          <div class="match-result-kicker">${escapeHtml(modeLabel)}</div>
+          <div class="match-result-title">${playerWon?'VITÓRIA':'DERROTA'}</div>
+          <div class="match-result-subline">${escapeHtml((p1.name||'P1')+' '+(bestOfThree?.p1Wins||0)+' × '+(bestOfThree?.p2Wins||0)+' '+(p2.name||'P2'))}</div>
+          <p class="match-result-lead">${escapeHtml(detail)}</p>
+          <div class="match-result-badges">
+            <div class="match-pill reward">${escapeHtml(rewardText)}</div>
+            <div class="match-pill ${playerWon?'good':''}">${escapeHtml(stageIcon+' '+stageName)}</div>
+            <div class="match-pill">MODO ${escapeHtml(String(current.mode||'cpu').toUpperCase())}</div>
+          </div>
+        </div>
+        <div class="match-result-scorebar">
+          <div class="match-fighter-name">${escapeHtml(p1.name||'P1')}</div>
+          <div class="match-score-core"><span class="match-score-number">${bestOfThree?.p1Wins||0}</span><span class="match-score-x">×</span><span class="match-score-number">${bestOfThree?.p2Wins||0}</span></div>
+          <div class="match-fighter-name" style="text-align:right">${escapeHtml(p2.name||'P2')}</div>
+        </div>
+      </div>
+      <div class="match-result-main">
+        <div class="match-result-toprow">
+          <div class="match-result-heading">
+            <small>Resumo da partida</small>
+            <h3>PAINEL DE RESULTADOS</h3>
+          </div>
+          <div class="match-result-mini">
+            <div class="mini-card"><b>${playerWon?'WIN':'LOSE'}</b><span>STATUS FINAL</span></div>
+            <div class="mini-card"><b>${Math.max(1,totalRounds)}</b><span>ROUNDS DISPUTADOS</span></div>
+            <div class="mini-card"><b>${timeLeft}s</b><span>TEMPO RESTANTE</span></div>
+          </div>
+        </div>
+        <div class="match-result-stats">
+          <div class="match-stat-card"><div class="label">Melhor combo</div><div class="value">${combo}x</div><div class="sub">Maior sequência da luta.</div></div>
+          <div class="match-stat-card"><div class="label">Vida restante</div><div class="value">${life}</div><div class="sub">HP do seu campeão no fim.</div></div>
+          <div class="match-stat-card"><div class="label">Acertos dados</div><div class="value">${dealt}</div><div class="sub">Golpes válidos no combate.</div></div>
+          <div class="match-stat-card"><div class="label">Super</div><div class="value">${superPct}%</div><div class="sub">Carga final do super.</div></div>
+        </div>
+        <div class="match-result-focus">
+          <div class="match-focus-text">
+            <h4>${playerWon?'Domínio na arena':'Análise da derrota'}</h4>
+            <p>${playerWon?'Você controlou o ritmo da luta e fechou a melhor de três com presença forte na arena.':'A luta terminou em desvantagem, mas o resumo mostra onde recuperar vantagem na próxima tentativa.'}</p>
+            <div class="match-focus-bar"><div class="match-focus-fill" style="width:${focusPct}%"></div></div>
+          </div>
+          <div class="match-focus-side">
+            <h4>Leitura rápida</h4>
+            <p><b>${taken}</b> golpes recebidos para carregar super · arena <b>${escapeHtml(stageName)}</b> · placar final <b>${bestOfThree?.p1Wins||0} × ${bestOfThree?.p2Wins||0}</b>.</p>
+          </div>
+        </div>
+        <div class="match-result-actions">
+          <button id="result-replay" class="btn big primary-win">↻ JOGAR NOVAMENTE</button>
+          <button id="result-select" class="btn big secondary-dark">🥊 VOLTAR AOS CAMPEÕES</button>
+          <button id="result-lobby" class="btn big secondary-dark">⌂ SAIR PARA O LOBBY</button>
+        </div>
+      </div>
+    </section>`;
+    document.body.appendChild(overlay);
+
+    const snapshot={mode:current.mode,p1:p1.id,p2:p2.id,stage:current.stage?.id||null,chaos:current.chaosPenalties};
+    const reset=()=>{removeMatchResult();fight=null;bestOfThree={p1Wins:0,p2Wins:0,round:1,active:false};};
+    document.getElementById('result-replay').onclick=()=>{reset();if(snapshot.mode==='boss')startBossFight(snapshot.p1);else if(snapshot.mode==='tournament')startTournament(snapshot.p1);else startFight(snapshot.p1,snapshot.mode,snapshot.p2,snapshot.stage,snapshot.chaos);};
+    document.getElementById('result-select').onclick=()=>{reset();if(snapshot.mode==='boss')renderBossSelect();else if(snapshot.mode==='tournament')renderTournamentSelect();else if(snapshot.mode==='chaos')renderSelect('chaos');else if(snapshot.mode==='mix')renderSelect('mix');else renderSelect(snapshot.mode);};
+    document.getElementById('result-lobby').onclick=()=>{reset();renderMenu();};
+  };
+})();
+</script>
+
 </body>
 </html>
 
