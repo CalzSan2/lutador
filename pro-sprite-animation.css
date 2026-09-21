@@ -1,0 +1,13 @@
+/* LUTADOR — sprite atlas presentation */
+.has-pro-sprite-v2{position:relative!important;overflow:hidden!important;isolation:isolate}
+.has-pro-sprite-v2>.pro-character-art,.has-pro-sprite-v2>.pro-fallback-art,.has-pro-sprite-v2>.pro-detail-art,.has-pro-sprite-v2>.shop-face{opacity:0!important;visibility:hidden!important}
+.pro-sprite-v2{position:absolute;inset:0;z-index:3;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 12px 13px rgba(0,0,0,.75));transform-origin:50% 88%;animation:pro-sprite-card-idle 3.6s ease-in-out infinite}
+.fighter-card:nth-child(even) .pro-sprite-v2{animation-delay:-1.2s}.fighter-card:nth-child(3n) .pro-sprite-v2{animation-delay:-2.4s}
+.pro-sprite-v2-detail{inset:-4% -8%;width:116%;height:108%}.pro-sprite-v2-shop{inset:-5%;width:110%;height:110%}
+.pro-sprites-ready .fighter-card .mk-portrait:before{display:none}
+.pro-sprite-v2{animation:none;filter:none}
+body:has(#game:not(.hidden)){overflow:hidden!important;align-items:center!important}
+body:has(#game:not(.hidden)) #app{width:100vw!important;max-width:none!important;height:100dvh;padding:0!important;display:grid;place-items:center}
+body:has(#game:not(.hidden)) #game{width:min(100vw,calc(100dvh * 1.5625));height:auto;max-height:100dvh;aspect-ratio:1600/1024;border-radius:0}
+@keyframes pro-sprite-card-idle{0%,100%{transform:translateY(2px) scale(1)}50%{transform:translateY(-5px) scale(1.018)}}
+@media(prefers-reduced-motion:reduce){.pro-sprite-v2{animation:none!important}}

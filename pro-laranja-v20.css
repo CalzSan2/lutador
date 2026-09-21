@@ -1,0 +1,6 @@
+/* LARANJA — velocista supersônico */
+.fighter-card[data-id="laranja"]{--char-color:#ff5b22}
+.fighter-card[data-id="laranja"] .mk-portrait{background:radial-gradient(circle at 50% 35%,rgba(255,91,34,.26),transparent 56%),linear-gradient(145deg,#120705,#08090e)!important}
+.fighter-card[data-id="laranja"] .pro-portrait-tag{color:#ffd09a;border-color:rgba(255,120,56,.48);background:rgba(40,12,5,.78)}
+.fighter-card[data-id="laranja"].selected{box-shadow:inset 0 0 0 2px #ff6a2f,0 0 28px rgba(255,91,34,.18)}
+.pro-character-art.generated img[alt*="laranja" i],.pro-detail-art img[alt*="Laranja" i]{filter:drop-shadow(0 14px 18px rgba(0,0,0,.58))}

@@ -1,0 +1,38 @@
+.pro-audio-launch{min-width:88px!important}
+.pro-audio-dialog{box-sizing:border-box;width:min(620px,calc(100vw - 28px));max-height:calc(100dvh - 28px);padding:0;border:1px solid #53516a;border-radius:20px;background:#10111b;color:#edf0fa;box-shadow:0 28px 100px #000b;font-family:Oxanium,Arial,sans-serif;overflow:auto;color-scheme:dark}
+.pro-audio-dialog::backdrop{background:rgba(3,5,12,.83);backdrop-filter:blur(5px)}
+.pro-audio-panel{padding:28px}
+.pro-audio-header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pro-audio-header small{font-size:10px;letter-spacing:2px;color:#e9b16c}
+.pro-audio-header h2{margin:5px 0 0;font-family:Anton,Arial,sans-serif;font-size:32px;line-height:1.2;letter-spacing:1px}
+.pro-audio-close{width:38px;height:38px;border:1px solid #444656;border-radius:10px;background:#202230;color:#fff;font:28px/1 Arial;cursor:pointer}
+.pro-audio-intro{color:#b9bdd0;font-size:12px;line-height:1.6;margin:16px 0 22px}
+.pro-audio-mixer{display:grid;gap:21px}
+.pro-audio-row{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:18px}
+.pro-audio-label,.pro-audio-toggle>span{display:grid;gap:5px}
+.pro-audio-label strong,.pro-audio-toggle strong{font-size:13px;font-weight:700}
+.pro-audio-label small,.pro-audio-toggle small{font-size:10px;color:#a9adc4;line-height:1.5}
+.pro-audio-slider{display:flex;align-items:center;gap:12px}
+.pro-audio-slider input{appearance:none;-webkit-appearance:none;min-width:0;width:100%;height:6px;margin:12px 0;border-radius:6px;background:linear-gradient(to right,#ecaf64 var(--audio-fill,50%),#323647 var(--audio-fill,50%));cursor:pointer}
+.pro-audio-slider input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:3px solid #edaf65;border-radius:50%;background:#fff3dc;box-shadow:0 2px 8px #0006}
+.pro-audio-slider input::-moz-range-thumb{width:13px;height:13px;border:3px solid #edaf65;border-radius:50%;background:#fff3dc}
+.pro-audio-slider output{min-width:38px;text-align:right;color:#ffdaa6;font-size:12px;font-variant-numeric:tabular-nums}
+.pro-audio-toggles{margin-top:24px;border-top:1px solid #2e3042;border-bottom:1px solid #2e3042;padding:18px 0;display:grid;gap:17px}
+.pro-audio-toggle{display:flex;align-items:center;justify-content:space-between;gap:20px;cursor:pointer}
+.pro-audio-toggle input{appearance:none;-webkit-appearance:none;width:42px;min-width:42px;height:24px;border-radius:14px;background:#323646;position:relative;cursor:pointer;transition:background .16s}
+.pro-audio-toggle input:before{content:'';position:absolute;left:4px;top:4px;width:16px;height:16px;background:#c0c5d7;border-radius:50%;transition:transform .16s}
+.pro-audio-toggle input:checked{background:#a96725}
+.pro-audio-toggle input:checked:before{transform:translateX(18px);background:#fff2d9}
+.pro-audio-test{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:20px}
+.pro-audio-status{font-size:10px;color:#a9adc4;line-height:1.5}
+.pro-audio-button{min-height:38px;padding:9px 15px;border:1px solid #555b72;border-radius:8px;background:#252a3c;color:#f1f3fc;font:700 11px Oxanium,Arial,sans-serif;letter-spacing:.5px;white-space:nowrap;cursor:pointer}
+.pro-audio-button:hover{background:#32394e;border-color:#b5bdce}
+.pro-audio-footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:15px}
+.pro-audio-reset{border:0;background:none;color:#b4bacb;font:11px Oxanium,Arial,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.pro-audio-done{background:#ce443e;border-color:#ec665d;min-width:140px;color:white}
+.pro-audio-done:hover{background:#e65349;border-color:#ff9185}
+.pro-audio-dialog :focus-visible{outline:2px solid #ffe0a1;outline-offset:4px}
+@media(max-width:520px){.pro-audio-panel{padding:20px}.pro-audio-header h2{font-size:26px}.pro-audio-row{grid-template-columns:1fr;gap:2px}.pro-audio-mixer{gap:15px}.pro-audio-test{align-items:flex-start}.pro-audio-intro{margin:13px 0 18px}}
+@media(prefers-reduced-motion:reduce){.pro-audio-dialog *{transition:none!important}}
+
+/* SORTEP NIAK */ .pro-audio-dialog{border-radius:24px!important;border-color:rgba(135,185,255,.28)!important;background:linear-gradient(145deg,#101426,#090b14)!important}.pro-audio-panel{padding:30px!important}.pro-audio-dialog button{border-radius:12px!important}

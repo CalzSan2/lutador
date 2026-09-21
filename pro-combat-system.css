@@ -1,0 +1,18 @@
+.pro-combat-guide{width:min(880px,94vw);max-height:92dvh;overflow:auto;border:1px solid #4c617d;border-radius:18px;padding:26px;background:linear-gradient(130deg,#172439,#090f1c);color:#e9f2ff;box-shadow:0 24px 100px #000b;font:14px/1.5 system-ui}
+.pro-combat-guide::backdrop{background:#020714da;backdrop-filter:blur(4px)}
+.pro-combat-guide header{display:flex;justify-content:space-between;align-items:center;color:#77e7d3;letter-spacing:2px}
+.pro-combat-guide h2{font:900 clamp(26px,3vw,42px)/1.1 system-ui;margin:12px 0}
+.pro-combat-guide p{color:#b8c8df;max-width:740px}
+.pro-combat-guide button{cursor:pointer;border:1px solid #506583;border-radius:8px;color:#fff;background:#233954;padding:10px 16px;font-weight:700}
+.pro-combat-guide header button{font-size:20px;padding:3px 12px}
+.pro-move-table{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:1px;border:1px solid #314058;border-radius:10px;overflow:hidden;margin:20px 0}
+.pro-move-table>*{padding:12px;background:#101e31;font:inherit}.pro-move-table>b{background:#243650;font-size:11px;letter-spacing:1px}.pro-move-table>kbd{color:#b8ffee}
+.pro-training-row{display:flex;gap:10px;margin:9px 0 16px}.pro-training-row select{flex:1;min-width:0;background:#0b1829;color:#fff;border:1px solid #425776;border-radius:8px;padding:12px}.pro-training-row button{background:#156459}
+.pro-combat-guide footer{font-size:12px;color:#9babbe}.pro-combat-guide label{font-size:11px;letter-spacing:1px;color:#6be2cb}
+.pro-combat-note{font-size:13px;border-left:3px solid #62cdbb;padding-left:12px}
+body:has(.pro-screen){display:block!important;overflow:auto!important}
+body:has(.pro-screen) #app{width:100%!important;max-width:none!important;padding:12px 16px!important;margin:0!important;box-sizing:border-box}
+body:has(.pro-screen) .pro-screen{width:min(1500px,100%)!important;max-width:100%!important;margin:0 auto!important;box-sizing:border-box}
+body:has(.pro-screen)>#creator-credits,body:has(.pro-screen)>#aiBadge,body:has(.pro-screen)>#flameInfo{display:none!important}
+body:has(#game:not(.hidden)) #knunkaInfo,body:has(#game:not(.hidden)) #ytiriInfo,body:has(#game:not(.hidden)) #trefohInfo,body:has(#game:not(.hidden)) #flameInfo,body:has(#game:not(.hidden)) #aiBadge{display:none!important}
+@media(max-width:650px){.pro-combat-guide{padding:16px}.pro-move-table>*{padding:8px;font-size:11px}.pro-training-row{flex-direction:column}}
