@@ -223,7 +223,15 @@
       const hint=now()<(p.niakV32HintUntil||0)?p.niakV32Hint:'';
       const cooldown=p.human?`J ${p.throwCd>.05?p.throwCd.toFixed(1)+'s':'PRONTO'} · L ${p.superDisabled?'SILENCIADO':p.superReady?'PRONTO':Math.round(clamp(p.superMeter,0,1)*100)+'%'}`:'';
       const lines=[cooldown,status,hint].filter(Boolean);
-      if(lines.length){c.fillStyle='rgba(3,8,17,.88)';c.fillRect(x-188,y-12,376,lines.length*18+7);lines.forEach((line,i)=>{c.fillStyle=i===lines.length-1&&hint?'#fde68a':'#e2e8f0';c.fillText(line,x,y+i*18,366)});}
+      if(lines.length){
+        c.save();
+        c.shadowColor='rgba(0,0,0,.8)';
+        c.shadowBlur=8;
+        c.shadowOffsetX=0;
+        c.shadowOffsetY=2;
+        lines.forEach((line,i)=>{c.fillStyle=i===lines.length-1&&hint?'#fde68a':'#e2e8f0';c.fillText(line,x,y+i*18,366)});
+        c.restore();
+      }
     }
     if(training(f)&&settings.trainingHud){
       const p=f.p1,other=f.p2,ph=phase(p),m=p.proMove,spec=window.ProCombat?.specs?.[m?.kind||'punch'];
