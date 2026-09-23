@@ -8,7 +8,7 @@
 (()=>{
   'use strict';
   if(window.JonePikesV20?.version)return;
-  const VERSION='20.10.9-toxic-system';
+  const VERSION='33.0.0-scythe-hera';
   const ID='jone';
   const TAN='#d7c7ae', GREEN='#7ddc56', PALE='#ecffe4';
   const POISON_TYPES=Object.freeze({
@@ -62,7 +62,7 @@
     p.joneMarkStacks=0;p.joneMarkT=0;
     p.joneFlashT=0;
   }
-  function init(p){if(p?.id===ID){if(!Number.isFinite(p.joneFlashT))p.joneFlashT=0;if(!Number.isFinite(p.jonePoisonIndex))p.jonePoisonIndex=0;}}
+  function init(p){if(p?.id===ID){if(!Number.isFinite(p.joneFlashT))p.joneFlashT=0;if(!Number.isFinite(p.jonePowerIndex))p.jonePowerIndex=0;if(!Number.isFinite(p.joneHealTick))p.joneHealTick=0;}}
   function addFx(f,x,y,type='ring',life=.32,r=40,col=GREEN){
     ensureFight(f);if(f.joneFx.length>=4)f.joneFx.shift();f.joneFx.push({x,y,type,life,maxLife:life,r,col,phase:Math.random()*6.28});
   }
@@ -92,13 +92,27 @@
     target.jonePoisonOwner=owner;target.jonePoisonDir=dir||1;
     const add=Math.max(cfg.marks||1,forceMarks||0);target.joneMarkStacks=clamp((target.joneMarkStacks||0)+add,1,3);target.joneMarkT=8;
   }
-  function poisonProjectile(p){
+  function heraKiss(p){
     const f=getFight();if(!f||!p||p.state==='ko')return false;ensureFight(f);init(p);
     const target=opponent(p,f);if(!target)return false;
     const dir=Math.sign(target.x-p.x)||p.facing||1;p.facing=p.manualFacing=dir;
-    const kind=POISON_ORDER[(p.jonePoisonIndex||0)%POISON_ORDER.length],cfg=poisonConfig(kind);p.jonePoisonIndex=((p.jonePoisonIndex||0)+1)%POISON_ORDER.length;
+    const kind='deep',cfg=poisonConfig(kind);
     f.joneShots.push({x:p.x+dir*42,y:body(p)-42,vx:dir*650,vy:24,life:1.35,targetSlot:target.playerSlot,ownerSlot:p.playerSlot,dead:false,kind,color:cfg.color});
-    p.throwCd=Math.max(p.throwCd||0,.48);setPState(p,'throw');p.joneFlashT=.16;sound('attack_light',.74);addFx(f,p.x+dir*40,body(p)-42,'ring',.20,26,cfg.color);return true;
+    p.throwCd=Math.max(p.throwCd||0,.48);setPState(p,'throw');p.joneFlashT=.16;sound('attack_light',.74);addFx(f,p.x+dir*40,body(p)-42,'ring',.20,26,cfg.color);toast('JONE · BEIJO DA HERA');return true;
+  }
+  function deathScythe(p){
+    const f=getFight();if(!f||!p||p.state==='ko')return false;ensureFight(f);init(p);
+    const target=opponent(p,f);if(!target)return false;const dir=Math.sign(target.x-p.x)||p.facing||1;p.facing=p.manualFacing=dir;
+    p.throwCd=Math.max(p.throwCd||0,.54);setPState(p,'throw');p.joneFlashT=.24;sound('attack_heavy',.84);
+    const close=Math.abs(target.x-p.x)<=154&&Math.abs((target.y||0)-(p.y||0))<105;
+    if(close){applyDamage(target,Math.max(72,(p.dmg||34)*2.15),p,dir,'jone-death-scythe');target.vx=dir*310;hitFx(target.x,body(target)-48,TAN,8);addFx(f,target.x,body(target)-50,'burst',.32,74,TAN)}
+    else addFx(f,p.x+dir*86,body(p)-54,'ring',.26,58,TAN);
+    toast('JONE · CORTE DA MORTE');return true;
+  }
+  function activePower(p){init(p);return(p.jonePowerIndex||0)%2===0?'scythe':'hera'}
+  function togglePower(p){
+    if(!p||p.id!==ID||p.state==='ko')return;p.jonePowerIndex=((p.jonePowerIndex||0)+1)%2;p.joneFlashT=.22;
+    const mode=activePower(p);addFx(getFight(),p.x,body(p)-42,'ring',.25,42,mode==='scythe'?TAN:GREEN);sound('menu_select',.55);toast(`JONE · ${mode==='scythe'?'CORTE DA MORTE':'BEIJO DA HERA'}`);
   }
   function smokeBomb(p){
     const f=getFight();if(!f||!p||p.state==='ko')return false;ensureFight(f);init(p);
@@ -110,9 +124,17 @@
   }
 
   const oldThrow=window.throwProjectile;
-  if(typeof oldThrow==='function')window.throwProjectile=function(p){if(p?.id===ID){poisonProjectile(p);return}return oldThrow.apply(this,arguments)};
+  if(typeof oldThrow==='function')window.throwProjectile=function(p){if(p?.id===ID){return activePower(p)==='scythe'?deathScythe(p):heraKiss(p)}return oldThrow.apply(this,arguments)};
   const oldSpecial=window.castSpecial;
   if(typeof oldSpecial==='function')window.castSpecial=function(p){if(p?.id===ID){smokeBomb(p);return}return oldSpecial.apply(this,arguments)};
+
+  // O P2 online envia Numpad9 como entrada de rede, sem evento de teclado no HOST.
+  // Tratar H no mesmo fluxo de playerInput mantém P1, P2 local e P2 remoto iguais.
+  const oldPlayerInput=window.playerInput;
+  if(typeof oldPlayerInput==='function')window.playerInput=function(p){
+    if(p?.id===ID&&p.human){const f=getFight(),key=p.playerSlot==='p2'?'Numpad9':'KeyH';if(f&&!f.paused&&!f.over&&window.justPressed?.[key]){window.justPressed[key]=false;togglePower(p)}}
+    return oldPlayerInput.apply(this,arguments)
+  };
 
   function updatePoison(target,dt){
     if(!target)return;
@@ -163,6 +185,9 @@
       const owner=slot(f,c.ownerSlot),target=slot(f,c.targetSlot);
       if(c.tick<=0){
         c.tick=.28;
+        if(owner&&owner.state!=='ko'&&Math.abs(owner.x-c.x)<c.r&&Math.abs(body(owner)-c.y)<135){
+          const heal=Math.max(14,(owner.maxHp||2190)*.010);owner.hp=Math.min(owner.maxHp,owner.hp+heal);addFx(f,owner.x,body(owner)-38,'ring',.20,30,PALE);
+        }
         if(target&&target.state!=='ko'&&Math.abs(target.x-c.x)<c.r&&Math.abs(body(target)-c.y)<120){
           const dir=Math.sign(target.x-c.x)||1,cfg=poisonConfig(c.kind||'plague');applyPoisonDamage(target,(owner?.dmg||34)*.34,owner,dir,'jone-smoke');
           applyPoison(target,owner,dir,c.kind||'plague',Math.max(2.4,cfg.duration*.55),c.supreme?3:1);
@@ -338,7 +363,7 @@
     for(const c of f.joneClouds)drawCloud(ctx,c);
     for(const e of f.joneFx)drawFx(ctx,e);
     drawStatus(ctx,f.p1);drawStatus(ctx,f.p2);
-    for(const p of [f.p1,f.p2])if(p?.id===ID&&p.human){const x=p===f.p1?34:worldW()-326,y=192,next=POISON_ORDER[(p.jonePoisonIndex||0)%POISON_ORDER.length],cfg=poisonConfig(next);ctx.save();ctx.fillStyle='rgba(18,15,12,.76)';ctx.strokeStyle=cfg.color;ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(x,y,292,52,10);ctx.fill();ctx.stroke();ctx.fillStyle='#f8efdf';ctx.font='900 11px Oxanium,Arial';ctx.fillText('JONE PIKES · VENENO',x+12,y+17);ctx.fillStyle=cfg.color;ctx.font='800 11px Oxanium,Arial';ctx.fillText(`J · ${cfg.label}  ·  PRÓXIMO VENENO`,x+12,y+34);ctx.fillStyle=GREEN;ctx.font='800 9px Oxanium,Arial';ctx.fillText('L · PRAGA TÓXICA SUPREMA + MARCA ×3',x+12,y+47);ctx.restore()}
+    for(const p of [f.p1,f.p2])if(p?.id===ID&&p.human){const x=p===f.p1?34:worldW()-326,y=192,mode=activePower(p),cfg=mode==='scythe'?{color:TAN,label:'CORTE DA MORTE · FOICE CURTA'}:{color:GREEN,label:'BEIJO DA HERA · VENENO LONGO'};ctx.save();ctx.fillStyle='rgba(18,15,12,.82)';ctx.strokeStyle=cfg.color;ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(x,y,292,58,10);ctx.fill();ctx.stroke();ctx.fillStyle='#f8efdf';ctx.font='900 11px Oxanium,Arial';ctx.fillText('JONE PIKES · H ALTERNA O PODER',x+12,y+17);ctx.fillStyle=cfg.color;ctx.font='800 10px Oxanium,Arial';ctx.fillText(`J · ${cfg.label}`,x+12,y+36);ctx.fillStyle=PALE;ctx.font='800 9px Oxanium,Arial';ctx.fillText('L · JARDIM MORTAL · DANO + CURA NA ÁREA',x+12,y+51);ctx.restore()}
   }
   const oldDraw=window.draw;
   if(typeof oldDraw==='function')window.draw=function(f){const r=oldDraw.apply(this,arguments);try{drawJoneFx(canvas.getContext('2d'),f)}catch(_){}return r};

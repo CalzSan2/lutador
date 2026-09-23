@@ -604,6 +604,18 @@
   function unlockPremium(){
     if (data.battlePass.premium) return true;
     const s = getGameState();
+    // Preserva ativações já conquistadas em versões anteriores, sem manter o modo removido.
+    if (s && Number(s.griawPassActivations) > 0){
+      s.griawPassActivations = Math.max(0, Math.floor(Number(s.griawPassActivations)) - 1);
+      data.battlePass.premium = true;
+      saveGameState();
+      save();
+      showToast('PASSE PREMIUM ATIVADO!', 'level');
+      playSfx('menu_confirm');
+      emit('premium', {price:0, currency:'activation'});
+      showBattlePass(lastPassOrigin);
+      return true;
+    }
     if (!s || gamePsy() < PREMIUM_PSY_PRICE) {
       showToast(`Você precisa de ${PREMIUM_PSY_PRICE.toLocaleString('pt-BR')} PSY.`, 'error');
       playSfx('menu_back');
@@ -764,7 +776,7 @@
       <section class="pp-daily-section" aria-labelledby="pp-daily-heading"><div class="pp-section-caption"><h3 id="pp-daily-heading">MISSÕES DIÁRIAS</h3><span>Renovam à meia-noite local · ${missions.filter(m=>m.claimed).length}/3 resgatadas</span></div><div class="pp-daily-grid">${missions.map(mission => `<article class="pp-mission-card ${mission.claimed ? 'claimed' : mission.completed ? 'ready' : ''}"><div class="pp-mission-symbol">${mission.icon}</div><div class="pp-mission-body"><div><h4>${mission.title}</h4><b>${mission.progress}/${mission.target}</b></div><p>${mission.description}</p><div class="pro-progress"><i style="width:${mission.progress/mission.target*100}%"></i></div><footer><span>+${mission.xp} XP · ${mission.coins} GOLD</span><button class="pro-claim ${mission.completed && !mission.claimed ? 'ready' : ''}" data-claim-mission="${mission.id}" ${!mission.completed || mission.claimed ? 'disabled' : ''}>${mission.claimed ? '✓ RESGATADA' : mission.completed ? 'RESGATAR' : 'EM ANDAMENTO'}</button></footer></div></article>`).join('')}</div></section>
       <div class="pp-track-toolbar"><div><h3>TRILHA DE RECOMPENSAS</h3><small>Patamar 1 é um presente de boas-vindas. Resgate o restante ao avançar.</small></div><button id="pro-claim-all" class="btn pro-accent-btn" ${readyCount ? '' : 'disabled'}>RESGATAR DISPONÍVEIS (${readyCount})</button><div class="pp-track-nav"><button type="button" data-track-step="-1" aria-label="Patamares anteriores">←</button><button type="button" data-track-step="1" aria-label="Próximos patamares">→</button></div></div>
       <div class="pp-track-grid" tabindex="0" aria-label="Recompensas do passe; use as setas para navegar">${tiers}</div>
-      <footer class="pp-pass-bottom"><div><strong>${data.battlePass.premium ? '◆ PREMIUM ATIVO' : '◆ COMPLETE A SUA COLEÇÃO'}</strong><span>O Premium é válido apenas nesta temporada. No fim dos 28 dias o Passe reinicia e chega uma nova coleção; recompensa final atual: <b>${escapeHtml(info.season.finalTitle)}</b>.</span></div>${data.battlePass.premium ? '<span class="pro-premium-owned">70 RECOMPENSAS EXTRAS</span>' : `<button id="pro-unlock-premium" class="btn pro-premium-buy">DESBLOQUEAR • ${PREMIUM_PSY_PRICE.toLocaleString('pt-BR')} PSY</button>`}</footer>
+      <footer class="pp-pass-bottom"><div><strong>${data.battlePass.premium ? '◆ PREMIUM ATIVO' : '◆ COMPLETE A SUA COLEÇÃO'}</strong><span>O Premium é válido apenas nesta temporada. No fim dos 28 dias o Passe reinicia e chega uma nova coleção; recompensa final atual: <b>${escapeHtml(info.season.finalTitle)}</b>.</span></div>${data.battlePass.premium ? '<span class="pro-premium-owned">70 RECOMPENSAS EXTRAS</span>' : `<button id="pro-unlock-premium" class="btn pro-premium-buy">${Number(getGameState()?.griawPassActivations)>0?'USAR ATIVAÇÃO DISPONÍVEL':`DESBLOQUEAR • ${PREMIUM_PSY_PRICE.toLocaleString('pt-BR')} PSY`}</button>`}</footer>
       <div class="pp-title-locker"><label for="pp-title-select">SEU TÍTULO NO LOBBY</label><select id="pp-title-select"><option value="">NOVO DESAFIANTE</option>${data.titles.map(value=>`<option value="${escapeHtml(value)}" ${value===data.equippedTitle ? 'selected' : ''}>${escapeHtml(titleLabel(value))}</option>`).join('')}</select><button id="pp-equip-title" class="btn">EQUIPAR TÍTULO</button><button id="pro-open-upgrades-from-pass" class="btn">MELHORIAS DO PERFIL →</button></div>
     </section>`;
     host.querySelectorAll('[data-claim-track]').forEach(button => button.addEventListener('click', () => {

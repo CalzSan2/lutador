@@ -853,7 +853,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <script>
 const ROSTER = [
   { id: 'laranja', name: 'Laranja', color: '#ff5b22', hp: 1880, dmg: 33, speed: 165, price: 0, weapon: 'speedCombo', special: 'speedTornado', secret: true, codeOnly: true, portrait: 'ai-assets/characters/laranja.png' },
-  { id: 'jone', name: 'Jone Pikes', color: '#c8b79e', hp: 1940, dmg: 34, speed: 88, price: 0, weapon: 'jonePoison', special: 'joneSmoke', secret: true, codeOnly: true, portrait: 'ai-assets/characters/jone.png' },
+  { id: 'jone', name: 'Jone Pikes', color: '#c8b79e', hp: 2190, dmg: 34, speed: 88, price: 0, weapon: 'jonePoison', special: 'joneSmoke', secret: true, codeOnly: true, portrait: 'ai-assets/characters/jone.png' },
   { id: 'ktrak', name: 'Ktrak Calzsan', color: '#e65b2a', hp: 2100, dmg: 36, speed: 86, price: 0, weapon: 'ktrakElements', special: 'ktrakAvatar', secret: true, codeOnly: true, portrait: 'ai-assets/characters/ktrak.png' },
   { id: 'ztaaa', name: 'ZTAAA', color: '#ff3030', hp: 7350, dmg: 85, speed: 105, price: 0, weapon: 'knife', special: 'rain', secret: true },
   { id: 'knunka', name: 'Knunka', color: '#3b82f6', hp: 1950, dmg: 34, speed: 88, price: 1800, weapon: 'knunkaDashRay', special: 'knunkaBlackFire' },
@@ -886,7 +886,7 @@ const ROSTER = [
 
 const ABILITIES = {
   laranja:{ flag:'PRIME', role:'Velocista Supersônico', tag:'PRIME · VELOCIDADE ×3', desc:'Movimento 3× mais rápido. J conecta 4 socos rápidos. L ativa uma Cadeia Relâmpago Suprema com múltiplos impactos e finalização explosiva.' },
-  jone:   { flag:'PRIME', role:'Tático do Veneno', tag:'PRIME', desc:'J alterna veneno corrosivo, ácido e toxina profunda. Cada acerto cria Marcas Tóxicas; L lança a Praga Tóxica Suprema, uma bomba que cria uma grande área venenosa sem travar os movimentos do rival.' },
+  jone:   { flag:'PRIME', role:'Ceifador da Hera', tag:'PRIME', desc:'H alterna o poder de J entre Corte da Morte, uma foice de curto alcance, e Beijo da Hera, veneno de longa distância. L cria uma área letal que fere rivais e cura Jone enquanto ele permanece sobre ela.' },
   ktrak:  { flag:'PRIME', role:'Mestre dos Elementos', tag:'PRIME', desc:'Água nasce do chão em ondas, Terra rompe e racha o piso, Raio carrega no corpo antes do disparo, Lava abre fendas e Cura ergue água sobre Ktrak. L ativa o MODO AVATAR com transição elemental e versões supremas.' },
   frogh:  { flag:'MUTA',role:'Sapo Mimético', tag:'SECRETO', desc:'Copia o ataque e o super do inimigo juntos. Com L, vira outro campeão por 5s, cura toda a vida e depois retorna ao normal.' },
   jimmy:  { flag:'THN',role:'Senhor dos Raios', tag:'LENDÁRIO', desc:'Lança um raio para o alto que cai exatamente sobre o inimigo. No super, Jimmy voa por 5 segundos enquanto convoca raios continuamente.' },
@@ -918,6 +918,13 @@ const ABILITIES = {
 };
 
 function abilityOf(c) { return ABILITIES[c.id]; }
+
+// Os cards mostram os mesmos números usados pelo motor de combate.
+function realStats(c, human=true) {
+  if (!c) return { hp:0, dmg:0, speed:0 };
+  const hp = c.id === 'jone' ? 2190 : (c.id === 'ztaaa' ? 3600 : Math.round((c.hp || 1200) * 2.2 * (1 + Math.max(0, (c.dmg || 30) - 28) * 0.012)));
+  return { hp, dmg: Math.round(c.dmg * 1.5) * (human ? 1 : 1.06), speed: 150 + c.speed };
+}
 
 /* ---------------- SOUND MANAGER (50 SFX) ---------------- */
 const CHAR_SFX = {
@@ -1798,9 +1805,9 @@ function shopCard(c) {
         <div class="mk-role"><span class="flag">${a.flag}</span><span class="rname">${a.role}</span></div>
         <div class="mk-desc">${a.desc}</div>
         <div class="mk-stats2">
-          <div class="mk-stat pw"><b>${c.dmg}</b><span>DANO</span></div>
-          <div class="mk-stat ag"><b>${c.speed}</b><span>AGIL</span></div>
-          <div class="mk-stat vt"><b>${c.hp}</b><span>VIDA</span></div>
+          <div class="mk-stat pw"><b>${realStats(c).dmg}</b><span>DANO REAL</span></div>
+          <div class="mk-stat ag"><b>${realStats(c).speed}</b><span>AGIL REAL</span></div>
+          <div class="mk-stat vt"><b>${realStats(c).hp}</b><span>VIDA REAL</span></div>
         </div>
         ${owned
           ? `<button class="btn pick owned-shop" disabled><span class="pick-label">✔ DESBLOQUEADO</span></button>`
@@ -1930,9 +1937,9 @@ function renderSelect(mode = selectedMode) {
               <div class="mk-role"><span class="flag">${a.flag}</span><span class="rname">${a.role}</span></div>
               <div class="mk-desc">${a.desc}</div>
               <div class="mk-stats2">
-                <div class="mk-stat pw"><b>${c.dmg}</b><span>DANO</span></div>
-                <div class="mk-stat ag"><b>${c.speed}</b><span>AGIL</span></div>
-                <div class="mk-stat vt"><b>${c.hp}</b><span>VIDA</span></div>
+                <div class="mk-stat pw"><b>${realStats(c).dmg}</b><span>DANO REAL</span></div>
+                <div class="mk-stat ag"><b>${realStats(c).speed}</b><span>AGIL REAL</span></div>
+                <div class="mk-stat vt"><b>${realStats(c).hp}</b><span>VIDA REAL</span></div>
               </div>
               ${owned
                 ? `<button class="btn pick" data-id="${c.id}"><span class="pick-label">Escolher</span></button>`
@@ -1958,8 +1965,8 @@ function renderSelect(mode = selectedMode) {
 }
 
 const MOVES = {
-  laranja:[['J','COMBO VELOZ · 4 socos alternando os punhos'],['I','Soco rápido'],['O','Chute supersônico'],['L','CADEIA RELÂMPAGO SUPREMA · múltiplos impactos + explosão final']],
-  jone:   [['J','Venenos rotativos · Corrosivo / Ácido / Toxina Profunda + Marca Tóxica'],['L','PRAGA TÓXICA SUPREMA · bomba + grande área de veneno sem travar o rival']],
+  laranja:[['J','RAJADA VELOZ · 4 socos alternando os punhos'],['I','Soco rápido'],['O','Chute supersônico'],['L','CADEIA RELÂMPAGO SUPREMA · múltiplos impactos + explosão final']],
+  jone:   [['H','Alterna CORTE DA MORTE / BEIJO DA HERA'],['J','Corte de foice perto ou disparo de veneno longe'],['L','JARDIM MORTAL · causa dano e cura Jone dentro da área']],
   ktrak:  [['J','Dobra do elemento atual · Água/Terra/Fogo/Ar/Raio/Lava/Cura'],['H','Alternar elemento'],['L','MODO AVATAR · transição elemental · dano ×2 · J supremo']],
   frogh:  [['J','Copia ATAQUE + SUPER do inimigo de uma vez'],['L','Vira outro campeão aleatório por 5s + cura total']],
   jimmy:  [['J','Raio: sobe ao céu e cai sobre o jogador'],['L','Voo do Trovão: voa por 5s enquanto chama raios']],
@@ -2093,7 +2100,7 @@ const ARENA_MUTATIONS = [
 const HAZARD_BY_STAGE = {
   vulcao:{name:'LAVA',icon:'🌋',color:'#ff5a1f'}, geleira:{name:'GELO',icon:'❄️',color:'#67e8f9'}, cidade:{name:'NEON',icon:'⚡',color:'#c084fc'},
   floresta:{name:'ESPINHOS',icon:'🌲',color:'#4ade80'}, deserto:{name:'TEMPESTADE',icon:'🌪️',color:'#facc15'}, espaco:{name:'METEOROS',icon:'☄️',color:'#818cf8'},
-  castelo:{name:'CHAMAS',icon:'🔥',color:'#f472b6'}, dojo:{name:'DRAGÃO',icon:'🐉',color:'#fb923c'}, ruinas:{name:'COLAPSO',icon:'🗿',color:'#a3e635'}, templo:{name:'LANTERNAS',icon:'🏯',color:'#ff4d6d'}
+  castelo:{name:'CHAMAS',icon:'🔥',color:'#f472b6'}, dojo:{name:'DRAGÃO',icon:'🐉',color:'#fb923c'}, templo:{name:'LANTERNAS',icon:'🏯',color:'#ff4d6d'}
 };
 function featureStats(){
   try{return JSON.parse(localStorage.getItem('lutador_arena_stats')||'{}')}catch(e){return {}}
@@ -2101,14 +2108,14 @@ function featureStats(){
 function saveFeatureStats(st){try{localStorage.setItem('lutador_arena_stats',JSON.stringify(st))}catch(e){}}
 function recordFeatureMatch(winner, f){
   const st=featureStats();
-  st.matches=(st.matches||0)+1; st.kos=(st.kos||0)+1; st.bestCombo=Math.max(st.bestCombo||0, f.bestCombo||0);
+  st.matches=(st.matches||0)+1; st.kos=(st.kos||0)+1;
   const id=winner===f.p1?'P1':'CPU/P2'; st.wins=(st.wins||0)+(winner===f.p1?1:0); st.losses=(st.losses||0)+(winner===f.p1?0:1);
   st.streak=winner===f.p1?(st.streak||0)+1:0; st.bestStreak=Math.max(st.bestStreak||0,st.streak||0);
   st.lastWinner=id; saveFeatureStats(st);
 }
 function renderRanking(){
   screen='ranking'; drawCanvas(); const st=featureStats();
-  app.innerHTML=`<div class="card mk-card mk-arena" style="max-width:760px;margin:auto;padding:28px;text-align:center"><h2 class="select-title mk-title">🏆 <span class="mk-accent">RANKING</span></h2><p class="select-subtitle">Suas estatísticas desta instalação do jogo.</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0"><div class="mk-card" style="padding:18px"><b>VITÓRIAS</b><div style="font-size:34px">${st.wins||0}</div></div><div class="mk-card" style="padding:18px"><b>MELHOR COMBO</b><div style="font-size:34px">${st.bestCombo||0}x</div></div><div class="mk-card" style="padding:18px"><b>SEQUÊNCIA</b><div style="font-size:34px">${st.bestStreak||0}</div></div></div><p>Partidas: <b>${st.matches||0}</b> · Vitórias: <b>${st.wins||0}</b> · Derrotas: <b>${st.losses||0}</b></p><button id="rank-reset" class="btn">Zerar estatísticas</button> <button id="rank-back" class="btn">← Voltar</button></div>`;
+  app.innerHTML=`<div class="card mk-card mk-arena" style="max-width:760px;margin:auto;padding:28px;text-align:center"><h2 class="select-title mk-title">🏆 <span class="mk-accent">RANKING</span></h2><p class="select-subtitle">Suas estatísticas desta instalação do jogo.</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0"><div class="mk-card" style="padding:18px"><b>VITÓRIAS</b><div style="font-size:34px">${st.wins||0}</div></div><div class="mk-card" style="padding:18px"><b>PARTIDAS</b><div style="font-size:34px">${st.matches||0}</div></div><div class="mk-card" style="padding:18px"><b>SEQUÊNCIA</b><div style="font-size:34px">${st.bestStreak||0}</div></div></div><p>Partidas: <b>${st.matches||0}</b> · Vitórias: <b>${st.wins||0}</b> · Derrotas: <b>${st.losses||0}</b></p><button id="rank-reset" class="btn">Zerar estatísticas</button> <button id="rank-back" class="btn">← Voltar</button></div>`;
   document.getElementById('rank-reset').onclick=()=>{if(confirm('Zerar o ranking?')){saveFeatureStats({});renderRanking()}};
   document.getElementById('rank-back').onclick=()=>renderMenu();
 }
@@ -2185,8 +2192,7 @@ const STAGES = [
   {id:'deserto',name:'Deserto Dourado',icon:'🏜️',desc:'Areia, ruínas e um sol brutal.',top:'#35220d',bottom:'#7a4a18',floor:'#a66a25',accent:'#facc15'},
   {id:'espaco',name:'Arena Cósmica',icon:'🌌',desc:'Batalha no vazio entre estrelas.',top:'#050615',bottom:'#15104a',floor:'#29215e',accent:'#818cf8'},
   {id:'castelo',name:'Castelo Sombrio',icon:'🏰',desc:'Pedra antiga, tochas e trevas.',top:'#111117',bottom:'#29232f',floor:'#49404f',accent:'#f472b6'},
-  {id:'dojo',name:'Dojo do Dragão',icon:'🐉',desc:'Arena clássica de treino dos mestres.',top:'#20130d',bottom:'#513019',floor:'#744523',accent:'#fb923c'},
-  {id:'ruinas',name:'Ruínas Perdidas',icon:'🗿',desc:'Templo quebrado em uma arena esquecida.',top:'#171719',bottom:'#3b3a32',floor:'#5b5948',accent:'#a3e635'}
+  {id:'dojo',name:'Dojo do Dragão',icon:'🐉',desc:'Arena clássica de treino dos mestres.',top:'#20130d',bottom:'#513019',floor:'#744523',accent:'#fb923c'}
 ];
 
 function renderStageSelect(playerId, mode='cpu', player2Id=null){
@@ -2318,7 +2324,7 @@ function registerRoundWin(winner) {
   const playerWon = bestOfThree.p1Wins >= 2;
   recordFeatureMatch(playerWon ? fight.p1 : fight.p2, fight);
   if(storyBattle?.playerId && fight.mode==='story'){
-    if(!playerWon){ storyBattle=null; setTimeout(()=>{alert('💀 A história foi interrompida. Tente novamente.');renderStorySelect();},700); return; }
+    if(!playerWon){ const lostChapter=storyBattle;storyBattle=null;setTimeout(()=>{if(window.NiakStoryV37?.onLoss)window.NiakStoryV37.onLoss(lostChapter);else{alert('💀 A história foi interrompida. Tente novamente.');renderStorySelect()}},700);return; }
     advanceStoryAfterWin(); return;
   }
   if(tournament?.active && fight.mode==='tournament'){
@@ -2426,13 +2432,11 @@ function startFight(playerId, mode = 'cpu', player2Id = null, stageId = null, ch
 function applyChaosPenalty(p,id){p.chaosPenalty=id;if(id==='half-hp'){p.hp*=.5;p.maxHp*=.5}if(id==='double-hp'){p.hp*=2;p.maxHp*=2}if(id==='crazy-speed')p.speed*=1.75;if(id==='low-damage')p.dmg*=.5;if(id==='double-damage')p.dmg*=2;if(id==='no-jump')p.jumpDisabled=true;if(id==='no-super')p.superDisabled=true;if(id==='swap')p.controlsSwapped=true}
 
 function makeFighter(c, x, human, playerSlot = 'p1') {
-  const rawHp = c.id === 'ztaaa' ? 3600 : (c.hp || 1200);
-  const forceFactor = 1 + Math.max(0, (c.dmg || 30) - 28) * 0.012;
-  const strengthHp = Math.round(rawHp * 2.2 * forceFactor);
+  const stats = realStats(c, human);
   return {
     id: c.id, name: c.name, color: c.color, weapon: c.weapon || 'knife', special: c.special || 'rain',
     x, y: 0, vy: 0, onGround: true, facing: x < W / 2 ? 1 : -1, manualFacing: x < W / 2 ? 1 : -1,
-    hp: strengthHp, maxHp: strengthHp, speed: 150 + c.speed, dmg: Math.round(c.dmg * 1.5) * (human ? 1 : 1.06),
+    hp: stats.hp, maxHp: stats.hp, speed: stats.speed, dmg: stats.dmg,
     human, playerSlot, state: 'idle', stateT: 0, throwCd: 0, specialCd: 0,
     extraCd: 0, extra2Cd: 0, defend: false, guardHits: 0, guardBroken: false, poisonT: 0, poisonFlash: 0,
     jumpLock: false, jumpT: 0, freezeT: 0, attackDisabledT: 0, mudSlowT: 0, mudJumpDisabledT: 0, ytiriCopyId: null, ytiriCopyT: 0,
@@ -4766,7 +4770,7 @@ function damage(victim, dmg, src, dir, type) {
   const attacker = src && src.owner && src.owner !== victim ? src.owner : (src && src.id && src !== victim ? src : null);
   if(fight?.mutations?.some(m=>m.id==='glass')) d *= 1.18;
   const isCombatHit = !!attacker && attacker !== victim && type !== 'hazard' && d > 0;
-  if(isCombatHit){ attacker.superHitsDealt=(attacker.superHitsDealt||0)+1; updateSuperMeter(attacker); attacker.combo=(attacker.comboT>0?(attacker.combo||0):0)+1; attacker.comboT=1.15; fight.bestCombo=Math.max(fight.bestCombo||0,attacker.combo); }
+  if(isCombatHit){ attacker.superHitsDealt=(attacker.superHitsDealt||0)+1; updateSuperMeter(attacker); }
   if(victim && isCombatHit){ victim.superHitsTaken=(victim.superHitsTaken||0)+1; updateSuperMeter(victim); }
   const bossHit = victim.boss && dmg > 0 && src && src.owner !== victim;
   if (bossHit) {
@@ -6588,7 +6592,7 @@ const YTIRI_J_SCALE = 0.55;
  A sala é casual e o HOST é autoritativo para a simulação.
 */
 (()=>{
-  const ONLINE_VERSION='16.1.0';
+  const ONLINE_VERSION='16.2.0';
   const PEER_OPTIONS={debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}};
   const lan={
     peer:null,conn:null,role:null,connected:false,lastState:0,
@@ -6655,6 +6659,7 @@ const YTIRI_J_SCALE = 0.55;
 
   function closeLan(){
     const keepRavam=!!lan.ravamOnly;
+    const keepNucleo=lan.matchType==='nucleo';
     try{lan.conn&&lan.conn.close();}catch(e){}
     try{lan.peer&&lan.peer.destroy();}catch(e){}
     lan.peer=null;
@@ -6666,7 +6671,7 @@ const YTIRI_J_SCALE = 0.55;
     lan.roomId=null;
     lan.visualFight=null;
     lan.ravamOnly=keepRavam;
-    lan.matchType=keepRavam?'ravam':'casual'; lan.remoteProfile=null;
+    lan.matchType=keepRavam?'ravam':keepNucleo?'nucleo':'casual'; lan.remoteProfile=null;
   }
 
   function roomId(){
@@ -6700,7 +6705,7 @@ const YTIRI_J_SCALE = 0.55;
     conn.on('open',()=>{
       lan.connected=true;
       status('✓ P2 conectado! Conexão online estabelecida.',true);
-      if(lan.role==='guest') send({type:'hello',version:ONLINE_VERSION,name:playerName(),ravamOnly:!!lan.ravamOnly});
+      if(lan.role==='guest') send({type:'hello',version:ONLINE_VERSION,name:playerName(),ravamOnly:!!lan.ravamOnly,matchType:lan.matchType});
       updateNetBadge();
       renderLanCharacterSelect();
     });
@@ -6712,12 +6717,13 @@ const YTIRI_J_SCALE = 0.55;
         lan.remoteVersion=String(msg.version||'');lan.remoteName=String(msg.name||'JOGADOR');
         if(lan.remoteVersion!==ONLINE_VERSION){send({type:'version-error',expected:ONLINE_VERSION});status('✕ Versões diferentes. Os dois precisam usar a mesma versão.');return;}
         if(!!msg.ravamOnly!==!!lan.ravamOnly){send({type:'mode-error',ravamOnly:!!lan.ravamOnly});status('✕ A sala foi aberta em outro modo. Entre pelo mesmo menu do HOST.');return;}
-        send({type:'hello-ack',version:ONLINE_VERSION,name:playerName(),ravamOnly:!!lan.ravamOnly});
+        if(String(msg.matchType||'casual')!==lan.matchType){send({type:'mode-error'});status('✕ A sala pertence a outro modo P2P.');return;}
+        send({type:'hello-ack',version:ONLINE_VERSION,name:playerName(),ravamOnly:!!lan.ravamOnly,matchType:lan.matchType});
         send({type:'lan-p1',id:lan.p1||null});
         if(lan.p2) send({type:'lan-p2',id:lan.p2});
         return;
       }
-      if(msg.type==='hello-ack'){lan.remoteVersion=String(msg.version||'');lan.remoteName=String(msg.name||'JOGADOR');if(!!msg.ravamOnly!==!!lan.ravamOnly){status('✕ O HOST está em outro modo.');return;}updateNetBadge();return;}
+      if(msg.type==='hello-ack'){lan.remoteVersion=String(msg.version||'');lan.remoteName=String(msg.name||'JOGADOR');if(!!msg.ravamOnly!==!!lan.ravamOnly||String(msg.matchType||'casual')!==lan.matchType){status('✕ O HOST está em outro modo.');try{lan.conn?.close()}catch(_){}return;}updateNetBadge();return;}
       if(msg.type==='version-error'){status('✕ Versão incompatível. Use V'+String(msg.expected||ONLINE_VERSION)+'.');try{lan.conn?.close()}catch(_){};return;}
       if(msg.type==='mode-error'){status('✕ Esta sala pertence a outro modo. Volte e abra o ONLINE pelo mesmo menu do HOST.');try{lan.conn?.close()}catch(_){};return;}
       if(msg.type==='ping'){send({type:'pong',t:msg.t});return;}
@@ -6777,6 +6783,7 @@ const YTIRI_J_SCALE = 0.55;
 
       if(msg.type==='setup' && lan.role==='guest'){
         lan.visualFight=null;
+        if(msg.matchType==='nucleo')lan.matchType='nucleo';
         startFight(msg.p1,'lan',msg.p2,msg.stage);
         return;
       }
@@ -6807,14 +6814,17 @@ const YTIRI_J_SCALE = 0.55;
 
       if(msg.type==='leave'){
         const rv=!!lan.ravamOnly;
+        const nucleo=lan.matchType==='nucleo';
         closeLan();
-        renderLanLobby(rv?'ravam':'standard');
+        renderLanLobby(rv?'ravam':nucleo?'nucleo':'standard');
       }
     });
 
     conn.on('close',()=>{
+      const interrupted=lan.matchType==='nucleo'&&screen==='fight'&&fight?.mode==='lan';
       lan.connected=false;
       lan.conn=null;
+      if(interrupted){fight=null;bestOfThree={p1Wins:0,p2Wins:0,round:1,active:false};renderLanLobby('nucleo');status('O adversário saiu. Partida encerrada sem pontuação.');return;}
       if(screen==='fight') status('⚠ O outro jogador saiu da partida.');
       else status('Conexão encerrada.');
     });
@@ -6952,9 +6962,10 @@ const YTIRI_J_SCALE = 0.55;
 
   function renderLanLobby(scope='standard'){
     const wantRavam=scope==='ravam'||scope===true;
+    const wantNucleo=scope==='nucleo';
     closeLan();
     lan.ravamOnly=wantRavam;
-    lan.matchType=wantRavam?'ravam':'casual';
+    lan.matchType=wantRavam?'ravam':wantNucleo?'nucleo':'casual';
     screen='lan-lobby';
     drawCanvas();
 
@@ -6963,10 +6974,10 @@ const YTIRI_J_SCALE = 0.55;
       <div class="card mk-card mk-arena ${rv?'ravam-online-lobby':''}" style="max-width:860px">
         <div class="emblem"><span>${rv?'✿':'🌐'}</span></div>
         <h2 class="select-title mk-title">
-          ${rv?'R.A.V.A.M <span class="mk-accent">ONLINE P2P</span>':'ONLINE <span class="mk-accent">INTERNET</span>'}
+          ${rv?'R.A.V.A.M <span class="mk-accent">ONLINE P2P</span>':wantNucleo?'DUELO DO <span class="mk-accent">NÚCLEO</span>':'ONLINE <span class="mk-accent">INTERNET</span>'}
         </h2>
         <p class="select-subtitle">
-          ${rv?'Duas pessoas pela internet. A sala usa somente Alana Sorelle, Kain e Aria Valfleur.':'Crie uma sala privada e jogue pela internet. Não precisa de LAN ou Radmin VPN.'}
+          ${rv?'Duas pessoas pela internet. A sala usa somente Alana Sorelle, Kain e Aria Valfleur.':wantNucleo?'P2P para duas pessoas: controle o núcleo móvel para marcar pontos ou vença por nocaute. Melhor de três rodadas.':'Crie uma sala privada e jogue pela internet. Não precisa de LAN ou Radmin VPN.'}
         </p>
         <div id="v16-net-badge" style="display:inline-flex;margin:0 auto 14px;padding:7px 12px;border:1px solid ${rv?'#386b4d':'#2b4968'};border-radius:999px;background:${rv?'#07170f':'#071321'};color:${rv?'#9dffb7':'#83eaff'};font:800 12px Oxanium,system-ui">PRONTO PARA CONECTAR</div>
 
@@ -6979,12 +6990,12 @@ const YTIRI_J_SCALE = 0.55;
         <div id="lan-status" style="min-height:24px;margin:12px;font-weight:800"></div>
 
         <div style="padding:14px;border-radius:14px;background:rgba(15,23,42,.7);color:#cbd5e1;font-size:13px">
-          <b>${rv?'R.A.V.A.M ONLINE P2P':'V16 ONLINE ALPHA'}:</b><br>
+          <b>${rv?'R.A.V.A.M ONLINE P2P':wantNucleo?'DUELO DO NÚCLEO · P2P':'V16 ONLINE ALPHA'}:</b><br>
           1. Os dois jogadores precisam estar conectados à internet e usar a mesma versão.<br>
           2. Jogador 1 clica em <b>Criar sala</b> e envia o código NIAK ao amigo.<br>
           3. Jogador 2 clica em <b>Entrar na sala</b> e cola o código.<br>
           4. Cada jogador usa os controles de P1 no próprio PC e escolhe ${rv?'uma Lenda R.A.V.A.M':'seu campeão'}.<br>
-          5. A partida é P2P e o HOST simula a luta. Redes muito restritas podem exigir TURN dedicado.
+          5. ${wantNucleo?'Fique sozinho na área luminosa para pontuar. O núcleo muda de posição; 100 pontos ou nocaute vencem a rodada.':'A partida é P2P e o HOST simula a luta.'} Redes muito restritas podem exigir TURN dedicado.
         </div>
 
         <button id="lan-back" class="btn" style="margin-top:14px">Voltar</button>
@@ -7047,7 +7058,7 @@ const YTIRI_J_SCALE = 0.55;
       <div class="card select mk-card mk-arena">
         <div class="emblem"><span>⚔️</span></div>
         <h2 class="select-title mk-title">
-          ${lan.ravamOnly?(hasRavamPrime?'SELECIONE <span class="mk-accent">LENDA / PRIME</span>':'SELECIONE A <span class="mk-accent">LENDA</span>'):'SELECIONE O <span class="mk-accent">CAMPEÃO</span>'}
+          ${lan.ravamOnly?(hasRavamPrime?'SELECIONE <span class="mk-accent">LENDA / PRIME</span>':'SELECIONE A <span class="mk-accent">LENDA</span>'):lan.matchType==='nucleo'?'ESCOLHA PARA O <span class="mk-accent">NÚCLEO</span>':'SELECIONE O <span class="mk-accent">CAMPEÃO</span>'}
         </h2>
 
         <div class="pick-status">
@@ -7071,9 +7082,9 @@ const YTIRI_J_SCALE = 0.55;
               </div>
               <div class="mk-body">
                 <div class="mk-stats2">
-                  <div class="mk-stat pw"><b>${c.dmg}</b><span>DANO</span></div>
-                  <div class="mk-stat ag"><b>${c.speed}</b><span>AGIL</span></div>
-                  <div class="mk-stat vt"><b>${c.hp}</b><span>VIDA</span></div>
+                  <div class="mk-stat pw"><b>${realStats(c).dmg}</b><span>DANO REAL</span></div>
+                  <div class="mk-stat ag"><b>${realStats(c).speed}</b><span>AGIL REAL</span></div>
+                  <div class="mk-stat vt"><b>${realStats(c).hp}</b><span>VIDA REAL</span></div>
                 </div>
               </div>
             </button>`).join('')}
@@ -7116,7 +7127,8 @@ const YTIRI_J_SCALE = 0.55;
       type:'setup',
       p1:lan.p1,
       p2:lan.p2,
-      stage
+      stage,
+      matchType:lan.matchType
     });
 
     startFight(lan.p1,'lan',lan.p2,stage);
@@ -7257,7 +7269,7 @@ const YTIRI_J_SCALE = 0.55;
   window.renderLanLobby=renderLanLobby;
   window.renderLanWaiting=renderLanWaiting;
   window.renderLanCharacterSelect=renderLanCharacterSelect;
-  window.LutadorOnlineV16={version:ONLINE_VERSION,open:renderLanLobby,openRavam:()=>renderLanLobby('ravam'),state:lan,getPing:()=>lan.ping,ensurePeerReady,bindConnection,close:closeLan,send,startIfReady:startLanMatchIfReady,backToSelect:returnLanToSelection,peerOptions:PEER_OPTIONS};
+  window.LutadorOnlineV16={version:ONLINE_VERSION,open:renderLanLobby,openRavam:()=>renderLanLobby('ravam'),openNucleo:()=>renderLanLobby('nucleo'),state:lan,getPing:()=>lan.ping,ensurePeerReady,bindConnection,close:closeLan,send,startIfReady:startLanMatchIfReady,backToSelect:returnLanToSelection,peerOptions:PEER_OPTIONS};
 })();
 </script>
 
@@ -7418,7 +7430,7 @@ setTimeout(function(){
   window.renderShopChampions=()=>{
     screen='shop';drawCanvas();
     const chars=CHARACTERS.filter(c=>!c.secret&&!STORY_UNLOCKABLE_15.includes(c.id)&&!STORY_LEGENDS.includes(c.id));
-    app.innerHTML=`<div class="card shop mk-card mk-arena shop-ultimate"><div class="shop-hero"><div><div class="pause-kicker">LUTADOR • MERCADO</div><h2 class="shop-title">ARSENAL DE CAMPEÕES</h2><p class="select-subtitle" style="margin:4px 0 0">Desbloqueie poderes. Monte sua coleção. Domine a arena.</p></div><div class="gold-pill">🪙 ${state.coins.toLocaleString('pt-BR')} GOLD</div></div><div class="shop-grid">${chars.map((c,i)=>{const a=abilityOf(c),owned=state.roster.includes(c.id);return `<div class="shop-card ${owned?'owned':'locked'}" style="--c:${c.color};animation-delay:${i*35}ms"><div class="shop-art" style="background:radial-gradient(circle at 50% 35%,${c.color}66,transparent 68%)"><div class="shop-face">${letterFace(c)}</div></div><div class="shop-body"><h3>${c.name}</h3><div class="role">${a.flag} • ${a.role}</div><div class="statrow"><div class="stat"><b>${c.dmg}</b><span>FORÇA</span></div><div class="stat"><b>${c.speed}</b><span>AGILIDADE</span></div><div class="stat"><b>${c.hp}</b><span>VIDA</span></div></div>${owned?`<button class="btn buy" disabled>✓ DESBLOQUEADO</button>`:`<button class="btn buy shop-buy" data-id="${c.id}">COMPRAR • ${c.price.toLocaleString('pt-BR')} 🪙</button>`}</div></div>`}).join('')}</div><button id="shop-ultimate-back" class="btn" style="margin-top:18px">← VOLTAR À LOJA</button></div>`;
+    app.innerHTML=`<div class="card shop mk-card mk-arena shop-ultimate"><div class="shop-hero"><div><div class="pause-kicker">LUTADOR • MERCADO</div><h2 class="shop-title">ARSENAL DE CAMPEÕES</h2><p class="select-subtitle" style="margin:4px 0 0">Os cards exibem os valores reais usados na luta.</p></div><div class="gold-pill">🪙 ${state.coins.toLocaleString('pt-BR')} GOLD</div></div><div class="shop-grid">${chars.map((c,i)=>{const a=abilityOf(c),s=realStats(c),owned=state.roster.includes(c.id);return `<div class="shop-card ${owned?'owned':'locked'}" data-id="${c.id}" style="--c:${c.color};animation-delay:${i*35}ms"><div class="shop-art" style="background:radial-gradient(circle at 50% 35%,${c.color}66,transparent 68%)"><div class="shop-face">${letterFace(c)}</div></div><div class="shop-body"><h3>${c.name}</h3><div class="role">${a.flag} • ${a.role}</div><div class="statrow"><div class="stat"><b>${s.dmg}</b><span>DANO REAL</span></div><div class="stat"><b>${s.speed}</b><span>AGIL REAL</span></div><div class="stat"><b>${s.hp}</b><span>VIDA REAL</span></div></div>${owned?`<button class="btn buy" disabled>✓ DESBLOQUEADO</button>`:`<button class="btn buy shop-buy" data-id="${c.id}">COMPRAR • ${c.price.toLocaleString('pt-BR')} 🪙</button>`}</div></div>`}).join('')}</div><button id="shop-ultimate-back" class="btn" style="margin-top:18px">← VOLTAR À LOJA</button></div>`;
     document.querySelectorAll('.shop-buy').forEach(b=>b.onclick=()=>{buyCharacter(b.dataset.id);renderShopChampions()});document.getElementById('shop-ultimate-back').onclick=renderShop;
   };
 })();
@@ -7456,6 +7468,8 @@ setTimeout(function(){
   };
   window.addEventListener('keydown',e=>{
     if(e.key!=='Escape'||e.repeat)return;
+    if(document.getElementById('n37-story-scene')||document.getElementById('n37-story-result')||document.getElementById('v16-ranked-forfeit'))return;
+    if(window.LutadorOnlinePro?.cancelActive?.()){e.preventDefault();e.stopImmediatePropagation();return;}
     if(window.ProAudio?.isOpen?.()||window.ProCombat?.isGuideOpen?.())return;
     if(screen==='fight')return;
     if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName||'')){e.target.blur();return;}
@@ -7487,8 +7501,8 @@ setTimeout(function(){
 })();
 </script>
 
-<link rel="stylesheet" href="pro-v16-online-pro.css?v=161">
-<script src="pro-v16-online-pro.js?v=180"></script>
+<link rel="stylesheet" href="pro-v16-online-pro.css?v=37000">
+<script src="pro-v16-online-pro.js?v=37000"></script>
 
 
 <style id="v20-10-6-victory-horizontal">
@@ -7573,7 +7587,7 @@ setTimeout(function(){
           </div>
         </div>
         <div class="match-result-stats">
-          <div class="match-stat-card"><div class="label">Melhor combo</div><div class="value">${combo}x</div><div class="sub">Maior sequência da luta.</div></div>
+          <div class="match-stat-card"><div class="label">Golpes conectados</div><div class="value">${dealt}</div><div class="sub">Ataques válidos na luta.</div></div>
           <div class="match-stat-card"><div class="label">Vida restante</div><div class="value">${life}</div><div class="sub">HP do seu campeão.</div></div>
           <div class="match-stat-card"><div class="label">Acertos dados</div><div class="value">${dealt}</div><div class="sub">Golpes válidos no combate.</div></div>
           <div class="match-stat-card"><div class="label">Super</div><div class="value">${superPct}%</div><div class="sub">Carga final do super.</div></div>
@@ -7705,7 +7719,7 @@ setTimeout(function(){
           </div>
         </div>
         <div class="match-result-stats">
-          <div class="match-stat-card"><div class="label">Melhor combo</div><div class="value">${combo}x</div><div class="sub">Sequência máxima.</div></div>
+          <div class="match-stat-card"><div class="label">Golpes conectados</div><div class="value">${dealt}</div><div class="sub">Ataques válidos na luta.</div></div>
           <div class="match-stat-card"><div class="label">Vida restante</div><div class="value">${life}</div><div class="sub">HP final.</div></div>
           <div class="match-stat-card"><div class="label">Acertos dados</div><div class="value">${dealt}</div><div class="sub">Golpes válidos.</div></div>
           <div class="match-stat-card"><div class="label">Super</div><div class="value">${superPct}%</div><div class="sub">Carga final.</div></div>
@@ -7873,8 +7887,7 @@ setTimeout(function(){
     deserto:'ai-assets/arenas/deserto-ai.png',
     espaco:'ai-assets/arenas/espaco-ai.png',
     castelo:'ai-assets/arenas/castelo-ai.png',
-    dojo:'ai-assets/arenas/dojo-ai.png',
-    ruinas:'ai-assets/arenas/ruinas-ai.png'
+    dojo:'ai-assets/arenas/dojo-ai.png'
   };
 
   // Acrescenta duas arenas sem remover as dez que o jogo já possuía.
@@ -7999,7 +8012,7 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-combat-system.css?v=combate4">
 <script src="pro-audio.js?v=lobby61"></script>
 <script src="pro-attack-visuals.js?v=2093"></script>
-<script src="pro-combat-system.js?v=2093"></script>
+<script src="pro-combat-system.js?v=46000"></script>
 <link rel="stylesheet" href="pro-ultimate.css?v=ultimate4">
 <script src="pro-ultimate.js?v=ultimate4"></script>
 <link rel="stylesheet" href="pro-story-overhaul.css?v=story2">
@@ -8010,14 +8023,14 @@ setTimeout(function(){
 <script src="pro-expansion.js?v=season28"></script>
 
 <link rel="stylesheet" href="pro-v5-competitive.css?v=v50">
-<script src="pro-v5-competitive.js?v=v50"></script>
+<script src="pro-v5-competitive.js?v=46000"></script>
 <link rel="stylesheet" href="pro-v6-quality.css?v=v60">
 <script src="pro-v6-quality.js?v=v60"></script>
 <link rel="stylesheet" href="pro-v7-polish.css?v=v70">
-<script src="pro-v7-polish.js?v=v70"></script>
+<script src="pro-v7-polish.js?v=46000"></script>
 
 <link rel="stylesheet" href="pro-v8-supreme.css?v=v81">
-<script src="pro-v8-supreme.js?v=v81"></script>
+<script src="pro-v8-supreme.js?v=46000"></script>
 
 <link rel="stylesheet" href="pro-v8-6-fluid.css?v=v861">
 <script src="pro-v8-6-fluid.js?v=v861"></script>
@@ -8060,16 +8073,13 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-laranja-v20.css?v=2081">
 <script src="pro-laranja-v20.js?v=2108"></script>
 <link rel="stylesheet" href="pro-jone-v20.css?v=2081">
-<script src="pro-jone-v20.js?v=2109"></script>
+<script src="pro-jone-v20.js?v=46000"></script>
 <script src="pro-performance-v20.js?v=2093"></script>
 
-<!-- V20.12.1 — RUÍNAS CIDADE REMASTERIZADA -->
-<link rel="stylesheet" href="pro-ruins-v20.css?v=22810">
-<script src="pro-ruins-v20.js?v=22800"></script>
-
-<!-- V22 — CONFRONTO DA ILHA · PLATFORM FIGHTER ONLINE P2P -->
+<!-- V45 — ARENA TOTAL · PLATFORM FIGHTER ONLINE P2P -->
 <link rel="stylesheet" href="pro-island-clash-v22.css?v=22810">
-<script src="pro-island-clash-v22.js?v=22800"></script>
+<script src="pro-island-clash-v22.js?v=47000"></script>
+<link rel="stylesheet" href="pro-arena-total-v44.css?v=45000">
 
 <!-- V24 — R.A.V.A.M: LENDAS COM LOJA, GOLPES NOMEADOS E ANIMAÇÕES -->
 <link rel="stylesheet" href="pro-ravam-chronicle-v24.css?v=24000">
@@ -8086,3 +8096,13 @@ setTimeout(function(){
 <script src="pro-v32-trials.js?v=32003"></script>
 <script src="pro-v32-combat.js?v=32001"></script>
 <script src="pro-v32-journey.js?v=32003"></script>
+<script src="pro-v33-request.js?v=46000"></script>
+<script src="pro-jone-animation-v34.js?v=35000"></script>
+<script src="pro-maintenance-v36.js?v=36000"></script>
+<link rel="stylesheet" href="pro-story-v37.css?v=37000">
+<script src="pro-story-v37.js?v=37000"></script>
+<link rel="stylesheet" href="pro-nucleo-p2p-v42.css?v=42000">
+<script src="pro-nucleo-p2p-v42.js?v=42000"></script>
+<link rel="stylesheet" href="pro-season-event-v43.css?v=43000">
+<script src="pro-season-event-v43.js?v=43000"></script>
+<script src="pro-power-variants-v46.js?v=46000"></script>

@@ -28,8 +28,8 @@
   }
 
   function cleanRankUI(){
-    ['mode-ranked','mode-online-ranked','btn-ranking','v16-ranked-result','v16-history-dialog','v16-rules-dialog'].forEach(id=>document.getElementById(id)?.remove());
-    document.querySelectorAll('[data-v84="ranking"],[data-v83="ranking"],[data-v82-go="ranking"],[data-v8-go="ranking"],.mega-rank-panel,.v11-ranked-season,.mega-ranked-mode,.v16-ranked-card').forEach(e=>e.remove());
+    ['mode-ranked','mode-online-ranked','btn-ranking'].forEach(id=>document.getElementById(id)?.remove());
+    document.querySelectorAll('[data-v84="ranking"],[data-v83="ranking"],[data-v82-go="ranking"],[data-v8-go="ranking"],.mega-rank-panel,.v11-ranked-season,.mega-ranked-mode').forEach(e=>e.remove());
     document.querySelectorAll('.v84-menu-grid small,.v83-action-grid small,.v82-card small,.v8-quick-grid small').forEach(e=>{const old=e.textContent,next=old.replace(/Ranked/gi,'partidas').replace(/Ranqueado/gi,'partidas');if(next!==old)e.textContent=next});
     document.querySelectorAll('.v11-result span').forEach(e=>{if(/^RANK\b/i.test((e.firstChild?.textContent||e.textContent).trim()))e.remove()});
     document.querySelectorAll('.v11-profile-banner small,.exp-profile-hero span,.v8-hero-badge span').forEach(e=>{

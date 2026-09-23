@@ -115,7 +115,7 @@
     {id:'skin-gelo',cat:'skins',name:'Skin · Gelo Espectral',currency:'coins',cost:1800,icon:'❄️',value:'Gelo Espectral'},
     {id:'skin-primordial',cat:'skins',name:'Skin · Neon Primordial',currency:'vandais',cost:40,icon:'✹',value:'Neon Primordial'},
     {id:'skin-ouro',cat:'skins',name:'Skin · Ouro do Campeão',currency:'vandais',cost:60,icon:'♛',value:'Ouro do Campeão'},
-    {id:'title-combo',cat:'titles',name:'Título · Mestre do Combo',currency:'coins',cost:900,icon:'🏷️',value:'Mestre do Combo'},
+    {id:'title-combo',cat:'titles',name:'Título · Mestre do Ataque',currency:'coins',cost:900,icon:'🏷️',value:'Mestre do Ataque'},
     {id:'title-duelista',cat:'titles',name:'Título · Duelista Primordial',currency:'vandais',cost:25,icon:'🏷️',value:'Duelista Primordial'},
     {id:'frame-neon',cat:'frames',name:'Moldura · Pulso Neon',currency:'coins',cost:800,icon:'▣',value:'Pulso Neon'},
     {id:'frame-prime',cat:'frames',name:'Moldura · Primordial',currency:'vandais',cost:30,icon:'▣',value:'Primordial'},
@@ -148,7 +148,28 @@
     {id:'victory-supreme',cat:'victories',name:'Pose · Desafio Supremo',currency:'vandais',cost:36,icon:'✦',value:'Desafio Supremo'},
     {id:'finish-cosmic',cat:'finishers',name:'Finalização · Impacto Cósmico',currency:'coins',cost:2600,icon:'☄',value:'Impacto Cósmico'},
     {id:'finish-neon',cat:'finishers',name:'Finalização · Ruptura Neon',currency:'vandais',cost:52,icon:'⚡',value:'Ruptura Neon'},
-    {id:'finish-judgement',cat:'finishers',name:'Finalização · Julgamento Primordial',currency:'vandais',cost:72,icon:'♛',value:'Julgamento Primordial'}
+    {id:'finish-judgement',cat:'finishers',name:'Finalização · Julgamento Primordial',currency:'vandais',cost:72,icon:'♛',value:'Julgamento Primordial'},
+    /* V33 — mais 20 skins reais: todas alteram cor e aura durante a luta */
+    {id:'skin-v33-01',cat:'skins',name:'Skin · Safira Elétrica',currency:'coins',cost:1800,icon:'💎',value:'Safira Elétrica'},
+    {id:'skin-v33-02',cat:'skins',name:'Skin · Rubi Vulcânico',currency:'coins',cost:1850,icon:'🔴',value:'Rubi Vulcânico'},
+    {id:'skin-v33-03',cat:'skins',name:'Skin · Jade Tóxico',currency:'coins',cost:1900,icon:'🟢',value:'Jade Tóxico'},
+    {id:'skin-v33-04',cat:'skins',name:'Skin · Ametista Real',currency:'coins',cost:1950,icon:'🟣',value:'Ametista Real'},
+    {id:'skin-v33-05',cat:'skins',name:'Skin · Bronze de Guerra',currency:'coins',cost:2000,icon:'🛡️',value:'Bronze de Guerra'},
+    {id:'skin-v33-06',cat:'skins',name:'Skin · Ciano Holográfico',currency:'coins',cost:2050,icon:'🪩',value:'Ciano Holográfico'},
+    {id:'skin-v33-07',cat:'skins',name:'Skin · Rosa Quântico',currency:'coins',cost:2100,icon:'🌸',value:'Rosa Quântico'},
+    {id:'skin-v33-08',cat:'skins',name:'Skin · Tempestade Cinza',currency:'coins',cost:2150,icon:'🌩️',value:'Tempestade Cinza'},
+    {id:'skin-v33-09',cat:'skins',name:'Skin · Sol Branco',currency:'coins',cost:2200,icon:'☀️',value:'Sol Branco'},
+    {id:'skin-v33-10',cat:'skins',name:'Skin · Abismo Azul',currency:'coins',cost:2250,icon:'🌊',value:'Abismo Azul'},
+    {id:'skin-v33-11',cat:'skins',name:'Skin · Hera Venenosa',currency:'vandais',cost:36,icon:'🌿',value:'Hera Venenosa'},
+    {id:'skin-v33-12',cat:'skins',name:'Skin · Foice Lunar',currency:'vandais',cost:38,icon:'🌙',value:'Foice Lunar'},
+    {id:'skin-v33-13',cat:'skins',name:'Skin · Chama Azul',currency:'vandais',cost:40,icon:'🔥',value:'Chama Azul'},
+    {id:'skin-v33-14',cat:'skins',name:'Skin · Sangue Neon',currency:'vandais',cost:42,icon:'🩸',value:'Sangue Neon'},
+    {id:'skin-v33-15',cat:'skins',name:'Skin · Gelo Negro',currency:'vandais',cost:44,icon:'❄️',value:'Gelo Negro'},
+    {id:'skin-v33-16',cat:'skins',name:'Skin · Radioativo',currency:'vandais',cost:46,icon:'☢️',value:'Radioativo'},
+    {id:'skin-v33-17',cat:'skins',name:'Skin · Cobre Solar',currency:'vandais',cost:48,icon:'🌞',value:'Cobre Solar'},
+    {id:'skin-v33-18',cat:'skins',name:'Skin · Prisma Vivo',currency:'vandais',cost:52,icon:'🌈',value:'Prisma Vivo'},
+    {id:'skin-v33-19',cat:'skins',name:'Skin · Espectro Carmesim',currency:'vandais',cost:56,icon:'👻',value:'Espectro Carmesim'},
+    {id:'skin-v33-20',cat:'skins',name:'Skin · Campeão Celestial',currency:'vandais',cost:65,icon:'🌌',value:'Campeão Celestial'}
   ];
   function equippedKey(cat){return cat==='skins'?'skin':cat==='frames'?'frame':cat==='entrances'?'entrance':cat==='victories'?'victory':cat==='finishers'?'finisher':cat==='trails'?'trail':'title'}
   function own(cat,value){return data.owned[cat]?.includes(value)}
@@ -205,9 +226,9 @@
     try{typeof persist==='function'&&persist()}catch(_){ }save();
   }
   function masteryChallenges(id,m){
-    if(id==='rojo')return [[m.wins,10,'10 vitórias com Rojo'],[m.damage,5000,'5.000 de dano acumulado'],[m.maxCombo,8,'Combo de 8 golpes']];
-    if(id==='thuvaa')return [[m.wins,10,'10 vitórias com Thuvaa'],[m.ultimates,12,'12 Ultimates glaciais'],[m.maxCombo,7,'Combo de 7 golpes']];
-    return [[m.wins,5,'5 vitórias'],[m.ultimates,5,'5 Ultimates'],[m.maxCombo,6,'Combo de 6 golpes']];
+    if(id==='rojo')return [[m.wins,10,'10 vitórias com Rojo'],[m.damage,5000,'5.000 de dano acumulado'],[m.ultimates,8,'8 Supers usados']];
+    if(id==='thuvaa')return [[m.wins,10,'10 vitórias com Thuvaa'],[m.ultimates,12,'12 Supers glaciais'],[m.damage,7000,'7.000 de dano acumulado']];
+    return [[m.wins,5,'5 vitórias'],[m.ultimates,5,'5 Supers'],[m.damage,6000,'6.000 de dano acumulado']];
   }
   function openMastery(selected='rojo'){
     if(!charBy(selected))selected=chars()[0]?.id||'rojo';const d=dialog('exp-mastery','MAESTRIA DE CAMPEÕES','<div id="exp-mastery-root"></div>');
@@ -222,9 +243,9 @@
     {id:'firstwin',name:'Primeiro Sangue',desc:'Vença sua primeira partida.',test:()=>data.stats.wins>=1,reward:{coins:200}},
     {id:'wins10',name:'Veterano',desc:'Vença 10 partidas.',test:()=>data.stats.wins>=10,reward:{coins:700}},
     {id:'wins50',name:'Lenda da Arena',desc:'Vença 50 partidas.',test:()=>data.stats.wins>=50,reward:{vandais:25,title:'Lenda da Arena'}},
-    {id:'combo10',name:'Sem Respirar',desc:'Faça um combo de 10 golpes.',test:()=>data.stats.maxCombo>=10,reward:{coins:600}},
+    {id:'combo10',name:'Sem Respirar',desc:'Cause 10.000 de dano acumulado.',test:()=>data.stats.totalDamage>=10000,reward:{coins:600}},
     {id:'noUlt',name:'Punhos Puros',desc:'Vença uma luta sem usar Ultimate.',event:true,reward:{coins:450}},
-    {id:'combo15',name:'Combo Supremo',desc:'Faça um combo de 15 golpes.',test:()=>data.stats.maxCombo>=15,reward:{vandais:50,title:'Mestre dos Combos'}},
+    {id:'combo15',name:'Ataque Supremo',desc:'Use 15 Supers.',test:()=>data.stats.ultimates>=15,reward:{vandais:50,title:'Mestre do Ataque'}},
     {id:'groundKO',name:'Sem Escapatória',desc:'Finalize um rival com chute no chão.',test:()=>data.stats.groundKOs>=1,reward:{coins:800}},
     {id:'story',name:'Duas Lendas',desc:'Conclua uma campanha de Rojo ou Thuvaa.',test:()=>data.campaign.rojo>=CAMPAIGNS.rojo.length||data.campaign.thuvaa>=CAMPAIGNS.thuvaa.length,reward:{vandais:20}},
     {id:'tourney',name:'Dono da Chave',desc:'Seja campeão de um torneio.',test:()=>data.stats.tournamentWins>=1,reward:{coins:1200,title:'Campeão da Chave'}},
@@ -248,21 +269,21 @@
     return {level:pp?.profile?.level||1,xp:pp?.data?.totalXp||0,title:pp?.profile?.displayTitle||'NOVO DESAFIANTE',fav};
   }
   function openProfile(){
-    const p=profileSnapshot(),aCount=Object.keys(data.achievements).length;const wr=data.stats.matches?Math.round(data.stats.wins/data.stats.matches*100):0;
-    const d=dialog('exp-profile','PERFIL DO JOGADOR',`<section class="exp-profile-hero ${data.equipped.frame.toLowerCase().includes('primordial')?'prime':''}"><div class="exp-profile-seal">${p.level}</div><div><small>${esc(p.title)}</small><h2>JOGADOR 1</h2><span>${wr}% DE VITÓRIAS</span></div></section><div class="exp-stat-grid"><div><span>PARTIDAS</span><b>${fmt(data.stats.matches)}</b></div><div><span>VITÓRIAS</span><b>${fmt(data.stats.wins)}</b></div><div><span>DERROTAS</span><b>${fmt(data.stats.losses)}</b></div><div><span>MAIOR COMBO</span><b>${fmt(data.stats.maxCombo)}x</b></div><div><span>DANO TOTAL</span><b>${fmt(data.stats.totalDamage)}</b></div><div><span>MAIS USADO</span><b>${esc(p.fav)}</b></div><div><span>CONQUISTAS</span><b>${aCount}/${ACH.length}</b></div><div><span>TORNEIOS</span><b>${fmt(data.stats.tournamentWins)}</b></div></div><div class="exp-profile-actions"><button class="btn" id="exp-prof-mastery">★ MAESTRIA</button><button class="btn" id="exp-prof-ach">🏆 CONQUISTAS</button><button class="btn" id="exp-prof-shop">🛒 COSMÉTICOS</button><button class="btn" id="exp-prof-backup">💾 BACKUP AGORA</button></div><footer class="exp-save-status">Último backup: ${data.lastBackupAt?new Date(data.lastBackupAt).toLocaleString('pt-BR'):'ainda não criado'} · XP total: ${fmt(p.xp)}</footer>`);
+    const p=profileSnapshot(),aCount=Object.keys(data.achievements).length,gs=gameState()||{};const wr=data.stats.matches?Math.round(data.stats.wins/data.stats.matches*100):0;
+    const masteryLevels=Object.values(data.mastery).map(m=>masteryLevel(m.xp)),masteryTotal=masteryLevels.reduce((a,b)=>a+b,0),cosmetics=Object.values(data.owned).reduce((n,v)=>n+(Array.isArray(v)?v.length:0),0),rating=Math.max(0,1000+data.stats.wins*28-data.stats.losses*16);
+    const d=dialog('exp-profile','PERFIL & EVOLUÇÃO',`<section class="exp-profile-hero ${data.equipped.frame.toLowerCase().includes('primordial')?'prime':''}"><div class="exp-profile-seal">${p.level}</div><div><small>${esc(p.title)}</small><h2>${esc(gs.playerName||'JOGADOR 1')}</h2><span>${wr}% DE VITÓRIAS · RATING ${fmt(rating)}</span></div></section><div class="exp-stat-grid"><div><span>PARTIDAS</span><b>${fmt(data.stats.matches)}</b></div><div><span>VITÓRIAS</span><b>${fmt(data.stats.wins)}</b></div><div><span>DERROTAS</span><b>${fmt(data.stats.losses)}</b></div><div><span>DANO TOTAL</span><b>${fmt(data.stats.totalDamage)}</b></div><div><span>CAMPEÃO FAVORITO</span><b>${esc(p.fav)}</b></div><div><span>MAESTRIA TOTAL</span><b>${fmt(masteryTotal)}</b></div><div><span>CONQUISTAS</span><b>${aCount}/${ACH.length}</b></div><div><span>COSMÉTICOS</span><b>${fmt(cosmetics)}</b></div><div><span>TORNEIOS</span><b>${fmt(data.stats.tournamentWins)}</b></div><div><span>GOLD</span><b>${fmt(gs.coins)}</b></div><div><span>PSY</span><b>${fmt(gs.psy)}</b></div><div><span>VANDAIS</span><b>${fmt(gs.vandais)}</b></div></div><section class="exp-profile-systems"><h3>SISTEMAS DE MELHORIA</h3><p>Suba a maestria de cada campeão, conclua conquistas, personalize a identidade e proteja o progresso com backup local.</p></section><div class="exp-profile-actions"><button class="btn" id="exp-prof-mastery">★ MAESTRIA & RECOMPENSAS</button><button class="btn" id="exp-prof-ach">🏆 CONQUISTAS</button><button class="btn" id="exp-prof-shop">🎨 40+ COSMÉTICOS</button><button class="btn" id="exp-prof-backup">💾 BACKUP AGORA</button></div><footer class="exp-save-status">Último backup: ${data.lastBackupAt?new Date(data.lastBackupAt).toLocaleString('pt-BR'):'ainda não criado'} · XP total: ${fmt(p.xp)} · Nível ${p.level}</footer>`);
     d.querySelector('#exp-prof-mastery').onclick=()=>{d.close();openMastery()};d.querySelector('#exp-prof-ach').onclick=()=>{d.close();openAchievements()};d.querySelector('#exp-prof-shop').onclick=()=>{d.close();openCosmeticShop()};d.querySelector('#exp-prof-backup').onclick=()=>{safeBackup(false);d.close();setTimeout(openProfile,0)};if(!d.open)d.showModal();
   }
 
   /* ---------- 1. TUTORIAL INTERATIVO ---------- */
   let tutorial=null;
   const tutorialSteps=[
-    {id:'punch',title:'SOCO',text:'Acerte Thuvaa com seu soco. O golpe rápido é a base dos combos.',action:'punch'},
+    {id:'punch',title:'SOCO',text:'Acerte Thuvaa com seu soco. Você pode continuar andando durante o golpe.',action:'punch'},
     {id:'kick',title:'CHUTE',text:'Use o chute para causar impacto e preparar finalizações.',action:'kick'},
     {id:'hook',title:'GANCHO',text:'Use o Gancho Demolidor. Ele causa dano e derruba o inimigo.',action:'uppercut'},
     {id:'ground',title:'CHUTE NO CHÃO',text:'Com o rival derrubado, só o chute causa dano. Finalize a sequência.',action:'groundKick'},
     {id:'dodge',title:'ESQUIVA',text:'Use a esquiva. Uma esquiva perfeita abre uma janela de contra-ataque.',action:'dodge'},
     {id:'stamina',title:'STAMINA',text:'Segure a defesa por um instante. Defender, correr, esquivar e golpes fortes gastam stamina.',action:'stamina'},
-    {id:'combo',title:'COMBO REAL',text:'Faça SOCO + SOCO + CHUTE. O contador confirma a sequência.',action:'combo'},
     {id:'ultimate',title:'ULTIMATE',text:'Sua barra foi carregada. Use a Ultimate cinematográfica para concluir o treino.',action:'ultimate'}
   ];
   function tutorialKey(action){const k=data.keybinds.p1;return {punch:k.punch,kick:k.kick,uppercut:k.hook,groundKick:k.kick,dodge:k.dodge,stamina:k.guard,combo:`${k.punch} · ${k.punch} · ${k.kick}`,ultimate:k.ultimate}[action]||''}
@@ -476,7 +497,7 @@
   }
   function applyLobbyCosmetics(menu){menu=menu||appNode()?.querySelector('.menu');if(!menu)return;menu.dataset.expFrame=data.equipped.frame;menu.classList.toggle('exp-frame-prime',data.equipped.frame.toLowerCase().includes('primordial'));menu.classList.toggle('exp-frame-neon',data.equipped.frame.toLowerCase().includes('neon'))}
   function injectShopButton(){const root=appNode()?.querySelector('.shop');if(!root||root.querySelector('#exp-cosmetic-shop-btn'))return;const actions=root.querySelector('.lobby-actions');if(actions){const b=document.createElement('button');b.id='exp-cosmetic-shop-btn';b.className='btn big exp-shop-main';b.textContent='✨ COSMÉTICOS · SKINS · FINALIZAÇÕES';b.onclick=openCosmeticShop;actions.prepend(b)}}
-  function injectStoryCampaign(){const root=appNode()?.querySelector('.story-screen');if(!root||root.querySelector('.exp-story-banner'))return;const banner=document.createElement('section');banner.className='exp-story-banner';banner.innerHTML=`<div><small>NOVA CAMPANHA DUPLA</small><h3>ROJO × THUVAA</h3><p>Diálogos, chefes, recompensas e duas rotas até a Arena Primordial.</p></div><button class="btn big">ABRIR CAMPANHAS</button>`;root.querySelector('.story-progress')?.before(banner);banner.querySelector('button').onclick=renderCampaignHub}
+  function injectStoryCampaign(){return}
   function enhanceSettings(){
     const body=document.querySelector('.ultimate-dialog[data-kind="settings"] .ultimate-body');if(!body||body.querySelector('.exp-settings-extra'))return;const sec=document.createElement('section');sec.className='exp-settings-extra';sec.innerHTML=`<div><span class="settings-panel-icon">⌨</span><div><h3>CONTROLES & SEGURANÇA</h3><p>Teclas, gamepad e backup do progresso.</p></div></div><div class="exp-settings-actions"><button class="btn" id="exp-open-controls">⌨ CONFIGURAR TECLAS / GAMEPAD</button><button class="btn" id="exp-backup-now">💾 CRIAR BACKUP</button><button class="btn" id="exp-backup-restore">↺ RESTAURAR BACKUP</button></div>`;body.appendChild(sec);sec.querySelector('#exp-open-controls').onclick=openControls;sec.querySelector('#exp-backup-now').onclick=()=>safeBackup(false);sec.querySelector('#exp-backup-restore').onclick=restoreBackup;
   }

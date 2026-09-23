@@ -182,6 +182,26 @@
     'Fantasma Branco':{filter:'grayscale(.88) brightness(1.35) contrast(.92)',aura:'#f4fbff'},
     'Matrix Esmeralda':{filter:'hue-rotate(82deg) saturate(1.8) contrast(1.1)',aura:'#32f59a'},
     'Inferno Magenta':{filter:'hue-rotate(305deg) saturate(1.9) contrast(1.16)',aura:'#ff4fc8'},
+    'Safira Elétrica':{filter:'hue-rotate(190deg) saturate(1.8) brightness(1.08)',aura:'#3b82f6'},
+    'Rubi Vulcânico':{filter:'hue-rotate(345deg) saturate(2) contrast(1.15)',aura:'#ef3340'},
+    'Jade Tóxico':{filter:'hue-rotate(82deg) saturate(1.75) brightness(1.08)',aura:'#34d399'},
+    'Ametista Real':{filter:'hue-rotate(265deg) saturate(1.7) contrast(1.1)',aura:'#a855f7'},
+    'Bronze de Guerra':{filter:'sepia(.75) saturate(1.8) brightness(.92)',aura:'#c47b3a'},
+    'Ciano Holográfico':{filter:'hue-rotate(170deg) saturate(1.9) brightness(1.22)',aura:'#22d3ee'},
+    'Rosa Quântico':{filter:'hue-rotate(315deg) saturate(1.75) brightness(1.12)',aura:'#fb70ba'},
+    'Tempestade Cinza':{filter:'grayscale(.72) contrast(1.3) brightness(.9)',aura:'#94a3b8'},
+    'Sol Branco':{filter:'sepia(.22) saturate(.7) brightness(1.38)',aura:'#fff7d6'},
+    'Abismo Azul':{filter:'hue-rotate(205deg) saturate(1.65) brightness(.72)',aura:'#1d4ed8'},
+    'Hera Venenosa':{filter:'hue-rotate(98deg) saturate(2.1) contrast(1.12)',aura:'#65e65d'},
+    'Foice Lunar':{filter:'hue-rotate(235deg) saturate(.85) brightness(1.12)',aura:'#c4b5fd'},
+    'Chama Azul':{filter:'hue-rotate(178deg) saturate(2.2) contrast(1.18)',aura:'#38bdf8'},
+    'Sangue Neon':{filter:'hue-rotate(335deg) saturate(2.3) contrast(1.22)',aura:'#ff1744'},
+    'Gelo Negro':{filter:'hue-rotate(185deg) saturate(.72) contrast(1.55) brightness(.68)',aura:'#5ee7f7'},
+    'Radioativo':{filter:'hue-rotate(70deg) saturate(2.6) brightness(1.18)',aura:'#c8ff2e'},
+    'Cobre Solar':{filter:'sepia(.92) saturate(2.25) hue-rotate(338deg)',aura:'#fb923c'},
+    'Prisma Vivo':{filter:'hue-rotate(120deg) saturate(2.15) brightness(1.18)',aura:'#f0abfc'},
+    'Espectro Carmesim':{filter:'grayscale(.4) sepia(.5) saturate(2.2) hue-rotate(320deg)',aura:'#ff3864'},
+    'Campeão Celestial':{filter:'hue-rotate(215deg) saturate(1.35) brightness(1.3) contrast(1.08)',aura:'#e0e7ff'},
     'carmesim':{filter:'saturate(1.35) hue-rotate(342deg) contrast(1.08)',aura:'#ff304e'},
     'gelo':{filter:'hue-rotate(160deg) saturate(1.32) brightness(1.08)',aura:'#72dcff'},
     'neon':{filter:'hue-rotate(278deg) saturate(1.65) brightness(1.16)',aura:'#c56cff'},
@@ -222,7 +242,7 @@
     if(combat&&!combat.querySelector('.v8-command-center')){const box=document.createElement('section');box.className='v8-command-center';box.innerHTML=`<header><div><small>CENTRAL DA ARENA</small><h3>ENTRE NA ARENA</h3></div><span>V${VERSION}</span></header><div class="v8-quick-grid"><button data-v8-go="play">⚔<b>JOGAR</b><small>Modos e partidas</small></button><button data-v8-go="training">🥊<b>TREINO</b><small>Hitbox e frame data</small></button><button data-v8-go="story">📖<b>HISTÓRIA</b><small>Campanha narrativa</small></button><button data-v8-go="shop">🛒<b>LOJA</b><small>Campeões e itens</small></button><button data-v8-go="wardrobe">🎨<b>SKINS</b><small>Vestiário funcional</small></button><button data-v8-go="settings">⚙<b>CONFIG.</b><small>Vídeo, som e controles</small></button></div><div class="v8-mini-links"><button data-v8-go="codes">CÓDIGOS</button><button data-v8-go="news">NOTÍCIAS</button><button data-v8-go="hub">MAIS</button></div><div class="v8-lobby-tip"><span>💡 ${esc(lobbyTip())}</span><button data-v8-go="styles">ESTILOS DE LUTA</button></div>`;combat.prepend(box);box.querySelectorAll('[data-v8-go]').forEach(b=>b.onclick=()=>runLobbyAction(b.dataset.v8Go))}
     menu.querySelectorAll('.exp-premium-home').forEach(x=>x.classList.add('v8-legacy-hide'));menu.querySelectorAll('.v6-live-strip').forEach(x=>x.classList.add('v8-compact-live'));
   }
-  function runLobbyAction(a){if(a==='play')return window.renderModes?.();if(a==='training')return window.ProCombat?.openGuide?.(true);if(a==='story')return window.renderStorySelect?.();if(a==='shop')return window.renderShop?.();if(a==='wardrobe')return window.LutadorV6?.openWardrobe?.();if(a==='settings')return window.LutadorUltimate?.openSettings?.();if(a==='ranking')return window.renderRanking?.();if(a==='codes')return window.renderCodes?.();if(a==='news')return window.renderNews?.();if(a==='hub'){const b=document.querySelector('.v7-hub-button');if(b)return b.click()}if(a==='styles')return openStyleDialog()}
+  function runLobbyAction(a){if(a==='play')return window.renderModes?.();if(a==='training')return window.LutadorV5?.renderTrainingSelect?.();if(a==='story')return window.renderStorySelect?.();if(a==='shop')return window.renderShop?.();if(a==='wardrobe')return window.LutadorV6?.openWardrobe?.();if(a==='settings')return window.LutadorUltimate?.openSettings?.();if(a==='ranking')return window.renderRanking?.();if(a==='codes')return window.renderCodes?.();if(a==='news')return window.renderNews?.();if(a==='hub'){const b=document.querySelector('.v7-hub-button');if(b)return b.click()}if(a==='styles')return openStyleDialog()}
 
   function openStyleDialog(){
     let d=document.getElementById('v8-style-dialog');if(!d){d=document.createElement('dialog');d.id='v8-style-dialog';d.className='v8-dialog';document.body.appendChild(d)}
@@ -258,7 +278,7 @@
   const APP_VER='8.2.0';
   const lobbyActions={
     play(){ return window.renderModes?.(); },
-    training(){ return window.ProCombat?.openGuide?.(true); },
+    training(){ return window.LutadorV5?.renderTrainingSelect?.(); },
     story(){ return window.renderStorySelect?.(); },
     shop(){ return window.renderShop?.(); },
     wardrobe(){ return window.LutadorV6?.openWardrobe?.(); },
@@ -428,7 +448,7 @@
   const action=(id)=>{
     const map={
       play:()=>window.renderModes?.(),
-      training:()=>window.ProCombat?.openGuide?.(true),
+      training:()=>window.LutadorV5?.renderTrainingSelect?.(),
       story:()=>window.renderStorySelect?.(),
       shop:()=>window.renderShop?.(),
       roulette:()=>window.renderShopRoulette?.(),
@@ -530,7 +550,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const actions={
     play:()=>window.renderModes?.(),
-    training:()=>window.ProCombat?.openGuide?.(true),
+    training:()=>window.LutadorV5?.renderTrainingSelect?.(),
     story:()=>window.renderStorySelect?.(),
     shop:()=>window.renderShop?.(),
     mastery:()=>window.LutadorExpansion?.openMastery?.(),

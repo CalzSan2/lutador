@@ -61,7 +61,7 @@
   function action(id){
     const close=()=>document.getElementById('v7-quick-hub')?.close();
     if(id==='play'){close();window.renderModes?.();return}
-    if(id==='training'){close();window.ProCombat?.openGuide?.(true);return}
+    if(id==='training'){close();window.LutadorV5?.renderTrainingSelect?.();return}
     if(id==='story'){close();window.renderStorySelect?.();return}
     if(id==='tournament'){close();window.renderTournamentSelect?.();return}
     if(id==='profile'){close();window.LutadorV6?.openProfile?.();return}

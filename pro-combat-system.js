@@ -1,4 +1,4 @@
-/* Directional techniques, timed melee, impact feedback and an isolated practice room. */
+/* Controles diretos, golpes simples, ataque em movimento e sala de treino. */
 (()=>{
   'use strict';
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -17,6 +17,12 @@
   const specs=Object.freeze({
     punch:{duration:.29,start:.085,end:.15,range:102,damage:.78,cost:6,height:114},
     kick:{duration:.47,start:.16,end:.26,range:144,damage:1.22,cost:12,height:84},
+    doublepunch:{duration:.43,start:.07,end:.28,range:112,damage:1.30,cost:10,height:110},
+    strongpunch:{duration:.48,start:.15,end:.27,range:126,damage:1.62,cost:16,height:128},
+    doublekick:{duration:.58,start:.12,end:.36,range:155,damage:1.68,cost:18,height:84},
+    sweep:{duration:.50,start:.14,end:.28,range:166,damage:1.46,cost:16,height:38},
+    flyingkick:{duration:.56,start:.14,end:.34,range:178,damage:1.78,cost:19,height:104},
+    airdown:{duration:.52,start:.10,end:.36,range:106,damage:1.58,cost:15,height:32},
     down:{duration:.42,start:.13,end:.20,range:620,damage:1.10,cost:18,height:35},
     forward:{duration:.48,start:.16,end:.29,range:128,damage:1.42,cost:23,height:103},
     diagonal:{duration:.59,start:.20,end:.32,range:116,damage:1.68,cost:29,height:125},
@@ -52,17 +58,22 @@
   }
   function requestedMove(p){
     const second=p.playerSlot==='p2',pressed=window.justPressed||{};
-    const f=game(),enemy=p===f?.p1?f?.p2:f?.p1,towardRight=!!enemy&&enemy.x>p.x;
-    const towardKey=second?(towardRight?'ArrowRight':'ArrowLeft'):(towardRight?'KeyD':'KeyA');
-    if(pressed[second?'Numpad4':'KeyG'])return'uppercut';
-    if(pressed[second?'Numpad5':'KeyI'])return'punch';
-    if(pressed[second?'Numpad6':'KeyO'])return'kick';
-    if(!pressed[second?'Numpad1':'KeyJ'])return null;
-    const sequence=directionalCombo(p);if(sequence){p.proDirHistory=[];return sequence}
-    const down=controlDown(p,second?'ArrowDown':'KeyS');
-    const right=controlDown(p,second?'ArrowRight':'KeyD'),left=controlDown(p,second?'ArrowLeft':'KeyA');
-    const forward=right!==left;
-    return down&&forward?'diagonal':down?'down':forward?'forward':null;
+    const punch=second?'Numpad5':'KeyI',kick=second?'Numpad6':'KeyO';
+    const up=second?'ArrowUp':'KeyW',down=second?'ArrowDown':'KeyS',now=performance.now();
+    if(pressed[punch]){
+      if(!p.onGround)return'airdown';
+      if(controlDown(p,down))return'uppercut';
+      if(controlDown(p,up))return'strongpunch';
+      const twice=now-(p.proLastPunchAt||0)<360;p.proLastPunchAt=now;return twice?'doublepunch':'punch';
+    }
+    if(pressed[kick]){
+      if(!p.onGround)return'airdown';
+      if(controlDown(p,down))return'sweep';
+      if(controlDown(p,up))return'flyingkick';
+      const twice=now-(p.proLastKickAt||0)<420;p.proLastKickAt=now;return twice?'doublekick':'kick';
+    }
+    // J/Num1 fica exclusivamente reservado ao poder original do personagem.
+    return null;
   }
   function faceInput(p){
     const second=p.playerSlot==='p2',r=controlDown(p,second?'ArrowRight':'KeyD'),l=controlDown(p,second?'ArrowLeft':'KeyA');
@@ -75,12 +86,10 @@
     if(p.proStamina<s.cost){announce(p,'RECUPERANDO FÔLEGO');return false}
     if(p.throwCd>0)return false;
     const theme=profile(p);
-    const chained=p.proChainT>0&&p.proLastKind!==kind;
-    p.proChain=chained?Math.min(3,p.proChain+1):0;
-    p.proStamina-=s.cost;p.proLastKind=kind;p.proChainT=.85;
-    p.proMove={kind,time:0,duration:s.duration,start:s.start,end:s.end,dir:p.facing||1,hit:false,spawned:false,theme,origin:p.x,chain:p.proChain};
-    p.state='throw';p.stateT=0;p.defend=false;p.vx=0;p.throwCd=s.duration;
-    const names={punch:'SOCO',kick:'CHUTE',down:theme.name+' · RASTEIRO',forward:theme.name+' · AVANÇO',diagonal:theme.name+' · ASCENDENTE',doubleforward:theme.name+' · ARRANCADA DUPLA',skyfall:theme.name+' · QUEDA CELESTE',crossrush:theme.name+' · RUPTURA CRUZADA',corewave:theme.name+' · ONDA DO NÚCLEO',comet:theme.name+' · COMETA PRISMÁTICO',astralrain:theme.name+' · CHUVA ASTRAL',uppercut:'GANCHO DEMOLIDOR'};
+    p.proStamina-=s.cost;p.proLastKind=kind;
+    p.proMove={kind,time:0,duration:s.duration,start:s.start,end:s.end,dir:p.facing||1,hit:false,spawned:false,theme,origin:p.x,chain:0};
+    p.state='throw';p.stateT=0;p.defend=false;p.throwCd=s.duration;
+    const names={punch:'SOCO',doublepunch:'DOIS SOCOS',strongpunch:'SOCO FORTE',kick:'CHUTE',doublekick:'DOIS CHUTES',sweep:'RASTEIRA',flyingkick:'VOADORA',airdown:'ATAQUE AÉREO PARA BAIXO',uppercut:'SOCO GANCHO'};
     announce(p,names[kind]);counts.moves++;
     window.ProAudio?.play(kind==='punch'||kind==='kick'?kind:'throw',{pan:clamp(p.x/800-1,-1,1),character:p.id});
     return true;
@@ -136,9 +145,15 @@
       if(p.state==='hurt'||p.state==='ko'||p.freezeT>0){p.proMove=null;p.proBuffer=null;continue}
       m.time+=dt;
       p.state='throw';p.facing=m.dir;
+      // Ataques não travam o deslocamento: o lutador conserva controle lateral.
+      const second=p.playerSlot==='p2',right=controlDown(p,second?'ArrowRight':'KeyD'),left=controlDown(p,second?'ArrowLeft':'KeyA');
+      if(right!==left){const dir=right?1:-1;p.facing=m.dir=dir;p.vx=dir*p.speed*(m.kind==='airdown'?.58:.72)}
+      else if(!['forward','doubleforward','crossrush'].includes(m.kind))p.vx*=.90;
       if(m.kind==='forward'&&m.time>=.07&&m.time<.26)p.x=clamp(p.x+m.dir*370*dt,26,W-26);
       if(m.kind==='doubleforward'&&m.time>=.06&&m.time<.37)p.x=clamp(p.x+m.dir*610*dt,26,W-26);
       if(m.kind==='crossrush'&&m.time>=.08&&m.time<.44)p.x=clamp(p.x+m.dir*530*dt,26,W-26);
+      if(m.kind==='flyingkick'&&m.time<.22&&p.onGround){p.vy=390;p.onGround=false;p.y=Math.max(3,p.y)}
+      if(m.kind==='airdown'&&m.time>=.06)p.vy=-620;
       if(m.kind==='down'&&m.time>=m.start&&!m.spawned){
         m.spawned=true;
         f.proProjectiles.push({x:p.x+m.dir*45,y:GROUND_Y-p.y-34,previousX:p.x+m.dir*45,vx:m.dir*600,life:1.1,r:17,owner:p,move:{...m},kind:'down'});
@@ -154,7 +169,7 @@
         const targetTop=GROUND_Y-target.y-(target.defend?140:178),targetBottom=GROUND_Y-target.y+8;
         const groundedDown=!!(target.proKnockdownT>0&&target.onGround);
         // No chão, somente o CHUTE pode conectar. Socos, gancho e técnicas passam sem causar dano.
-        const canConnect=groundedDown?m.kind==='kick':(hitY>=targetTop-20&&hitY<=targetBottom+20);
+        const canConnect=groundedDown?['kick','doublekick','sweep','airdown'].includes(m.kind):(hitY>=targetTop-20&&hitY<=targetBottom+20);
         if(distance>=-8&&distance<=s.range+23&&canConnect){
           m.hit=true;targetHit(f,p,target,m.kind,m,target.x,groundedDown?GROUND_Y-24:hitY);
         }
@@ -238,8 +253,8 @@
     if(f.paused||window.ProAudio?.isOpen()||inputDialog?.open)return;
     if((p.proKnockdownT||0)>0){p.vx=0;p.defend=false;p.proMove=null;p.proBuffer=null;return;}
     const request=requestedMove(p);
-    if(p.proMove){
-      p.vx=0;p.defend=false;
+      if(p.proMove){
+       p.defend=false;
       if(request&&p.proMove.time>p.proMove.end)p.proBuffer={kind:request,ttl:.16};
       return;
     }
@@ -291,16 +306,15 @@
     const f=game();pausedBeforeGuide=!!f?.paused;if(f)f.paused=true;
     returnFocus=document.activeElement;window.keys={};window.justPressed={};
     if(!inputDialog){inputDialog=document.createElement('dialog');inputDialog.className='pro-combat-guide';document.body.appendChild(inputDialog)}
-    inputDialog.innerHTML=`<form method="dialog"><header><small>LABORATÓRIO DE COMBATE</small><button aria-label="Fechar comandos">×</button></header><h2>DOMINE SEU LUTADOR</h2><p>J mantém o poder original. Segure a direção e toque em J para executar uma técnica. Frente acompanha o lado para o qual você está andando.</p><div class="pro-move-table"><b>TÉCNICA</b><b>JOGADOR 1</b><b>JOGADOR 2</b><span>Poder original</span><kbd>J</kbd><kbd>Num 1</kbd><span>Rasteiro de alcance</span><kbd>S + J</kbd><kbd>↓ + Num 1</kbd><span>Golpe de avanço</span><kbd>A ou D + J</kbd><kbd>← ou → + Num 1</kbd><span>Golpe ascendente</span><kbd>S + A/D + J</kbd><kbd>↓ + ←/→ + Num 1</kbd><span>Arrancada dupla</span><kbd>→ → + J</kbd><kbd>→ → + Num 1</kbd><span>Queda celeste</span><kbd>W, S + J</kbd><kbd>↑, ↓ + Num 1</kbd><span>Ruptura cruzada</span><kbd>←, → + J</kbd><kbd>←, → + Num 1</kbd><span>Soco rápido</span><kbd>I</kbd><kbd>Num 5</kbd><span>Chute forte</span><kbd>O</kbd><kbd>Num 6</kbd><span>Gancho derrubador</span><kbd>G</kbd><kbd>Num 4</kbd><span>Defesa / Super</span><kbd>K / L</kbd><kbd>Num 2 / Num 3</kbd></div><p class="pro-combat-note">As técnicas especiais precisam ser digitadas em sequência e finalizadas com J em menos de 0,76s. Cada uma causa mais dano e gasta mais fôlego.</p><footer>Consulte esta tela pelo F1 durante o jogo. O Treino Livre foi removido.</footer></form>`;
+    inputDialog.innerHTML=`<form method="dialog"><header><small>LABORATÓRIO DE COMBATE</small><button aria-label="Fechar comandos">×</button></header><h2>CONTROLES DIRETOS</h2><p>Todos os golpes podem ser executados enquanto o lutador anda. J usa apenas o poder do personagem; não existem comandos secretos de combo.</p><div class="pro-move-table"><b>GOLPE</b><b>JOGADOR 1</b><b>JOGADOR 2</b><span>Poder</span><kbd>J</kbd><kbd>Num 1</kbd><span>Defesa</span><kbd>K</kbd><kbd>Num 2</kbd><span>Super</span><kbd>L</kbd><kbd>Num 3</kbd><span>Soco</span><kbd>I</kbd><kbd>Num 5</kbd><span>Dois socos</span><kbd>I + I</kbd><kbd>Num 5 + Num 5</kbd><span>Soco gancho</span><kbd>S + I</kbd><kbd>↓ + Num 5</kbd><span>Soco forte</span><kbd>W + I</kbd><kbd>↑ + Num 5</kbd><span>Chute</span><kbd>O</kbd><kbd>Num 6</kbd><span>Dois chutes</span><kbd>O + O</kbd><kbd>Num 6 + Num 6</kbd><span>Rasteira</span><kbd>S + O</kbd><kbd>↓ + Num 6</kbd><span>Voadora</span><kbd>W + O</kbd><kbd>↑ + Num 6</kbd><span>Ataque aéreo</span><kbd>I/O no ar</kbd><kbd>Num 5/6 no ar</kbd></div><p class="pro-combat-note">A/D ou setas continuam funcionando durante a preparação e a recuperação dos golpes.</p><footer>F1 abre esta lista. O modo Treino pode ser aberto pela tela de Modos.</footer></form>`;
     const table=inputDialog.querySelector('.pro-move-table');
-    table?.insertAdjacentHTML('beforeend',`<span>Mover / virar</span><kbd>A / D</kbd><kbd>← / →</kbd><span>Pular</span><kbd>W</kbd><kbd>↑</kbd><span>Defesa</span><kbd>K</kbd><kbd>Num 2</kbd><span>Super</span><kbd>L</kbd><kbd>Num 3</kbd><span>Onda do núcleo</span><kbd>S, S + J</kbd><kbd>↓, ↓ + Num 1</kbd><span>Cometa prismático</span><kbd>→, S, → + J</kbd><kbd>→, ↓, → + Num 1</kbd><span>Chuva astral</span><kbd>W, W + J</kbd><kbd>↑, ↑ + Num 1</kbd>`);
-    inputDialog.querySelector('.pro-combat-note').textContent='GANCHO: G no P1 ou Num 4 no P2. Causa dano, lança e derruba o inimigo. Durante a derrubada, SOMENTE CHUTES causam dano; socos, projéteis, especiais e outro gancho não ferem o campeão caído. Sequências especiais precisam ser digitadas rapidamente e finalizadas com J (ou Num 1).';
+    table?.insertAdjacentHTML('beforeend','<span>Poder rasteiro</span><kbd>S + J</kbd><kbd>↓ + Num 1</kbd><span>Poder ascendente</span><kbd>W + J</kbd><kbd>↑ + Num 1</kbd><span>Poder aéreo</span><kbd>J no ar</kbd><kbd>Num 1 no ar</kbd><span>Alternar poder</span><kbd>H</kbd><kbd>Num 9</kbd>');
     inputDialog.onclose=()=>{const current=game();if(current&&current===f)current.paused=pausedBeforeGuide;window.keys={};window.justPressed={};returnFocus?.focus?.()};
     inputDialog.showModal();
   }
   function addButtons(){
     const controlBox=document.querySelector('.control-box');
-    if(controlBox&&!controlBox.dataset.combatControls){controlBox.dataset.combatControls='1';controlBox.textContent='P1: A/D mover · W pular · J poder · I soco · O chute · G gancho · K defesa · L super.  P2: setas · Num 1 poder · Num 5 soco · Num 6 chute · Num 4 gancho · Num 2 defesa · Num 3 super.  F1: combinações e comandos.'}
+    if(controlBox&&!controlBox.dataset.combatControls){controlBox.dataset.combatControls='1';controlBox.textContent='P1: A/D mover · W pular · J poder · K defesa · L super · I soco · O chute. P2 usa setas e Num 1/2/3/5/6. Ataques funcionam em movimento e no ar.'}
     const actions=document.querySelector('.pro-legacy-actions');
     if(actions&&!actions.querySelector('[data-combat-guide]')){const b=document.createElement('button');b.className='btn';b.dataset.combatGuide='1';b.textContent='🥊 GOLPES & COMANDOS';b.onclick=()=>openGuide();actions.appendChild(b)}
     const modes=document.querySelector('.mode-grid');
