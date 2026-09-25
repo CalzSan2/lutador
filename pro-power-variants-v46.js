@@ -5,9 +5,9 @@
   const FAMILY={
     rojo:'blade',perry:'nature',verry:'mud',uiye:'stone',ouip:'poison',lkugh:'moon',knunka:'lightning',dart:'element',jimmy:'lightning',hock:'meteor',vlad:'blood',flame:'fire',atizz:'glitch',klo:'quantum',nine85:'data',laranja:'speed',
     jetde:'repel',xillen:'alien',thuvaa:'ice',ytiri:'chain',grogh:'reflect',trefoh:'nature',yoi:'shadow',grizz:'laser',klopp:'copy',frogh:'copy',
-    priya:'bullet',aria:'nature',leo:'portal',tharoth:'shadow',ztaaa:'dark',petros:'stone',kai:'energy',rtess:'magnet'
+    priya:'bullet',aria:'nature',leo:'portal',tharoth:'shadow',ztaaa:'dark',petros:'stone',kai:'energy',rtess:'magnet',charl:'metal'
   };
-  const COLORS={blade:'#f87171',nature:'#84ed91',mud:'#a97d58',stone:'#d7a85f',poison:'#85e65f',moon:'#bfa5ff',lightning:'#72bdff',element:'#a9d7ff',meteor:'#ffa44e',blood:'#ed6478',fire:'#ff6b3d',glitch:'#64e5f0',quantum:'#6dffaa',data:'#67e8f9',speed:'#ffab4f',repel:'#7be7ff',alien:'#99f973',ice:'#8cdcff',chain:'#cbd5e1',reflect:'#75d9e6',shadow:'#b086d9',laser:'#ffc75b',copy:'#f29abe',bullet:'#f4d49f',portal:'#73ebc9',dark:'#b579e6',energy:'#a2ddff',scythe:'#ded1bd',hera:'#7ee863',water:'#50cfff',earth:'#d7a85f',air:'#d6f7ff',lava:'#ff8245',heal:'#99f6bc',flight:'#c7d2fe',shock:'#9bbdff',swap:'#c4a8ff',teleport:'#bdacff',drain:'#ef9bbc',gravity:'#a5adfb',magnet:'#ffad65'};
+  const COLORS={blade:'#f87171',nature:'#84ed91',mud:'#a97d58',stone:'#d7a85f',poison:'#85e65f',moon:'#bfa5ff',lightning:'#72bdff',element:'#a9d7ff',meteor:'#ffa44e',blood:'#ed6478',fire:'#ff6b3d',glitch:'#64e5f0',quantum:'#6dffaa',data:'#67e8f9',speed:'#ffab4f',repel:'#7be7ff',alien:'#99f973',ice:'#8cdcff',chain:'#cbd5e1',reflect:'#75d9e6',shadow:'#b086d9',laser:'#ffc75b',copy:'#f29abe',bullet:'#f4d49f',portal:'#73ebc9',dark:'#b579e6',energy:'#a2ddff',scythe:'#ded1bd',hera:'#7ee863',water:'#50cfff',earth:'#d7a85f',air:'#d6f7ff',lava:'#ff8245',heal:'#99f6bc',flight:'#c7d2fe',shock:'#9bbdff',swap:'#c4a8ff',teleport:'#bdacff',drain:'#ef9bbc',gravity:'#a5adfb',magnet:'#ffad65',metal:'#56dfff'};
   const LABEL={down:'ONDA RASTEIRA',up:'ASCENSÃO',air:'MERGULHO'};
   const currentFight=()=>{try{return typeof fight!=='undefined'?fight:null}catch(_){return null}};
   const keyDown=(p,code)=>{try{return typeof controlDown==='function'?!!controlDown(p,code):!!window.keys?.[code]}catch(_){return!!window.keys?.[code]}};
@@ -57,7 +57,7 @@
   if(typeof previousInput==='function')window.playerInput=function(p){
     const f=currentFight();if(f&&p?.human&&!f.paused&&!f.over&&!(f.mode==='lan'&&window.__lan?.role==='guest')){
       const p2=p.playerSlot==='p2',attack=p2?'Numpad1':'KeyJ',down=p2?'ArrowDown':'KeyS',up=p2?'ArrowUp':'KeyW';
-      if(window.justPressed?.[attack]){const variant=keyDown(p,down)?'down':keyDown(p,up)?'up':!p.onGround?'air':null;
+      if(window.justPressed?.[attack]&&!(p.id==='charl'&&(p.charlitoT||0)>0)){const variant=keyDown(p,down)?'down':keyDown(p,up)?'up':!p.onGround?'air':null;
         if(variant&&p.state!=='ko'&&p.state!=='hurt'&&p.state!=='special'&&p.state!=='throw'&&(p.throwCd||0)<=0&&(p.attackDisabledT||0)<=0&&!p.proMove&&!p.laranjaCombo&&!p.laranjaFlash){window.justPressed[attack]=false;cast(p,variant,f)}
       }
     }

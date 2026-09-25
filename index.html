@@ -3,7 +3,13 @@
 <head>
 <script id="v16-safe-boot">
 (()=>{
+  const bootStarted=performance.now(),minimumLoadingMs=10000;
+  let releaseTimer=0,released=false;
   const release=()=>{
+    if(released)return;
+    const remaining=minimumLoadingMs-(performance.now()-bootStarted);
+    if(remaining>0){if(!releaseTimer)releaseTimer=setTimeout(()=>{releaseTimer=0;release()},remaining);return}
+    released=true;
     try{const loader=document.getElementById('game-loading');if(loader){loader.classList.add('hide');setTimeout(()=>loader.remove(),260)}}catch(_){}
     try{const a=document.getElementById('app');if(a&&!a.children.length&&typeof window.renderMenu==='function')window.renderMenu()}catch(_){}
   };
@@ -261,6 +267,7 @@ body {
 .story-progress{display:flex;justify-content:space-between;max-width:900px;margin:15px auto;padding:12px 16px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(0,0,0,.18);color:#f0c566}
 .story-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:9px;max-width:900px;margin:18px auto}.story-node{min-height:72px;padding:9px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#8790aa;font:700 10px Oxanium}.story-node strong{font-size:15px;color:#fff}.story-node.done{border-color:rgba(53,224,138,.4);color:#35e08a}.story-node.active{border-color:rgba(240,197,102,.75);box-shadow:0 0 20px rgba(240,197,102,.12);color:#f0c566}.story-node.legend{border-color:rgba(244,63,94,.35);color:#f43f5e}.story-player{max-width:420px;margin:16px auto;padding:12px;border-radius:12px;background:rgba(255,255,255,.04);display:flex;justify-content:space-between}.story-player span{color:#8f96b5;font-size:11px}.story-player b{color:#fff}.story-tip{display:block;max-width:700px;margin:12px auto;color:#777f99}.story-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .news-dot{display:inline-block;margin-left:7px;padding:3px 7px;border-radius:999px;background:#e63946;color:#fff;font-size:10px;font-weight:900;letter-spacing:.5px;vertical-align:middle;animation:newsPulse 1.8s ease-in-out infinite}.news-screen{max-width:900px}.news-list{display:grid;gap:14px;max-width:760px;margin:20px auto 24px}.news-card{position:relative;padding:20px 22px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));box-shadow:0 10px 30px rgba(0,0,0,.18);text-align:left;overflow:hidden}.news-card.featured{border-color:rgba(230,57,70,.45);background:linear-gradient(135deg,rgba(230,57,70,.13),rgba(255,255,255,.025))}.news-card h3{margin:8px 0 7px;font-size:21px}.news-card p{margin:0;color:#b8bfd7;line-height:1.55}.news-card small{display:block;margin-top:13px;color:#777f99;font-weight:800;letter-spacing:.7px}.news-badge{display:inline-block;padding:5px 9px;border-radius:8px;background:rgba(255,255,255,.07);font-size:10px;font-weight:900;letter-spacing:.8px;color:#f0c566}@keyframes newsPulse{50%{transform:scale(1.06);filter:brightness(1.2)}}
+.charl-news{display:grid;grid-template-columns:minmax(0,1fr) 138px;gap:14px;align-items:center;border-color:rgba(86,223,255,.5)!important;background:linear-gradient(125deg,rgba(42,145,170,.2),rgba(8,21,37,.96))!important}.charl-news img{width:138px;height:164px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(86,223,255,.45))}.charl-news .btn{margin-top:14px}@media(max-width:520px){.charl-news{grid-template-columns:1fr 92px}.charl-news img{width:92px;height:125px}}
 /* PATCH 5.0 — HUD mais limpo: sem barra/sistema de Fúria e HP bem visível */
 .feature-bars, .rage-bar, .rage-wrap, .rage-meter, .fury-bar, .fury-wrap, .combo-meter { display:none !important; }
 .hp-text, .fighter-hp, .hp-number, .hud-hp, .health-text { text-shadow: 0 2px 0 #000, 2px 0 0 #000, -2px 0 0 #000, 0 -2px 0 #000; font-size: 24px !important; font-weight: 1000 !important; color:#fff !important; }
@@ -733,7 +740,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 .loading-title{display:none;margin-top:8px;font:900 clamp(38px,8vw,62px)/.9 'Segoe UI',sans-serif;letter-spacing:8px;background:linear-gradient(90deg,#fff,#e63946,#f0c566,#fff);background-size:250% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:loadShine 2.2s linear infinite}
 .loading-sub{display:none;margin-top:12px;color:#8992ae;font:700 11px Oxanium,sans-serif;letter-spacing:4px;text-transform:uppercase}
 .loading-bar{height:18px;width:min(620px,82vw);margin:0 auto;border-radius:99px;border-radius:99px;background:#151a2b;border:1px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 0 25px rgba(230,57,70,.08)}
-.loading-fill{height:100%;width:0;background:linear-gradient(90deg,#fff,#f0c566,#fff);box-shadow:0 0 12px rgba(255,255,255,.95),0 0 30px rgba(240,197,102,.9);animation:loadFill 2.2s ease-out forwards;position:relative;}
+.loading-fill{height:100%;width:0;background:linear-gradient(90deg,#fff,#f0c566,#fff);box-shadow:0 0 12px rgba(255,255,255,.95),0 0 30px rgba(240,197,102,.9);animation:loadFill 10s linear forwards;position:relative;}
 .loading-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);animation:loadSweep 1.1s linear infinite;}
 .loading-status{display:none;font:700 10px Oxanium,sans-serif;letter-spacing:2px;color:#69738f;text-transform:uppercase}
 @keyframes loadSweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
@@ -852,6 +859,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <div id="app"></div>
 <script>
 const ROSTER = [
+  { id: 'charl', name: 'Charl', color: '#56dfff', hp: 1980, dmg: 34, speed: 86, price: 2200, weapon: 'charlHardware', special: 'charlitoTransform', portrait: 'ai-assets/characters/charl.png' },
   { id: 'laranja', name: 'Laranja', color: '#ff5b22', hp: 1880, dmg: 33, speed: 165, price: 0, weapon: 'speedCombo', special: 'speedTornado', secret: true, codeOnly: true, portrait: 'ai-assets/characters/laranja.png' },
   { id: 'jone', name: 'Jone Pikes', color: '#c8b79e', hp: 2190, dmg: 34, speed: 88, price: 0, weapon: 'jonePoison', special: 'joneSmoke', secret: true, codeOnly: true, portrait: 'ai-assets/characters/jone.png' },
   { id: 'ktrak', name: 'Ktrak Calzsan', color: '#e65b2a', hp: 2100, dmg: 36, speed: 86, price: 0, weapon: 'ktrakElements', special: 'ktrakAvatar', secret: true, codeOnly: true, portrait: 'ai-assets/characters/ktrak.png' },
@@ -885,6 +893,7 @@ const ROSTER = [
 ];
 
 const ABILITIES = {
+  charl: { flag:'AND', role:'Androide de Combate', tag:'TRANSFORMAÇÃO', desc:'J dispara parafusos e placas metálicas. L transforma Charl no robô gigante Charlito por 6 segundos; durante a transformação, J lança foguetes.' },
   laranja:{ flag:'PRIME', role:'Velocista Supersônico', tag:'PRIME · VELOCIDADE ×3', desc:'Movimento 3× mais rápido. J conecta 4 socos rápidos. L ativa uma Cadeia Relâmpago Suprema com múltiplos impactos e finalização explosiva.' },
   jone:   { flag:'PRIME', role:'Ceifador da Hera', tag:'PRIME', desc:'H alterna o poder de J entre Corte da Morte, uma foice de curto alcance, e Beijo da Hera, veneno de longa distância. L cria uma área letal que fere rivais e cura Jone enquanto ele permanece sobre ela.' },
   ktrak:  { flag:'PRIME', role:'Mestre dos Elementos', tag:'PRIME', desc:'Água nasce do chão em ondas, Terra rompe e racha o piso, Raio carrega no corpo antes do disparo, Lava abre fendas e Cura ergue água sobre Ktrak. L ativa o MODO AVATAR com transição elemental e versões supremas.' },
@@ -948,12 +957,12 @@ function charSound(p, slot){
 }
 
 function defaultPlayer() {
-  return { coins: 0, psy: 0, vandais: 0, roster: ['rojo'], storyShopAvailable: [], ztaaaUnlocked: false, froghUnlocked: false, kloppUnlocked: false, ktrakUnlocked: false,
+  return { coins: 0, psy: 0, vandais: 0, roster: ['rojo'], charlPurchased: false, storyShopAvailable: [], ztaaaUnlocked: false, froghUnlocked: false, kloppUnlocked: false, ktrakUnlocked: false,
     storyProgress: 0, storyComplete: false };
 }
 
 /* MODO HISTÓRIA — 15 campeões de elite bloqueados. Os 3 últimos são as LENDAS. */
-const SHOP_FIGHTERS = ['flame','perry','verry','jimmy'];
+const SHOP_FIGHTERS = ['charl','flame','perry','verry','jimmy'];
 const STORY_FIGHTERS = ['nine85','knunka','uiye','rtess','atizz','grizz','ouip','jetde','xillen','lkugh','grogh','dart','yoi','klo','hock','vlad','klopp','ztaaa','frogh'];
 const STORY_LEGENDS = ['ztaaa','frogh'];
 const STORY_SEQUENCE = [...STORY_FIGHTERS];
@@ -1052,6 +1061,10 @@ function loadState() {
       s.psy = Math.max(0, Math.floor(Number(s.psy) || 0));
       s.vandais = Math.max(0, Math.floor(Number(s.vandais) || 0));
       s.roster = Array.from(new Set(Array.isArray(s.roster) ? s.roster : ['rojo']));
+      // V48 entregava Charl gratuitamente; na V49 ele só permanece no elenco após compra.
+      s.charlPurchased = s.charlPurchased === true;
+      if (!s.charlPurchased) s.roster = s.roster.filter(id => id !== 'charl');
+      else if (!s.roster.includes('charl')) s.roster.push('charl');
       s.storyShopAvailable = Array.from(new Set(Array.isArray(s.storyShopAvailable) ? s.storyShopAvailable.filter(id => STORY_FIGHTERS.includes(id)) : []));
       if (!s.roster.includes('rojo')) s.roster.unshift('rojo');
       s.redeemedCodes = Array.from(new Set(Array.isArray(s.redeemedCodes) ? s.redeemedCodes : []))
@@ -1168,10 +1181,12 @@ function renderNews() {
       <h2 class="select-title mk-title">CENTRAL DE <span class="mk-accent">NOTÍCIAS</span></h2>
       <p class="select-subtitle">Fique por dentro das novidades da Arena.</p>
       <div class="news-list">
-        <article class="news-card featured hock-news">
-          <div class="news-badge">🔨 LANÇAMENTO EM BREVE</div>
-          <h3>HOCK — O QUEBRA-LUAS</h3>
-          <p>Hock está chegando à Arena. Seu martelo fica sempre em suas mãos, enquanto seu super sobe até a lua, quebra o astro e derruba seus pedaços sobre o inimigo.</p>
+        <article class="news-card featured charl-news">
+          <div><div class="news-badge">🤖 NOVO CAMPEÃO</div>
+          <h3>CHARL E CHARLITO CHEGARAM</h3>
+          <p>Charl lança parafusos e placas com J. Seu super o transforma em Charlito por 6 segundos: um robô gigante que dispara foguetes. Disponível na Loja de Campeões por <b>2.200 GOLD</b>.</p>
+          <button id="news-charl-shop" class="btn">VER CHARL NA LOJA</button></div>
+          <img src="ai-assets/characters/charl.png" alt="Charl, novo campeão androide">
         </article>
         <article class="news-card">
           <div class="news-badge">🌩️ ARENAS</div>
@@ -1187,6 +1202,7 @@ function renderNews() {
       <button id="btn-news-back" class="btn">← Voltar ao Lobby</button>
     </div>`;
   document.getElementById('btn-news-back').onclick = () => { SFX.play('menu_back'); renderMenu(); };
+  document.getElementById('news-charl-shop').onclick = () => { SFX.play('menu_select'); renderShopChampions(); };
 }
 
 function renderCredits() {
@@ -1249,7 +1265,7 @@ function renderCodes() {
       input.value='';SFX.play('menu_confirm');return;
     }
     if(code==='00011'){
-      CHARACTERS.forEach(c=>{if(c.ravamOnly||c.codeOnly)return;if(!state.roster.includes(c.id))state.roster.push(c.id);});
+      CHARACTERS.forEach(c=>{if(c.ravamOnly||c.codeOnly||c.id==='charl')return;if(!state.roster.includes(c.id))state.roster.push(c.id);});
       state.ztaaaUnlocked=true;state.froghUnlocked=true;state.kloppUnlocked=true;
       status.textContent='🔓 TODOS OS CAMPEÕES FORAM LIBERADOS!';status.style.color='#7dd3fc';
     }else if(secretSig===3587581260){
@@ -1623,7 +1639,7 @@ function renderShopChampions() {
       <div class="emblem"><span style="font-size:58px">🥊</span></div>
       <h2 class="select-title mk-title">CAMPEÕES</h2>
       <div class="pick-status"><span class="pick-pill">💰 ${state.coins.toLocaleString('pt-BR')} GOLD</span></div>
-      <p class="select-subtitle">Quatro campeões estão disponíveis desde o início. Cada inimigo derrotado na história aparece aqui para compra.</p>
+      <p class="select-subtitle">Charl e quatro campeões estão disponíveis para compra desde o início. Cada inimigo derrotado na história também aparece aqui.</p>
       <div class="roster mk-roster shop-roster">${CHARACTERS.filter(c => SHOP_FIGHTERS.includes(c.id) || state.storyShopAvailable.includes(c.id)).map(shopCard).join('')}</div>
       <button id="btn-back-shop" class="btn">Voltar à loja</button>
     </div>`;
@@ -1736,7 +1752,7 @@ function spinDailyRoulette() {
   // Sorteio real: Gold, campeão, PSY e Vandais. O setor em que a roda para é o prêmio entregue.
   const roll = Math.random() * 100;
   let reward = 0, psyReward = 0, vandaisReward = 0, text = '', targetIndex = 0;
-  const locked = CHARACTERS.filter(c => !c.secret && !STORY_UNLOCKABLE_15.includes(c.id) && !STORY_LEGENDS.includes(c.id) && !state.roster.includes(c.id));
+  const locked = CHARACTERS.filter(c => c.id !== 'charl' && !c.secret && !STORY_UNLOCKABLE_15.includes(c.id) && !STORY_LEGENDS.includes(c.id) && !state.roster.includes(c.id));
 
   if (roll < 2) {
     reward = 10000; text = '💎 JACKPOT! VOCÊ GANHOU 10.000 GOLD!'; targetIndex = 3;
@@ -1832,6 +1848,7 @@ function buyCharacter(id) {
   state.coins -= price;
   if (!Array.isArray(state.roster)) state.roster = [];
   if (!state.roster.includes(c.id)) state.roster.push(c.id);
+  if (c.id === 'charl') state.charlPurchased = true;
 
   // Salva imediatamente moedas e personagem comprado.
   persist();
@@ -5121,12 +5138,12 @@ function updateFlameAttacks(dt) {
 }
 
 /* ================= MODO MISTURA DE CAMPEÕES ================= */
-const MIX_POOL = CHARACTERS.filter(c => c.id==='ztaaa' ? (!!state.ztaaaUnlocked && state.roster.includes('ztaaa')) : !c.codeOnly);
+function mixPool(){ return CHARACTERS.filter(c => c.id==='ztaaa' ? (!!state.ztaaaUnlocked && state.roster.includes('ztaaa')) : c.id==='charl' ? !!state.charlPurchased : !c.codeOnly); }
 function initMixedFighter(p){
   // Cada lutador recebe UM ataque e UM super fixos para toda a melhor de 3.
   // Eles são sorteados apenas uma vez no início da partida.
-  const pool=MIX_POOL.filter(c=>c.id!==p.id);
-  const attackSrc=pool[Math.floor(Math.random()*pool.length)] || MIX_POOL[0];
+  const available=mixPool(),pool=available.filter(c=>c.id!==p.id);
+  const attackSrc=pool[Math.floor(Math.random()*pool.length)] || available[0];
   const superPool=pool.filter(c=>c.id!==attackSrc.id);
   const superSrc=superPool[Math.floor(Math.random()*superPool.length)] || attackSrc;
   p.mixAttackId=attackSrc.id;
@@ -5138,7 +5155,8 @@ function initMixedFighter(p){
 }
 function pickMixedSource(p,kind){
   const id=kind==='attack'?p.mixAttackId:p.mixSuperId;
-  return MIX_POOL.find(c=>c.id===id) || MIX_POOL.find(c=>c.id!==p.id) || MIX_POOL[0];
+  const available=mixPool();
+  return available.find(c=>c.id===id) || available.find(c=>c.id!==p.id) || available[0];
 }
 function mixToast(text){
   const el=document.getElementById('mix-toast'); if(!el)return;
@@ -6345,10 +6363,8 @@ window.addEventListener('keyup', (e) => {
 renderMenu();
 (function bootLoading(){
   const loader=document.getElementById('game-loading');
-  // Carregamento curto: apresenta a capa sem parecer que o jogo travou.
-  const finish=()=>{loader?.classList.add('hide');setTimeout(()=>loader?.remove(),420);};
-  // Imagens locais já são carregadas pelo navegador; 2,2s é apenas a apresentação visual.
-  setTimeout(finish,2200);
+  // O bootstrap no início do documento mantém a apresentação por 10 segundos.
+  loader?.setAttribute('aria-label','Carregando jogo por 10 segundos');
 })();
 
 function drawCharacterSkin(ctx,p,x,y){
@@ -7373,6 +7389,7 @@ setTimeout(function(){
 /* Shop */
 .shop-ultimate{max-width:1180px!important;padding:34px!important;overflow:hidden}.shop-ultimate .shop-hero{display:flex;justify-content:space-between;align-items:end;gap:18px;padding:22px;border-radius:20px;background:linear-gradient(135deg,rgba(255,50,70,.12),rgba(95,35,160,.10));border:1px solid rgba(255,255,255,.09);margin-bottom:22px}.shop-ultimate .shop-title{font:900 52px Anton;margin:0;letter-spacing:2px}.shop-ultimate .gold-pill{padding:12px 18px;border-radius:999px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.35);color:#ffe477;font:800 14px Oxanium}.shop-ultimate .shop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:16px;max-height:65vh;overflow:auto;padding:4px}.shop-ultimate .shop-card{position:relative;overflow:hidden;border-radius:18px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(160deg,rgba(27,24,38,.98),rgba(10,10,17,.98));transition:.25s;animation:cardRise .45s both}.shop-ultimate .shop-card:hover{transform:translateY(-8px) scale(1.015);border-color:rgba(255,80,80,.5);box-shadow:0 22px 50px #0009,0 0 30px rgba(255,50,70,.12)}
 .shop-card .shop-art{height:145px;display:flex;align-items:center;justify-content:center;position:relative}.shop-card .shop-art:after{content:"";position:absolute;inset:auto 12% 0;height:3px;background:linear-gradient(90deg,transparent,var(--c),transparent);box-shadow:0 0 20px var(--c)}.shop-card .shop-face{font-size:70px;filter:drop-shadow(0 0 20px var(--c));animation:floatF 2.6s ease-in-out infinite}.shop-card .shop-body{padding:16px}.shop-card h3{font:900 25px Anton;margin:0}.shop-card .role{font:700 10px Oxanium;letter-spacing:1px;color:#aeb6d4;margin:4px 0 12px}.shop-card .statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.shop-card .stat{padding:8px;border-radius:10px;background:rgba(255,255,255,.045);text-align:center}.shop-card .stat b{display:block;font:900 18px Oxanium}.shop-card .stat span{font-size:8px;color:#8f96b5;letter-spacing:1px}.shop-card .buy{width:100%;margin-top:12px}.shop-card.locked{opacity:.82}.shop-card.owned{box-shadow:inset 0 0 0 1px rgba(74,222,128,.16)}
+.shop-card[data-id="charl"] .shop-art:before{content:"";position:absolute;inset:0;background:url("ai-assets/characters/charl.png") center bottom/contain no-repeat;filter:drop-shadow(0 0 14px #56dfff88);pointer-events:none}.shop-card[data-id="charl"] .shop-face{visibility:hidden}
 @keyframes cardRise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}@keyframes floatF{50%{transform:translateY(-7px) scale(1.04)}}
 /* Canvas remains full-screen, HUD gets polished through canvas draw override */
 </style>
@@ -7793,7 +7810,7 @@ setTimeout(function(){
       if(/not[ií]cias/i.test(b.textContent)) b.querySelectorAll('.news-launch,.news-dot').forEach(e=>e.remove());
     });
     document.querySelectorAll('#app .news-badge').forEach(e=>{
-      if(/novo campe[aã]o/i.test(e.textContent)) e.textContent=e.textContent.replace(/novo campe[aã]o/i,'LANÇAMENTO EM BREVE');
+      if(!e.closest('.charl-news') && /novo campe[aã]o/i.test(e.textContent)) e.textContent=e.textContent.replace(/novo campe[aã]o/i,'LANÇAMENTO EM BREVE');
     });
   };
   cleanNews();
@@ -8078,8 +8095,8 @@ setTimeout(function(){
 
 <!-- V45 — ARENA TOTAL · PLATFORM FIGHTER ONLINE P2P -->
 <link rel="stylesheet" href="pro-island-clash-v22.css?v=22810">
-<script src="pro-island-clash-v22.js?v=47000"></script>
-<link rel="stylesheet" href="pro-arena-total-v44.css?v=45000">
+<script src="pro-island-clash-v22.js?v=50000"></script>
+<link rel="stylesheet" href="pro-arena-total-v44.css?v=50000">
 
 <!-- V24 — R.A.V.A.M: LENDAS COM LOJA, GOLPES NOMEADOS E ANIMAÇÕES -->
 <link rel="stylesheet" href="pro-ravam-chronicle-v24.css?v=24000">
@@ -8106,3 +8123,4 @@ setTimeout(function(){
 <link rel="stylesheet" href="pro-season-event-v43.css?v=43000">
 <script src="pro-season-event-v43.js?v=43000"></script>
 <script src="pro-power-variants-v46.js?v=46000"></script>
+<script src="pro-charl-v48.js?v=50000"></script>
